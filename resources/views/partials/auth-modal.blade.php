@@ -55,7 +55,7 @@
                                 <label for="login_email" class="form-label fw-semibold fs-13 text-secondary">Email Address</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0 text-muted"><i class="feather-mail"></i></span>
-                                    <input type="email" name="email" id="login_email" class="form-control border-start-0" placeholder="admin@example.com" value="{{ old('email') }}" required>
+                                    <input type="email" name="email" id="login_email" class="form-control border-start-0" placeholder="admin@gmail.com" value="{{ old('email') }}" required>
                                 </div>
                             </div>
                             <div class="mb-4">
@@ -65,7 +65,7 @@
                                     <input type="password" name="password" id="login_password" class="form-control border-start-0" placeholder="••••••••" required>
                                 </div>
                                 <div class="form-text fs-11 text-muted mt-2">
-                                    Demo Credentials: <code>admin@example.com</code> / <code>admin123</code>
+                                    Demo Credentials: <code>admin@gmail.com</code> / <code>Admin@123</code>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-3 mb-2">

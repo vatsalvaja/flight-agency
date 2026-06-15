@@ -28,7 +28,23 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if ($credentials['email'] === 'admin@example.com' && $credentials['password'] === 'admin123') {
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
+
+        if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+            if ($user->role_id != 1) {
+                return redirect()->back()
+                    ->withInput($request->only('email'))
+                    ->withErrors(['login_error' => 'Access denied. Administrator privileges required.'])
+                    ->with('auth_error', 'Access denied. Administrator privileges required.');
+            }
+
+            if ($user->status != 0) {
+                return redirect()->back()
+                    ->withInput($request->only('email'))
+                    ->withErrors(['login_error' => 'Your account is inactive.'])
+                    ->with('auth_error', 'Your account is inactive.');
+            }
+
             session(['admin_logged_in' => true]);
             return redirect()->route('admin.dashboard')->with('success', 'Welcome back to Wings Control Center.');
         }
