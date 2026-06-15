@@ -66,11 +66,17 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card stretch stretch-full">
-                            <div class="card-body text-center py-5">
-                                <i class="feather-airplay fs-1 text-primary mb-4 d-block"></i>
-                                <h2 class="fw-bold mb-2 text-dark">Welcome to SkyTrack</h2>
-                                <p class="fs-14 text-muted mb-4">Project setup completed successfully.</p>
-                                <span class="badge bg-soft-success text-success px-3 py-2 fs-12 fw-semibold">This admin panel is ready for future modules</span>
+                            <div class="card-body py-5 text-center">
+                                <div class="avatar-text avatar-lg bg-soft-primary text-primary mx-auto mb-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: rgba(59, 130, 246, 0.1); font-size: 2rem;">
+                                    <i class="feather-airplay"></i>
+                                </div>
+                                <h2 class="fw-bold text-dark mb-1">Welcome to Wings</h2>
+                                <p class="fs-14 text-muted mb-4">Administrative Control Center</p>
+                                <div class="d-inline-flex align-items-center justify-content-center gap-2">
+                                    <span class="badge bg-soft-success text-success px-3 py-2 fs-12 fw-semibold rounded-pill">
+                                        <i class="feather-check-circle me-1"></i> System Online & Secure
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->string('application_name')->default('SkyTrack');
+            $table->string('application_name')->default('Wings');
             $table->string('application_logo')->nullable();
             $table->string('favicon')->nullable();
             $table->string('admin_email')->nullable();

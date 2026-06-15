@@ -1,0 +1,204 @@
+/* ==========================================================================
+   Wings Custom Stylesheet
+   Fixes dark mode readability, active menu items, hover contrast, and logo layouts.
+   ========================================================================== */
+
+/* 1. Sidebar Typography and Premium Logo Section */
+.nxl-navigation .b-brand {
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.5px;
+    font-weight: 800 !important;
+}
+
+.nxl-navigation .b-brand .logo-lg {
+    font-size: 1.5rem;
+    color: #3b82f6;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 2px rgba(59, 130, 246, 0.1);
+}
+
+.nxl-navigation .b-brand .logo-sm {
+    font-size: 1.25rem;
+    color: #3b82f6;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Sidebar Active & Hover States */
+.nxl-item .nxl-link {
+    transition: all 0.2s ease-in-out !important;
+    border-radius: 6px !important;
+    margin: 2px 14px !important;
+    padding: 10px 14px !important;
+}
+
+.nxl-item.active > .nxl-link {
+    background: #3b82f6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25) !important;
+}
+
+.nxl-item.active > .nxl-link .nxl-micon i {
+    color: #ffffff !important;
+}
+
+/* ==========================================================================
+   DARK MODE ENHANCEMENTS (html.app-skin-dark)
+   ========================================================================== */
+
+html.app-skin-dark body {
+    background-color: #0f172a !important; /* Premium dark background slate-900 */
+    color: #e2e8f0 !important; /* slate-200 */
+}
+
+/* High Contrast Headings and Text */
+html.app-skin-dark h1,
+html.app-skin-dark h2,
+html.app-skin-dark h3,
+html.app-skin-dark h4,
+html.app-skin-dark h5,
+html.app-skin-dark h6,
+html.app-skin-dark .h1,
+html.app-skin-dark .h2,
+html.app-skin-dark .h3,
+html.app-skin-dark .h4,
+html.app-skin-dark .h5,
+html.app-skin-dark .h6,
+html.app-skin-dark .card-title,
+html.app-skin-dark .card-header h5,
+html.app-skin-dark .text-dark,
+html.app-skin-dark .fw-bold.text-dark,
+html.app-skin-dark td.text-dark {
+    color: #f8fafc !important; /* slate-50 */
+}
+
+/* High Contrast Muted and Text-Secondary labels */
+html.app-skin-dark .text-muted,
+html.app-skin-dark .fs-12.text-muted,
+html.app-skin-dark .fs-14.text-muted,
+html.app-skin-dark .form-text,
+html.app-skin-dark .text-muted-xs {
+    color: #94a3b8 !important; /* slate-400 (clearly readable) */
+}
+
+/* Cards readability overrides */
+html.app-skin-dark .card {
+    background-color: #1e293b !important; /* slate-800 */
+    border: 1px solid #334155 !important; /* slate-700 */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.app-skin-dark .card-header {
+    background-color: #1e293b !important;
+    border-bottom: 1px solid #334155 !important;
+}
+
+html.app-skin-dark .card-footer {
+    background-color: #1e293b !important;
+    border-top: 1px solid #334155 !important;
+}
+
+/* Sidebar Navigation overrides */
+html.app-skin-dark .nxl-navigation {
+    background-color: #0f172a !important;
+    border-right: 1px solid #1e293b !important;
+}
+
+html.app-skin-dark .nxl-navigation .nxl-caption label {
+    color: #64748b !important; /* slate-500 */
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+html.app-skin-dark .nxl-navigation .nxl-link {
+    color: #94a3b8 !important; /* slate-400 */
+}
+
+html.app-skin-dark .nxl-navigation .nxl-link:hover {
+    color: #3b82f6 !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+}
+
+html.app-skin-dark .nxl-navigation .nxl-item.active > .nxl-link {
+    color: #ffffff !important;
+    background: #3b82f6 !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35) !important;
+}
+
+html.app-skin-dark .nxl-navigation .nxl-item.active > .nxl-link .nxl-micon i {
+    color: #ffffff !important;
+}
+
+/* Header & Breadcrumbs overrides */
+html.app-skin-dark .nxl-header {
+    background-color: #0f172a !important;
+    border-bottom: 1px solid #1e293b !important;
+}
+
+html.app-skin-dark .breadcrumb-item,
+html.app-skin-dark .breadcrumb-item a {
+    color: #94a3b8 !important;
+}
+
+html.app-skin-dark .breadcrumb-item.active {
+    color: #f8fafc !important;
+}
+
+/* Data Tables, lists and lines */
+html.app-skin-dark .table th,
+html.app-skin-dark .table-light {
+    background-color: #1e293b !important;
+    color: #94a3b8 !important;
+    border-bottom: 2px solid #334155 !important;
+}
+
+html.app-skin-dark .table td {
+    border-bottom: 1px solid #334155 !important;
+    color: #cbd5e1 !important;
+}
+
+html.app-skin-dark .table-hover tbody tr:hover {
+    background-color: #334155 !important;
+}
+
+/* Forms and Inputs */
+html.app-skin-dark .form-control,
+html.app-skin-dark .form-select {
+    background-color: #0f172a !important;
+    border: 1px solid #475569 !important;
+    color: #f8fafc !important;
+}
+
+html.app-skin-dark .form-control:focus,
+html.app-skin-dark .form-select:focus {
+    background-color: #020617 !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+html.app-skin-dark .form-label {
+    color: #cbd5e1 !important;
+}
+
+html.app-skin-dark .border-bottom,
+html.app-skin-dark .border-top,
+html.app-skin-dark .border {
+    border-color: #334155 !important;
+}
+
+/* Footer overrides */
+html.app-skin-dark .footer {
+    background-color: #0f172a !important;
+    border-top: 1px solid #1e293b !important;
+    color: #94a3b8 !important;
+}
+
+/* Custom details cards bg */
+html.app-skin-dark .bg-light {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}

@@ -14,7 +14,7 @@ class SettingsController extends Controller
     public function edit()
     {
         $setting = Setting::firstOrCreate([], [
-            'application_name' => 'SkyTrack',
+            'application_name' => 'Wings',
         ]);
         return view('admin.settings.edit', compact('setting'));
     }
@@ -25,7 +25,7 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $setting = Setting::firstOrCreate([], [
-            'application_name' => 'SkyTrack',
+            'application_name' => 'Wings',
         ]);
 
         $validated = $request->validate([

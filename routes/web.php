@@ -4,12 +4,16 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\AuthController;
 
-Route::get('/', function () {
-    return redirect('/admin');
-});
+// Public Landing Page & Auth Actions
+Route::get('/', [AuthController::class, 'showLanding'])->name('landing');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::prefix('admin')->group(function () {
+// Protected Admin Panel Routes
+Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
     
     Route::resource('companies', CompanyController::class);

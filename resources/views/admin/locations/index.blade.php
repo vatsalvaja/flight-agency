@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Locations || ' . ($appSettings->application_name ?? 'SkyTrack'))
+@section('title', 'Locations || ' . ($appSettings->application_name ?? 'Wings'))
 
 @section('content')
 <div class="nxl-content">

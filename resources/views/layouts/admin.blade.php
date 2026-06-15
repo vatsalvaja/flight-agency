@@ -1,6 +1,6 @@
 @php
     $appSettings = \App\Models\Setting::first() ?? new \App\Models\Setting([
-        'application_name' => 'SkyTrack',
+        'application_name' => 'Wings',
         'application_logo' => null,
         'favicon' => null,
     ]);
@@ -54,6 +54,7 @@
     <!--! END: Vendors CSS-->
     <!--! BEGIN: Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/theme.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom.css') }}" />
     <!--! END: Custom CSS-->
     <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
     <!--! WARNING: Respond.js doesn"t work if you view the page via file: !-->
@@ -71,12 +72,8 @@
         <div class="navbar-wrapper">
             <div class="m-header">
                 <a href="{{ url('/admin') }}" class="b-brand">
-                    @if($appSettings->application_logo)
-                        <img src="{{ asset('storage/' . $appSettings->application_logo) }}" alt="logo" class="logo-lg" style="max-height: 40px; width: auto; max-width: 140px;" />
-                    @else
-                        <span class="logo logo-lg fw-bolder fs-3 text-dark">{{ $appSettings->application_name }}</span>
-                    @endif
-                    <span class="logo logo-sm fw-bolder fs-4 text-dark">{{ substr($appSettings->application_name, 0, 2) }}</span>
+                    <span class="logo logo-lg fw-bolder fs-3 text-dark">Wings</span>
+                    <span class="logo logo-sm fw-bolder fs-4 text-dark">W</span>
                 </a>
             </div>
             <div class="navbar-content">
@@ -185,7 +182,7 @@
                                     <img src="{{ asset('assets/images/avatar/1.png') }}" alt="user-image" class="img-fluid user-avtar" />
                                     <div>
                                         <h6 class="text-dark mb-0">Administrator</h6>
-                                        <span class="fs-12 fw-medium text-muted">admin@skytrack.com</span>
+                                        <span class="fs-12 fw-medium text-muted">admin@wings.com</span>
                                     </div>
                                 </div>
                             </div>
@@ -199,10 +196,13 @@
                                 <span>Account Settings</span>
                             </a>
                             <div class="dropdown-divider"></div>
-                            <a href="{{ url('/admin') }}" class="dropdown-item">
+                            <a href="#" class="dropdown-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="feather-log-out"></i>
                                 <span>Logout</span>
                             </a>
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
                         </div>
                     </div>
                 </div>
