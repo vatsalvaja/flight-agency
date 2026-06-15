@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -11,7 +13,7 @@ class AuthController extends Controller
      */
     public function showLanding()
     {
-        if (session('admin_logged_in')) {
+        if (session()->has('user_id')) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -28,14 +30,17 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = \App\Models\User::where('email', $credentials['email'])->first();
+        $user = User::where('email', $credentials['email'])->first();
 
-        if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
-            if ($user->role_id != 1) {
-                return redirect()->back()
-                    ->withInput($request->only('email'))
-                    ->withErrors(['login_error' => 'Access denied. Administrator privileges required.'])
-                    ->with('auth_error', 'Access denied. Administrator privileges required.');
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+            if ($user->role_id != 0) {
+                // For dynamic roles (Manager, Driver), verify if the role is active in the roles table
+                if ($user->role && $user->role->status != 0) {
+                    return redirect()->back()
+                        ->withInput($request->only('email'))
+                        ->withErrors(['login_error' => 'Your role has been deactivated.'])
+                        ->with('auth_error', 'Your role has been deactivated.');
+                }
             }
 
             if ($user->status != 0) {
@@ -45,7 +50,7 @@ class AuthController extends Controller
                     ->with('auth_error', 'Your account is inactive.');
             }
 
-            session(['admin_logged_in' => true]);
+            session(['user_id' => $user->id]);
             return redirect()->route('admin.dashboard')->with('success', 'Welcome back to Wings Control Center.');
         }
 
@@ -66,7 +71,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        return redirect()->back()->with('success', 'Registration successful! You can now log in using the admin credentials.');
+        return redirect()->back()->with('success', 'Registration successful! You can now log in using your credentials.');
     }
 
     /**
@@ -74,7 +79,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        session()->forget('admin_logged_in');
+        session()->forget('user_id');
         return redirect('/')->with('success', 'Logged out successfully.');
     }
 }

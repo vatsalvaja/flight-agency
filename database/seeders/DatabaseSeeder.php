@@ -15,12 +15,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seed default roles
+        \App\Models\Role::updateOrCreate(
+            ['role_name' => 'Manager'],
+            ['status' => 0]
+        );
+
+        \App\Models\Role::updateOrCreate(
+            ['role_name' => 'Driver'],
+            ['status' => 0]
+        );
+
         User::updateOrCreate(
             ['email' => 'admin@gmail.com'],
             [
                 'name' => 'Admin User',
                 'password' => \Illuminate\Support\Facades\Hash::make('Admin@123'),
-                'role_id' => 1,
+                'role_id' => 0,
                 'status' => 0,
             ]
         );

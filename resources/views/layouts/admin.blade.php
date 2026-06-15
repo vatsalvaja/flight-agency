@@ -81,6 +81,18 @@
                     <li class="nxl-item nxl-caption">
                         <label>Navigation</label>
                     </li>
+                    
+                    @php
+                        $isAdmin = isset($loggedUser) && $loggedUser->role_id === 0;
+                        $isManager = false;
+                        $isDriver = false;
+                        if (isset($loggedUser) && $loggedUser->role_id > 0 && $loggedUser->role) {
+                            $isManager = (stripos($loggedUser->role->role_name, 'manager') !== false);
+                            $isDriver = (stripos($loggedUser->role->role_name, 'driver') !== false);
+                        }
+                    @endphp
+
+                    @if($isAdmin)
                     <li class="nxl-item {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
                         <a href="{{ route('admin.dashboard') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-airplay"></i></span>
@@ -111,12 +123,46 @@
                             <span class="nxl-mtext">Reports</span>
                         </a>
                     </li>
+                    @endif
+
+                    @if($isAdmin || $isManager)
+                    <li class="nxl-item {{ Request::routeIs('luggage-assign.*') ? 'active' : '' }}">
+                        <a href="{{ route('luggage-assign.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-package"></i></span>
+                            <span class="nxl-mtext">Luggage Assign</span>
+                        </a>
+                    </li>
+                    @endif
+
+                    @if($isAdmin || $isDriver)
+                    <li class="nxl-item {{ Request::routeIs('assignable-orders.*') ? 'active' : '' }}">
+                        <a href="{{ route('assignable-orders.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-truck"></i></span>
+                            <span class="nxl-mtext">Assignable Orders</span>
+                        </a>
+                    </li>
+                    @endif
+
+                    @if($isAdmin)
+                    <li class="nxl-item {{ Request::routeIs('roles.*') ? 'active' : '' }}">
+                        <a href="{{ route('roles.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-shield"></i></span>
+                            <span class="nxl-mtext">Role Management</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item {{ Request::routeIs('users.*') ? 'active' : '' }}">
+                        <a href="{{ route('users.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-users"></i></span>
+                            <span class="nxl-mtext">User Management</span>
+                        </a>
+                    </li>
                     <li class="nxl-item {{ Request::routeIs('settings.*') ? 'active' : '' }}">
                         <a href="{{ route('settings.edit') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-settings"></i></span>
                             <span class="nxl-mtext">Settings</span>
                         </a>
                     </li>
+                    @endif
                 </ul>
             </div>
         </div>

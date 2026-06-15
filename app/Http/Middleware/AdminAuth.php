@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\User;
 
 class AdminAuth
 {
@@ -13,10 +14,61 @@ class AdminAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->session()->has('admin_logged_in')) {
-            return redirect('/')->with('auth_error', 'Please log in to access the admin control center.');
+        if (!$request->session()->has('user_id')) {
+            return redirect('/')->with('auth_error', 'Please log in to access the control center.');
         }
 
-        return $next($request);
+        $user = User::find($request->session()->get('user_id'));
+
+        if (!$user) {
+            $request->session()->forget('user_id');
+            return redirect('/')->with('auth_error', 'User session invalid.');
+        }
+
+        if ($user->status != 0) {
+            $request->session()->forget('user_id');
+            return redirect('/')->with('auth_error', 'Your account is inactive.');
+        }
+
+        // Share logged-in user globally with views
+        view()->share('loggedUser', $user);
+
+        // Path authorization check
+        $path = $request->path(); // e.g. admin/companies
+        
+        // Admin (role_id === 0) has access to everything
+        if ($user->role_id === 0) {
+            return $next($request);
+        }
+
+        // Manager checks
+        $isManager = false;
+        if ($user->role_id > 0 && $user->role) {
+            $isManager = (stripos($user->role->role_name, 'manager') !== false);
+        }
+
+        // Driver checks
+        $isDriver = false;
+        if ($user->role_id > 0 && $user->role) {
+            $isDriver = (stripos($user->role->role_name, 'driver') !== false);
+        }
+
+        // Restrict paths
+        if ($isManager) {
+            if ($path === 'admin/luggage-assign' || str_starts_with($path, 'admin/luggage-assign/') || $path === 'admin' || $path === 'logout') {
+                return $next($request);
+            }
+            return redirect('/admin')->with('error', 'Unauthorized access.');
+        }
+
+        if ($isDriver) {
+            if ($path === 'admin/assignable-orders' || str_starts_with($path, 'admin/assignable-orders/') || $path === 'admin' || $path === 'logout') {
+                return $next($request);
+            }
+            return redirect('/admin')->with('error', 'Unauthorized access.');
+        }
+
+        // Default deny if role is undefined or not allowed
+        return redirect('/')->with('auth_error', 'Unauthorized role access.');
     }
 }

@@ -5,6 +5,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 
 // Public Landing Page & Auth Actions
 Route::get('/', [AuthController::class, 'showLanding'])->name('landing');
@@ -17,6 +19,8 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
     
     Route::resource('companies', CompanyController::class);
+    Route::resource('roles', RoleController::class);
+    Route::resource('users', UserController::class);
     
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
@@ -32,4 +36,12 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('reports', function () {
         return view('admin.reports.index');
     })->name('reports.index');
+
+    Route::get('luggage-assign', function () {
+        return view('admin.luggage-assign.index');
+    })->name('luggage-assign.index');
+
+    Route::get('assignable-orders', function () {
+        return view('admin.assignable-orders.index');
+    })->name('assignable-orders.index');
 });
