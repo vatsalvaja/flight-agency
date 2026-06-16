@@ -32,9 +32,6 @@ class SettingsController extends Controller
             'application_name' => 'required|string|max:255',
             'application_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'favicon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,ico|max:1024',
-            'admin_email' => 'nullable|email|max:255',
-            'company_phone' => 'nullable|string|max:255',
-            'company_address' => 'nullable|string',
         ]);
 
         if ($request->hasFile('application_logo')) {

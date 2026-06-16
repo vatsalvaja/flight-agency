@@ -16,9 +16,6 @@ return new class extends Migration
             $table->string('application_name')->default('Wings');
             $table->string('application_logo')->nullable();
             $table->string('favicon')->nullable();
-            $table->string('admin_email')->nullable();
-            $table->string('company_phone')->nullable();
-            $table->text('company_address')->nullable();
             $table->timestamps();
         });
     }

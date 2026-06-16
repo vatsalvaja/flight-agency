@@ -3,7 +3,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>WINGS - Operations Management System</title>
+    <title>{{ $appSettings->application_name }} - Operations Management System</title>
+    
+    <!-- Favicon -->
+    @if($appSettings->favicon)
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('storage/' . $appSettings->favicon) }}" />
+    @else
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/images/favicon.ico') }}" />
+    @endif
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -293,17 +300,21 @@
                     
                     <!-- Branding Block inside Card -->
                     <div class="card-brand-block">
-                        <svg class="wings-logo" width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="wingGrad" x1="20" y1="20" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-                                    <stop offset="0%" stop-color="#60a5fa" />
-                                    <stop offset="100%" stop-color="#2563eb" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M25 70 C25 70 52 60 85 30 C74 48 58 58 58 58 L42 55 L25 70 Z" fill="url(#wingGrad)" />
-                            <path d="M38 82 C38 82 62 72 95 42 C84 60 70 70 70 70 L55 67 L38 82 Z" fill="url(#wingGrad)" opacity="0.85" />
-                        </svg>
-                        <h1 class="wings-title">WINGS</h1>
+                        @if($appSettings->application_logo)
+                            <img class="wings-logo" src="{{ asset('storage/' . $appSettings->application_logo) }}" alt="{{ $appSettings->application_name }}" style="max-height: 64px; max-width: 100%; object-fit: contain;">
+                        @else
+                            <svg class="wings-logo" width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="wingGrad" x1="20" y1="20" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0%" stop-color="#60a5fa" />
+                                        <stop offset="100%" stop-color="#2563eb" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M25 70 C25 70 52 60 85 30 C74 48 58 58 58 58 L42 55 L25 70 Z" fill="url(#wingGrad)" />
+                                <path d="M38 82 C38 82 62 72 95 42 C84 60 70 70 70 70 L55 67 L38 82 Z" fill="url(#wingGrad)" opacity="0.85" />
+                            </svg>
+                        @endif
+                        <h1 class="wings-title">{{ $appSettings->application_name }}</h1>
                         <p class="wings-subtitle">Operations Management System</p>
                     </div>
                     

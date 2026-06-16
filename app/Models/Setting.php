@@ -18,8 +18,5 @@ class Setting extends Model
         'application_name',
         'application_logo',
         'favicon',
-        'admin_email',
-        'company_phone',
-        'company_address',
     ];
 }

@@ -1,10 +1,3 @@
-@php
-    $appSettings = \App\Models\Setting::first() ?? new \App\Models\Setting([
-        'application_name' => 'Wings',
-        'application_logo' => null,
-        'favicon' => null,
-    ]);
-@endphp
 <!DOCTYPE html>
 <html lang="zxx">
         
@@ -72,8 +65,17 @@
         <div class="navbar-wrapper">
             <div class="m-header">
                 <a href="{{ url('/admin') }}" class="b-brand">
-                    <span class="logo logo-lg fw-bolder fs-3 text-dark">Wings</span>
-                    <span class="logo logo-sm fw-bolder fs-4 text-dark">W</span>
+                    @if($appSettings->application_logo)
+                        <img src="{{ asset('storage/' . $appSettings->application_logo) }}" alt="{{ $appSettings->application_name }}" class="logo logo-lg" style="max-height: 42px; max-width: 145px; object-fit: contain; -webkit-text-fill-color: initial; background: transparent;">
+                    @else
+                        <span class="logo logo-lg fw-bolder fs-3 text-dark">{{ $appSettings->application_name }}</span>
+                    @endif
+
+                    @if($appSettings->favicon)
+                        <img src="{{ asset('storage/' . $appSettings->favicon) }}" alt="{{ $appSettings->application_name }}" class="logo logo-sm" style="max-height: 30px; max-width: 30px; object-fit: contain; -webkit-text-fill-color: initial; background: transparent;">
+                    @else
+                        <span class="logo logo-sm fw-bolder fs-4 text-dark">{{ substr($appSettings->application_name, 0, 1) }}</span>
+                    @endif
                 </a>
             </div>
             <div class="navbar-content">
@@ -111,12 +113,7 @@
                             <span class="nxl-mtext">Stations</span>
                         </a>
                     </li>
-                    <li class="nxl-item {{ Request::routeIs('locations.*') ? 'active' : '' }}">
-                        <a href="{{ route('locations.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-navigation"></i></span>
-                            <span class="nxl-mtext">Locations</span>
-                        </a>
-                    </li>
+
                     <li class="nxl-item {{ Request::routeIs('reports.*') ? 'active' : '' }}">
                         <a href="{{ route('reports.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-bar-chart-2"></i></span>

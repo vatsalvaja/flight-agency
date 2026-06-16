@@ -48,34 +48,10 @@
                             @method('PUT')
 
                             <div class="row mb-4">
-                                <div class="col-md-6 mb-3">
+                                <div class="col-12 mb-3">
                                     <label class="form-label fw-semibold" for="application_name">System Name <span class="text-danger">*</span></label>
                                     <input type="text" name="application_name" id="application_name" class="form-control @error('application_name') is-invalid @enderror" value="{{ old('application_name', $setting->application_name) }}" required>
                                     @error('application_name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold" for="admin_email">Admin Email</label>
-                                    <input type="email" name="admin_email" id="admin_email" class="form-control @error('admin_email') is-invalid @enderror" value="{{ old('admin_email', $setting->admin_email) }}">
-                                    @error('admin_email')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="row mb-4">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold" for="company_phone">Company Phone</label>
-                                    <input type="text" name="company_phone" id="company_phone" class="form-control @error('company_phone') is-invalid @enderror" value="{{ old('company_phone', $setting->company_phone) }}">
-                                    @error('company_phone')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold" for="company_address">Company Address</label>
-                                    <textarea name="company_address" id="company_address" class="form-control @error('company_address') is-invalid @enderror" rows="3">{{ old('company_address', $setting->company_address) }}</textarea>
-                                    @error('company_address')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

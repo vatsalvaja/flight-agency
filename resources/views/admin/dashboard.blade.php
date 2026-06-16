@@ -18,7 +18,7 @@
             <div class="main-content">
                 <div class="row">
                     <!-- Total Companies Card -->
-                    <div class="col-md-4 col-sm-12 mb-4">
+                    <div class="col-md-6 col-sm-12 mb-4">
                         <div class="card stretch stretch-full h-100">
                             <div class="card-body d-flex align-items-center justify-content-between">
                                 <div>
@@ -32,7 +32,7 @@
                         </div>
                     </div>
                     <!-- Total Stations Card -->
-                    <div class="col-md-4 col-sm-12 mb-4">
+                    <div class="col-md-6 col-sm-12 mb-4">
                         <div class="card stretch stretch-full h-100">
                             <div class="card-body d-flex align-items-center justify-content-between">
                                 <div>
@@ -46,21 +46,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Total Locations Card -->
-                    <div class="col-md-4 col-sm-12 mb-4">
-                        <div class="card stretch stretch-full h-100">
-                            <div class="card-body d-flex align-items-center justify-content-between">
-                                <div>
-                                    <span class="fs-12 text-muted text-uppercase d-block mb-1">Total Locations</span>
-                                    <h2 class="fw-bold mb-0 text-dark">0</h2>
-                                    <span class="fs-11 text-warning d-block mt-1"><i class="feather-alert-circle me-1"></i>Under planning</span>
-                                </div>
-                                <div class="avatar-text avatar-md bg-soft-warning text-warning rounded p-2 fs-4" style="background-color: rgba(245, 158, 11, 0.1);">
-                                    <i class="feather-navigation"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 
                 <div class="row">
@@ -70,7 +55,7 @@
                                 <div class="avatar-text avatar-lg bg-soft-primary text-primary mx-auto mb-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: rgba(59, 130, 246, 0.1); font-size: 2rem;">
                                     <i class="feather-airplay"></i>
                                 </div>
-                                <h2 class="fw-bold text-dark mb-1">Welcome to Wings</h2>
+                                <h2 class="fw-bold text-dark mb-1">Welcome to {{ $appSettings->application_name }}</h2>
                                 <p class="fs-14 text-muted mb-4">Administrative Control Center</p>
                                 <div class="d-inline-flex align-items-center justify-content-center gap-2">
                                     <span class="badge bg-soft-success text-success px-3 py-2 fs-12 fw-semibold rounded-pill">

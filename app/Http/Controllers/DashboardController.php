@@ -27,8 +27,7 @@ class DashboardController extends Controller
         $companiesCount = Company::count();
         // Placeholders as requested
         $stationsCount = 0; 
-        $locationsCount = 0;
 
-        return view('admin.dashboard', compact('companiesCount', 'stationsCount', 'locationsCount'));
+        return view('admin.dashboard', compact('companiesCount', 'stationsCount'));
     }
 }

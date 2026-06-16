@@ -28,10 +28,7 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('stations', function () {
         return view('admin.stations.index');
     })->name('stations.index');
-    
-    Route::get('locations', function () {
-        return view('admin.locations.index');
-    })->name('locations.index');
+
     
     Route::get('reports', function () {
         return view('admin.reports.index');
