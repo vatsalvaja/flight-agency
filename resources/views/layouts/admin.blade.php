@@ -105,7 +105,7 @@
                     <li class="nxl-item {{ Request::routeIs('companies.*') ? 'active' : '' }}">
                         <a href="{{ route('companies.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-briefcase"></i></span>
-                            <span class="nxl-mtext">Companies</span>
+                            <span class="nxl-mtext">Flight Companies</span>
                         </a>
                     </li>
                     <li class="nxl-item {{ Request::routeIs('stations.*') ? 'active' : '' }}">

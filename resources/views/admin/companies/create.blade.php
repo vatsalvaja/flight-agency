@@ -12,7 +12,7 @@
             </div>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ url('/admin') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('companies.index') }}">Companies</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('companies.index') }}">Flight Companies</a></li>
                 <li class="breadcrumb-item">Add Company</li>
             </ul>
         </div>

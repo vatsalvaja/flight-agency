@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Companies || ' . ($appSettings->application_name ?? 'Wings'))
+@section('title', 'Flight Companies || ' . ($appSettings->application_name ?? 'Wings'))
 
 @section('content')
 <div class="nxl-content">
@@ -8,11 +8,11 @@
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
             <div class="page-header-title">
-                <h5 class="m-b-10">Companies</h5>
+                <h5 class="m-b-10">Flight Companies</h5>
             </div>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ url('/admin') }}">Home</a></li>
-                <li class="breadcrumb-item">Companies</li>
+                <li class="breadcrumb-item">Flight Companies</li>
             </ul>
         </div>
         <div class="page-header-right ms-auto">
@@ -37,7 +37,7 @@
 
                 <div class="card stretch stretch-full">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Company Directory</h5>
+                        <h5 class="card-title mb-0">Flight Companies Directory</h5>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
