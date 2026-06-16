@@ -50,6 +50,10 @@ class AuthController extends Controller
                     ->with('auth_error', 'Your account is inactive.');
             }
 
+            $user->update([
+                'last_login_at' => now(),
+                'last_login_ip' => $request->ip(),
+            ]);
             session(['user_id' => $user->id]);
             return redirect()->route('admin.dashboard')->with('success', 'Welcome back to Wings Control Center.');
         }

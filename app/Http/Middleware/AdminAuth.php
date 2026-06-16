@@ -53,16 +53,25 @@ class AdminAuth
             $isDriver = (stripos($user->role->role_name, 'driver') !== false);
         }
 
+        // Common paths allowed for all authenticated roles
+        $allowedCommonPaths = [
+            'admin',
+            'logout',
+            'admin/profile',
+            'admin/account-settings',
+            'admin/change-password'
+        ];
+
         // Restrict paths
         if ($isManager) {
-            if ($path === 'admin/luggage-assign' || str_starts_with($path, 'admin/luggage-assign/') || $path === 'admin' || $path === 'logout') {
+            if (in_array($path, $allowedCommonPaths) || $path === 'admin/luggage-assign' || str_starts_with($path, 'admin/luggage-assign/')) {
                 return $next($request);
             }
             return redirect('/admin')->with('error', 'Unauthorized access.');
         }
 
         if ($isDriver) {
-            if ($path === 'admin/assignable-orders' || str_starts_with($path, 'admin/assignable-orders/') || $path === 'admin' || $path === 'logout') {
+            if (in_array($path, $allowedCommonPaths) || $path === 'admin/assignable-orders' || str_starts_with($path, 'admin/assignable-orders/')) {
                 return $next($request);
             }
             return redirect('/admin')->with('error', 'Unauthorized access.');

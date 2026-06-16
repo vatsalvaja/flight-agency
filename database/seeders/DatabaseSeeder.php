@@ -33,6 +33,9 @@ class DatabaseSeeder extends Seeder
                 'password' => \Illuminate\Support\Facades\Hash::make('Admin@123'),
                 'role_id' => 0,
                 'status' => 0,
+                'phone' => '+1 (555) 019-2834',
+                'designation' => 'System Administrator',
+                'address' => '123 Aviation Way, Hangar 4',
             ]
         );
     }

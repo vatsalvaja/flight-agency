@@ -217,24 +217,40 @@
                     </div>
                     <div class="dropdown nxl-h-item">
                         <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside">
-                            <img src="{{ asset('assets/images/avatar/1.png') }}" alt="user-image" class="img-fluid user-avtar me-0" />
+                            @if(isset($loggedUser) && $loggedUser->profile_photo)
+                                <img src="{{ asset('storage/' . $loggedUser->profile_photo) }}" alt="user-image" class="img-fluid user-avtar me-0" style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;" />
+                            @elseif(isset($loggedUser))
+                                <div class="avatar-text bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center me-0" style="width: 35px; height: 35px; font-weight: 700; font-size: 14px;">
+                                    {{ $loggedUser->getInitials() }}
+                                </div>
+                            @else
+                                <img src="{{ asset('assets/images/avatar/1.png') }}" alt="user-image" class="img-fluid user-avtar me-0" />
+                            @endif
                         </a>
                         <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-user-dropdown">
                             <div class="dropdown-header">
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ asset('assets/images/avatar/1.png') }}" alt="user-image" class="img-fluid user-avtar" />
+                                    @if(isset($loggedUser) && $loggedUser->profile_photo)
+                                        <img src="{{ asset('storage/' . $loggedUser->profile_photo) }}" alt="user-image" class="img-fluid user-avtar" style="width: 45px; height: 45px; object-fit: cover; border-radius: 50%;" />
+                                    @elseif(isset($loggedUser))
+                                        <div class="avatar-text bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px; font-weight: 700; font-size: 16px;">
+                                            {{ $loggedUser->getInitials() }}
+                                        </div>
+                                    @else
+                                        <img src="{{ asset('assets/images/avatar/1.png') }}" alt="user-image" class="img-fluid user-avtar" />
+                                    @endif
                                     <div>
-                                        <h6 class="text-dark mb-0">Administrator</h6>
-                                        <span class="fs-12 fw-medium text-muted">admin@wings.com</span>
+                                        <h6 class="text-dark mb-0">{{ $loggedUser->name ?? 'Administrator' }}</h6>
+                                        <span class="fs-12 fw-medium text-muted">{{ $loggedUser->email ?? 'admin@wings.com' }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="dropdown-divider"></div>
-                            <a href="{{ url('/admin') }}" class="dropdown-item">
+                            <a href="{{ route('profile.edit') }}" class="dropdown-item">
                                 <i class="feather-user"></i>
                                 <span>Profile Details</span>
                             </a>
-                            <a href="{{ url('/admin') }}" class="dropdown-item">
+                            <a href="{{ route('account-settings.edit') }}" class="dropdown-item">
                                 <i class="feather-settings"></i>
                                 <span>Account Settings</span>
                             </a>

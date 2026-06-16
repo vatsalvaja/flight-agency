@@ -25,6 +25,11 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
     
+    Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('account-settings', [\App\Http\Controllers\ProfileController::class, 'accountSettings'])->name('account-settings.edit');
+    Route::put('change-password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('change-password.update');
+    
     Route::get('stations', function () {
         return view('admin.stations.index');
     })->name('stations.index');
