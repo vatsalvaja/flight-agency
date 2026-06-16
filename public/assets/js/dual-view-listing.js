@@ -7,12 +7,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const table = document.querySelector('.table-responsive table.table');
     if (!table) return;
 
+    // Only target listing tables that have headers (ths)
+    const ths = table.querySelectorAll('thead th');
+    if (ths.length === 0) return;
+
     const tableContainer = table.closest('.table-responsive');
     if (!tableContainer) return;
 
     // 1. Gather headers
     const headers = [];
-    const ths = table.querySelectorAll('thead th');
     ths.forEach(th => {
         headers.push(th.textContent.trim());
     });
