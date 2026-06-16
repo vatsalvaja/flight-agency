@@ -12,12 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('phone')->nullable()->after('email');
-            $table->string('designation')->nullable()->after('phone');
-            $table->text('address')->nullable()->after('designation');
-            $table->string('profile_photo')->nullable()->after('address');
-            $table->timestamp('last_login_at')->nullable()->after('remember_token');
-            $table->string('last_login_ip')->nullable()->after('last_login_at');
+            if (!Schema::hasColumn('users', 'phone')) {
+                $table->string('phone')->nullable()->after('email');
+            }
+            if (!Schema::hasColumn('users', 'designation')) {
+                $table->string('designation')->nullable()->after('phone');
+            }
+            if (!Schema::hasColumn('users', 'address')) {
+                $table->text('address')->nullable()->after('designation');
+            }
+            if (!Schema::hasColumn('users', 'profile_photo')) {
+                $table->string('profile_photo')->nullable()->after('address');
+            }
+            if (!Schema::hasColumn('users', 'last_login_at')) {
+                $table->timestamp('last_login_at')->nullable()->after('remember_token');
+            }
+            if (!Schema::hasColumn('users', 'last_login_ip')) {
+                $table->string('last_login_ip')->nullable()->after('last_login_at');
+            }
         });
     }
 

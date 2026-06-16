@@ -12,7 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->dropColumn(['admin_email', 'company_phone', 'company_address']);
+            $columnsToDrop = [];
+            if (Schema::hasColumn('settings', 'admin_email')) {
+                $columnsToDrop[] = 'admin_email';
+            }
+            if (Schema::hasColumn('settings', 'company_phone')) {
+                $columnsToDrop[] = 'company_phone';
+            }
+            if (Schema::hasColumn('settings', 'company_address')) {
+                $columnsToDrop[] = 'company_address';
+            }
+            
+            if (!empty($columnsToDrop)) {
+                $table->dropColumn($columnsToDrop);
+            }
         });
     }
 

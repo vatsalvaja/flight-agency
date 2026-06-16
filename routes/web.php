@@ -30,9 +30,7 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('account-settings', [\App\Http\Controllers\ProfileController::class, 'accountSettings'])->name('account-settings.edit');
     Route::put('change-password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('change-password.update');
     
-    Route::get('stations', function () {
-        return view('admin.stations.index');
-    })->name('stations.index');
+    Route::resource('stations', \App\Http\Controllers\StationController::class);
 
     
     Route::get('reports', function () {
