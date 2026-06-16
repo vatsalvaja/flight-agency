@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Build Card HTML
             const col = document.createElement('div');
-            col.className = 'col-12 col-md-6 col-lg-4 col-xl-3';
+            col.className = 'col-12 col-md-6 col-lg-4 col-xl-4';
             col.innerHTML = `
                 <div class="dual-view-card card-hover-effect">
                     <div class="card-body">
