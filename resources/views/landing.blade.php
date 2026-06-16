@@ -3,295 +3,384 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Wings - Aviation Administrative Operations</title>
+    <title>WINGS - Operations Management System</title>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Feather Icons -->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/vendors.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/bootstrap.min.css') }}" />
     
     <style>
+        :root {
+            --primary-blue: #2563eb;
+            --primary-blue-hover: #1d4ed8;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at 10% 20%, rgb(15, 23, 42) 0%, rgb(9, 14, 28) 90.1%);
-            color: #cbd5e1;
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
             overflow-x: hidden;
         }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Outfit', sans-serif;
-            color: #f8fafc;
-        }
 
-        /* Glassmorphism Navbar */
-        .landing-navbar {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            background: rgba(15, 23, 42, 0.7);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s ease;
-        }
-
-        .brand-text {
-            font-weight: 800;
-            font-size: 1.5rem;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Hero Section */
-        .hero-section {
-            padding: 160px 0 100px;
+        .login-wrapper {
             position: relative;
+            width: 100vw;
+            min-height: 100vh;
+            background-image: url('{{ asset('assets/images/airplane_tarmac.png') }}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
         }
 
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            line-height: 1.15;
-            margin-bottom: 1.5rem;
-            letter-spacing: -1px;
-            background: linear-gradient(to right, #ffffff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-badge {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            padding: 8px 16px;
-            border-radius: 50px;
-            display: inline-flex;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .hero-subtitle {
-            font-size: 1.15rem;
-            line-height: 1.7;
-            color: #94a3b8;
-            max-width: 550px;
-            margin-bottom: 2.5rem;
-        }
-
-        /* Glass Cards */
-        .glass-card {
-            background: rgba(30, 41, 59, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            backdrop-filter: blur(8px);
-            padding: 2.5rem;
+        .dark-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
-            transition: transform 0.3s ease, border-color 0.3s ease;
+            background-color: rgba(8, 18, 41, 0.7);
+            z-index: 1;
         }
 
-        .glass-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(59, 130, 246, 0.25);
+        .login-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
         }
 
-        .card-icon {
-            font-size: 2rem;
-            color: #3b82f6;
-            margin-bottom: 1.5rem;
-            background: rgba(59, 130, 246, 0.1);
-            width: 60px;
-            height: 60px;
+        /* Left side is open to display the background plane image */
+        .left-empty-pane {
+            flex: 1;
+        }
+
+        /* Right pane holds the centered white card (occupies ~40% space on desktop) */
+        .right-pane {
+            width: 40%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
+            padding: 40px;
         }
 
-        /* Radar Grid CSS Background Effect */
-        .bg-radar {
+        .auth-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Branding header inside the card */
+        .card-brand-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .wings-logo {
+            margin-bottom: 14px;
+        }
+
+        .wings-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #0b1736;
+            margin: 0 0 4px;
+            text-transform: uppercase;
+        }
+
+        .wings-subtitle {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .card-divider {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 24px 0;
+            width: 100%;
+        }
+
+        .welcome-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .welcome-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* Form styling */
+        .form-group-custom {
+            margin-bottom: 18px;
+        }
+
+        .form-label-custom {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        .input-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            height: 40px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control-custom:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 1px var(--primary-blue);
+        }
+
+        .form-control-custom.password-input {
+            padding-right: 40px;
+        }
+
+        .password-toggle {
             position: absolute;
-            top: 10%;
-            right: -10%;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            border: 1px dashed rgba(59, 130, 246, 0.1);
-            pointer-events: none;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            animation: rotateRadar 60s linear infinite;
+            user-select: none;
         }
 
-        .bg-radar::before {
-            content: '';
-            position: absolute;
-            width: 80%;
-            height: 80%;
-            border-radius: 50%;
-            border: 1px solid rgba(59, 130, 246, 0.05);
+        .password-toggle:hover {
+            color: var(--text-main);
         }
 
-        .bg-radar::after {
-            content: '';
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            border-radius: 50%;
-            border: 1px dashed rgba(59, 130, 246, 0.08);
+        /* Checkbox Row */
+        .action-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        @keyframes rotateRadar {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .remember-label {
+            font-size: 0.85rem;
+            color: #475569;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
         }
 
-        /* Buttons styling */
-        .btn-premium {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        .remember-checkbox {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            margin-right: 8px;
+            cursor: pointer;
+            accent-color: var(--primary-blue);
+        }
+
+        /* Button */
+        .btn-signin {
+            background-color: var(--primary-blue);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            width: 100%;
+            height: 40px;
             border: none;
-            color: #ffffff;
-            font-weight: 600;
-            padding: 12px 28px;
-            border-radius: 8px;
-            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
-            transition: all 0.2s ease-in-out;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .btn-premium:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-            color: #ffffff;
+        .btn-signin:hover {
+            background-color: var(--primary-blue-hover);
         }
 
-        .btn-outline-premium {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #f8fafc;
-            font-weight: 600;
-            padding: 12px 28px;
-            border-radius: 8px;
-            transition: all 0.2s ease-in-out;
+        .btn-signin:active {
+            transform: scale(0.99);
         }
 
-        .btn-outline-premium:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.3);
-            color: #ffffff;
+        /* Error Alert Box */
+        .error-alert {
+            background-color: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: #ef4444;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .error-alert i {
+            font-size: 0.95rem;
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 991px) {
+            .left-empty-pane {
+                display: none;
+            }
+            .right-pane {
+                width: 100%;
+                padding: 24px;
+            }
+            .auth-card {
+                padding: 32px 24px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header / Navbar -->
-    <nav class="navbar navbar-expand-lg landing-navbar fixed-top py-3">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <span class="brand-text">Wings</span>
-            </a>
+    <div class="login-wrapper">
+        <div class="dark-overlay"></div>
+        
+        <div class="login-container">
+            <!-- Left Side (Empty to showcase background airplane) -->
+            <div class="left-empty-pane"></div>
             
-            <div class="ms-auto d-flex align-items-center gap-2">
-                <button class="btn btn-sm btn-outline-premium px-3 py-2" data-bs-toggle="modal" data-bs-target="#authModal" onclick="switchTab('signin')">
-                    Log In
-                </button>
-                <button class="btn btn-sm btn-premium px-3 py-2" data-bs-toggle="modal" data-bs-target="#authModal" onclick="switchTab('signup')">
-                    Register
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="bg-radar"></div>
-            
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <div class="hero-badge">
-                        <i class="feather-activity me-2"></i>Aviation Operations Portal
+            <!-- Right Side (Login Card Panel) -->
+            <div class="right-pane">
+                <div class="auth-card">
+                    
+                    <!-- Branding Block inside Card -->
+                    <div class="card-brand-block">
+                        <svg class="wings-logo" width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="wingGrad" x1="20" y1="20" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#60a5fa" />
+                                    <stop offset="100%" stop-color="#2563eb" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M25 70 C25 70 52 60 85 30 C74 48 58 58 58 58 L42 55 L25 70 Z" fill="url(#wingGrad)" />
+                            <path d="M38 82 C38 82 62 72 95 42 C84 60 70 70 70 70 L55 67 L38 82 Z" fill="url(#wingGrad)" opacity="0.85" />
+                        </svg>
+                        <h1 class="wings-title">WINGS</h1>
+                        <p class="wings-subtitle">Operations Management System</p>
                     </div>
-                    <h1 class="hero-title">
-                        Flight Logistics & master Control panel
-                    </h1>
-                    <p class="hero-subtitle">
-                        Streamlining station configurations, master routes, country listings, and airline directory profiles in a secure, high-contrast system hub.
-                    </p>
-                    <div class="d-flex gap-3">
-                        <button class="btn btn-premium px-4 py-3" data-bs-toggle="modal" data-bs-target="#authModal" onclick="switchTab('signin')">
-                            <i class="feather-log-in me-2"></i>Access Admin Center
-                        </button>
-                        <button class="btn btn-outline-premium px-4 py-3" data-bs-toggle="modal" data-bs-target="#authModal" onclick="switchTab('signup')">
-                            <i class="feather-user-plus me-2"></i>Sign Up
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="col-lg-5 offset-lg-1 mt-5 mt-lg-0">
-                    <div class="glass-card">
-                        <div class="card-icon">
-                            <i class="feather-shield"></i>
+                    
+                    <div class="card-divider"></div>
+                    
+                    <h2 class="welcome-title">Welcome Back</h2>
+                    <p class="welcome-subtitle">Please sign in to continue</p>
+                    
+                    <!-- Error Alert -->
+                    @if(session('auth_error'))
+                        <div class="error-alert">
+                            <i class="feather-alert-circle"></i>
+                            <span>{{ session('auth_error') }}</span>
                         </div>
-                        <h4 class="fw-bold mb-2">Secure Gateway</h4>
-                        <p class="text-muted fs-14 mb-4">
-                            All administrative features, aircraft directory lists, company profiles, and reports are fully protected with session encryption layers.
-                        </p>
+                    @elseif($errors->any())
+                        <div class="error-alert">
+                            <i class="feather-alert-circle"></i>
+                            <span>{{ $errors->first() }}</span>
+                        </div>
+                    @endif
+
+                    <!-- Form -->
+                    <form action="{{ route('login') }}" method="POST">
+                        @csrf
                         
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="d-flex align-items-center justify-content-center bg-soft-success rounded-circle" style="width: 32px; height: 32px; background: rgba(16, 185, 129, 0.1);">
-                                <i class="feather-check text-success"></i>
+                        <div class="form-group-custom">
+                            <label for="login_email" class="form-label-custom">Email Address</label>
+                            <div class="input-container">
+                                <input type="email" name="email" id="login_email" class="form-control-custom" placeholder="name@company.com" value="{{ old('email', 'admin@gmail.com') }}" required autocomplete="email" autofocus>
                             </div>
-                            <span class="fs-13 text-secondary">Aviation master templates integration</span>
                         </div>
-                        <div class="d-flex align-items-center gap-3 mt-3">
-                            <div class="d-flex align-items-center justify-content-center bg-soft-success rounded-circle" style="width: 32px; height: 32px; background: rgba(16, 185, 129, 0.1);">
-                                <i class="feather-check text-success"></i>
+                        
+                        <div class="form-group-custom">
+                            <label for="login_password" class="form-label-custom">Password</label>
+                            <div class="input-container">
+                                <input type="password" name="password" id="login_password" class="form-control-custom password-input" placeholder="••••••••" value="Admin@123" required autocomplete="current-password">
+                                <span class="password-toggle" id="password_eye_toggle" onclick="togglePassword()">
+                                    <i class="feather-eye" id="password_eye_icon"></i>
+                                </span>
                             </div>
-                            <span class="fs-13 text-secondary">Real-time status configurations</span>
                         </div>
-                    </div>
+                        
+                        <div class="action-row">
+                            <label class="remember-label">
+                                <input type="checkbox" name="remember" class="remember-checkbox" {{ old('remember') ? 'checked' : '' }}>
+                                Remember Me
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn-signin">
+                            Sign In
+                        </button>
+                    </form>
+
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Include Modal Partial -->
-    @include('partials.auth-modal')
-
-    <!-- Footer script and libraries -->
+    <!-- Scripts -->
     <script src="{{ asset('assets/vendors/js/vendors.min.js') }}"></script>
     <script src="{{ asset('assets/js/bootstrap.min.js') }}"></script>
     
     <script>
-        function switchTab(tabId) {
-            // Find tabs trigger element
-            var triggerEl = document.querySelector('#authTabs button[id="' + tabId + '-tab"]');
-            if (triggerEl) {
-                var tab = new bootstrap.Tab(triggerEl);
-                tab.show();
+        function togglePassword() {
+            var passwordField = document.getElementById('login_password');
+            var eyeIcon = document.getElementById('password_eye_icon');
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                eyeIcon.classList.remove("feather-eye");
+                eyeIcon.classList.add("feather-eye-off");
+            } else {
+                passwordField.type = "password";
+                eyeIcon.classList.remove("feather-eye-off");
+                eyeIcon.classList.add("feather-eye");
             }
         }
-        
-        // Auto open modal on authentication errors or redirects
-        @if(session('auth_error') || session('success') || $errors->any())
-            document.addEventListener("DOMContentLoaded", function() {
-                var myModal = new bootstrap.Modal(document.getElementById('authModal'));
-                myModal.show();
-                
-                // If it's a validation error or login failure, activate Sign In tab
-                @if(session('auth_error') || $errors->has('email') || $errors->has('password') || $errors->has('login_error'))
-                    switchTab('signin');
-                @elseif(session('success'))
-                    // Keep the signup/signin modal tab as active depending on success context
-                    switchTab('signin');
-                @endif
-            });
-        @endif
     </script>
 </body>
 </html>
