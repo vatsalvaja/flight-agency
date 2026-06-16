@@ -123,11 +123,11 @@
                     </li>
                     @endif
 
-                    @if($isAdmin || $isManager)
-                    <li class="nxl-item {{ Request::routeIs('luggage-assign.*') ? 'active' : '' }}">
-                        <a href="{{ route('luggage-assign.index') }}" class="nxl-link">
+                    @if($isManager)
+                    <li class="nxl-item {{ Request::routeIs('assign-luggage.*') ? 'active' : '' }}">
+                        <a href="{{ route('assign-luggage.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-package"></i></span>
-                            <span class="nxl-mtext">Luggage Assign</span>
+                            <span class="nxl-mtext">Assign Luggage</span>
                         </a>
                     </li>
                     @endif

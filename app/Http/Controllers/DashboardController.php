@@ -17,7 +17,7 @@ class DashboardController extends Controller
 
         if ($user && $user->role_id !== 0 && $user->role) {
             if (stripos($user->role->role_name, 'manager') !== false) {
-                return redirect()->route('luggage-assign.index');
+                return redirect()->route('assign-luggage.index');
             }
             if (stripos($user->role->role_name, 'driver') !== false) {
                 return redirect()->route('assignable-orders.index');

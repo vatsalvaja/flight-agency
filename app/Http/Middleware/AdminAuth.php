@@ -64,7 +64,7 @@ class AdminAuth
 
         // Restrict paths
         if ($isManager) {
-            if (in_array($path, $allowedCommonPaths) || $path === 'admin/luggage-assign' || str_starts_with($path, 'admin/luggage-assign/')) {
+            if (in_array($path, $allowedCommonPaths) || $path === 'admin/assign-luggage' || str_starts_with($path, 'admin/assign-luggage/')) {
                 return $next($request);
             }
             return redirect('/admin')->with('error', 'Unauthorized access.');

@@ -37,9 +37,7 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
         return view('admin.reports.index');
     })->name('reports.index');
 
-    Route::get('luggage-assign', function () {
-        return view('admin.luggage-assign.index');
-    })->name('luggage-assign.index');
+    Route::resource('assign-luggage', \App\Http\Controllers\AssignLuggageController::class);
 
     Route::get('assignable-orders', function () {
         return view('admin.assignable-orders.index');
