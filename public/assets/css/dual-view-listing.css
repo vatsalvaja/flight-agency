@@ -1,0 +1,264 @@
+/* Dual View Listing Custom Stylesheet */
+
+/* View Switcher Container Alignment */
+.page-header-right {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    flex-wrap: nowrap !important;
+}
+
+/* Segmented switcher toggle button group */
+.view-switcher-container {
+    display: inline-flex;
+    align-items: center;
+}
+
+.view-switcher-container .btn-group {
+    background-color: #f1f5f9;
+    padding: 3px;
+    border-radius: 8px;
+    display: flex;
+    border: none;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+html.app-skin-dark .view-switcher-container .btn-group {
+    background-color: #0f172a;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.view-switcher-container .btn-view {
+    border: none !important;
+    background: transparent !important;
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.725rem !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border-radius: 6px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    line-height: 1.2 !important;
+}
+
+html.app-skin-dark .view-switcher-container .btn-view {
+    color: #94a3b8 !important;
+}
+
+.view-switcher-container .btn-view:hover {
+    color: #0f172a !important;
+}
+
+html.app-skin-dark .view-switcher-container .btn-view:hover {
+    color: #f1f5f9 !important;
+}
+
+.view-switcher-container .btn-view.active {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+    pointer-events: none;
+}
+
+html.app-skin-dark .view-switcher-container .btn-view.active {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Mobile & Tablet breakpoint */
+@media (max-width: 991px) {
+    .view-switcher-container {
+        display: none !important;
+    }
+    .table-responsive {
+        display: none !important;
+    }
+    .dual-view-grid-container {
+        display: block !important;
+    }
+}
+
+/* Card structural styles */
+.dual-view-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+}
+
+html.app-skin-dark .dual-view-card {
+    border-color: #2e3a52;
+    background: #151e2c;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Flat hover style: no translations or childish movements */
+.dual-view-card:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+}
+
+html.app-skin-dark .dual-view-card:hover {
+    border-color: #3e4f70 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dual-view-card .card-body {
+    flex: 1 1 auto;
+    padding: 1.25rem;
+}
+
+.dual-view-card .card-footer {
+    padding: 0.75rem 1.25rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+html.app-skin-dark .dual-view-card .card-footer {
+    background: #111a2e;
+    border-top-color: #2e3a52;
+}
+
+.dual-view-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+html.app-skin-dark .dual-view-card-header {
+    border-bottom-color: #2e3a52;
+}
+
+.dual-view-card-avatar {
+    flex-shrink: 0;
+    margin-right: 0.85rem;
+}
+
+/* Avatar styling */
+.dual-view-card-avatar img {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.dual-view-card-avatar .avatar-text {
+    width: 38px;
+    height: 38px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-radius: 8px;
+}
+
+.dual-view-card-title-area {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.dual-view-card-title {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.9rem;
+    margin-bottom: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+html.app-skin-dark .dual-view-card-title {
+    color: #f1f5f9;
+}
+
+.dual-view-card-subtitle {
+    font-size: 0.75rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+html.app-skin-dark .dual-view-card-subtitle {
+    color: #94a3b8;
+}
+
+/* Card details list table keys */
+.dual-view-card-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.dual-view-card-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid #f8fafc;
+    font-size: 0.8rem;
+}
+
+html.app-skin-dark .dual-view-card-detail-item {
+    border-bottom-color: #1a2234;
+}
+
+.dual-view-card-detail-item:last-child {
+    border-bottom: none;
+}
+
+.dual-view-card-detail-label {
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: 0.7px;
+}
+
+html.app-skin-dark .dual-view-card-detail-label {
+    color: #64748b;
+}
+
+.dual-view-card-detail-value {
+    font-weight: 500;
+    color: #334155;
+    max-width: 65%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+}
+
+html.app-skin-dark .dual-view-card-detail-value {
+    color: #cbd5e1;
+}
+
+/* Card Footer Action Buttons styling overrides */
+.dual-view-card .card-footer .btn {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    border-radius: 4px !important;
+}
+
+/* Smooth transition for grid display */
+.dual-view-grid-container {
+    transition: opacity 0.2s ease-in-out;
+}
+.table-responsive {
+    transition: opacity 0.2s ease-in-out;
+}
