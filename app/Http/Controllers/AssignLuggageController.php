@@ -20,7 +20,17 @@ class AssignLuggageController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $userId = session('user_id');
+        $user = User::find($userId);
+        
         $query = AssignLuggage::with(['company', 'station', 'driver', 'creator']);
+
+        // Filter assignments: Managers can only see their own assigned list
+        if ($user && $user->role_id !== 0 && $user->role) {
+            if (stripos($user->role->role_name, 'manager') !== false) {
+                $query->where('created_by', $userId);
+            }
+        }
 
         if ($search) {
             $query->where(function($q) use ($search) {

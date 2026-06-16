@@ -63,6 +63,9 @@
                                         <th>Expected Delivery</th>
                                         <th>Status</th>
                                         <th>Created Date</th>
+                                        @if(isset($loggedUser) && $loggedUser->role_id === 0)
+                                            <th>Assigned By</th>
+                                        @endif
                                         <th class="text-end pe-4">Actions</th>
                                     </tr>
                                 </thead>
@@ -108,6 +111,11 @@
                                                 @endif
                                             </td>
                                             <td>{{ $assignment->created_at->format('M d, Y') }}</td>
+                                            @if(isset($loggedUser) && $loggedUser->role_id === 0)
+                                                <td>
+                                                    <span class="badge bg-soft-info text-info px-2 py-1 fw-semibold">{{ $assignment->creator->name ?? 'System' }}</span>
+                                                </td>
+                                            @endif
                                             <td class="text-end pe-4">
                                                 <div class="d-inline-flex gap-2">
                                                     <a href="{{ route('assign-luggage.show', $assignment->id) }}" class="btn btn-sm btn-light-brand" title="View Details">
@@ -128,7 +136,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="10" class="text-center py-5 text-muted">
+                                            <td colspan="{{ (isset($loggedUser) && $loggedUser->role_id === 0) ? 11 : 10 }}" class="text-center py-5 text-muted">
                                                 <i class="feather-alert-circle fs-3 d-block mb-2"></i>
                                                 No luggage assignments found. Click "Assign Luggage" to create a new one.
                                             </td>
