@@ -82,11 +82,11 @@
             </div>
 
             <!-- Search & Filters Container -->
-            <div class="card border border-gray-3 shadow-sm mb-4" style="border-radius: 12px;">
+            <div class="card border border-gray-3 shadow-sm mb-4 filter-card" style="border-radius: 12px;">
                 <div class="card-body p-3.5">
-                    <form action="{{ route('driver-activities.index') }}" method="GET" class="row g-3">
+                    <form action="{{ route('driver-activities.index') }}" method="GET" class="row g-3 align-items-center">
                         <!-- Search term input -->
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3 col-lg-4">
                             <div class="input-group">
                                 <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="feather-search fs-13"></i></span>
                                 <input type="text" name="search" value="{{ $search }}" class="form-control border-start-0 fs-12.5" placeholder="Search locations, driver or airline...">
@@ -94,8 +94,8 @@
                         </div>
                         
                         <!-- Driver dropdown selector -->
-                        <div class="col-12 col-sm-6 col-md-3">
-                            <select name="driver_id" class="form-select fs-12.5">
+                        <div class="col-12 col-sm-6 col-md-3 col-lg-3">
+                            <select name="driver_id" class="form-select select2-select fs-12.5">
                                 <option value="">All Drivers</option>
                                 @foreach($drivers as $d)
                                     <option value="{{ $d->id }}" {{ $driverId == $d->id ? 'selected' : '' }}>{{ $d->name }}</option>
@@ -104,8 +104,8 @@
                         </div>
 
                         <!-- Status filter selector -->
-                        <div class="col-12 col-sm-6 col-md-3">
-                            <select name="status" class="form-select fs-12.5">
+                        <div class="col-12 col-sm-6 col-md-3 col-lg-2">
+                            <select name="status" class="form-select select2-select fs-12.5">
                                 <option value="">All Statuses</option>
                                 <option value="In Progress" {{ $status === 'In Progress' ? 'selected' : '' }}>In Transit</option>
                                 <option value="Pickup" {{ $status === 'Pickup' ? 'selected' : '' }}>Pickup</option>
@@ -114,9 +114,9 @@
                         </div>
 
                         <!-- Filter action buttons -->
-                        <div class="col-12 col-md-2 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary flex-fill fs-12 fw-bold text-white"><i class="feather-filter me-1"></i> Filter</button>
-                            <a href="{{ route('driver-activities.index') }}" class="btn btn-light border flex-fill fs-12 fw-bold"><i class="feather-refresh-cw me-1"></i> Reset</a>
+                        <div class="col-12 col-md-3 col-lg-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-fill fs-12 fw-bold text-white text-nowrap"><i class="feather-filter me-1"></i> Filter</button>
+                            <a href="{{ route('driver-activities.index') }}" class="btn btn-light border flex-fill fs-12 fw-bold text-nowrap"><i class="feather-rotate-ccw me-1"></i> Reset</a>
                         </div>
                     </form>
                 </div>
@@ -577,3 +577,18 @@ html.app-skin-dark .table-stepper-label {
 }
 </style>
 @endsection
+
+@push('scripts')
+<!-- Include Select2 JS script -->
+<script src="{{ asset('assets/vendors/js/select2.min.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize Select2 selectors (Professional bootstrap-5 themed dropdowns)
+        $('.select2-select').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            dropdownParent: $('.filter-card')
+        });
+    });
+</script>
+@endpush
