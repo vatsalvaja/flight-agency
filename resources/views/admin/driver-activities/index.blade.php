@@ -490,5 +490,90 @@ html.app-skin-dark .table-stepper-label {
 .-space-x-8 > * + * {
     margin-left: -12px !important;
 }
+
+@media (max-width: 576px) {
+    /* ── LAYER 1: Kill outer layout container padding ────────────────── */
+    .nxl-container,
+    .nxl-content {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* ── LAYER 2: Main content vertical rhythm ──────────────────────── */
+    .main-content {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    /* ── LAYER 3: Primary page container — tight 12px side gutters ─── */
+    .container-fluid {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    /* ── Header row: wrap nicely on small screens ─────────────────── */
+    .d-flex.align-items-center.justify-content-between.mb-4 {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+    }
+
+    /* ── KPI cards: 2-up grid on mobile ──────────────────────────── */
+    .row-cols-1 > .col {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+
+    /* ── Activity Log list card: full-width, no margin leakage ────── */
+    .card {
+        border-radius: 12px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        margin-bottom: 14px !important;
+        width: 100% !important;
+    }
+    .card-body {
+        padding: 12px !important;
+    }
+    .card-header {
+        padding: 10px 12px !important;
+    }
+    .card-footer {
+        padding: 10px 12px !important;
+    }
+
+    /* ── Table: horizontal scroll within tight container ─────────── */
+    .table-responsive {
+        border-radius: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    .table td,
+    .table th {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+    /* Override Bootstrap ps-4 / pe-4 on first/last cells */
+    .table td.ps-4,
+    .table th.ps-4 {
+        padding-left: 10px !important;
+    }
+    .table td.pe-4,
+    .table th.pe-4 {
+        padding-right: 10px !important;
+    }
+
+    /* ── Badge / label sizes ──────────────────────────────────────── */
+    .badge {
+        font-size: 10px !important;
+    }
+
+    /* ── Breadcrumb: compact on mobile ───────────────────────────── */
+    .breadcrumb {
+        font-size: 11px !important;
+    }
+}
 </style>
 @endsection

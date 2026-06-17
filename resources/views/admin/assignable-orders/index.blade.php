@@ -509,6 +509,81 @@ html.app-skin-dark .stepper-label {
     -webkit-box-orient: vertical;  
     overflow: hidden;
 }
+
+@media (max-width: 576px) {
+    /* Reduce page container paddings to 12px margins */
+    .nxl-container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .main-content {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+    }
+    .container-fluid {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+    
+    /* Make order cards grid full-width with 12px edge margin */
+    #orders-list {
+        margin-left: -6px !important;
+        margin-right: -6px !important;
+    }
+    .order-card-wrapper {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+        margin-bottom: 12px !important;
+    }
+    .order-card {
+        border-radius: 12px !important;
+    }
+    .order-card .card-body {
+        padding: 16px !important;
+    }
+    
+    /* Adapt compact progress stepper on mobile screens */
+    .stepper-container {
+        padding: 8px 6px !important;
+    }
+    .stepper-line-bg {
+        left: 20px !important;
+        right: 20px !important;
+        top: 20px !important;
+        height: 3px !important;
+    }
+    .stepper-line-active {
+        left: 20px !important;
+        top: 20px !important;
+        height: 3px !important;
+    }
+    .stepper-item {
+        width: 52px !important;
+    }
+    .stepper-icon {
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 8.5px !important;
+        border-width: 2px !important;
+        box-shadow: 0 0 0 1.5px #cbd5e1 !important;
+    }
+    html.app-skin-dark .stepper-icon {
+        box-shadow: 0 0 0 1.5px #475569 !important;
+    }
+    .stepper-item.active .stepper-icon {
+        box-shadow: 0 0 0 1.5px #3b82f6, 0 0 6px rgba(59, 130, 246, 0.4) !important;
+    }
+    .stepper-item.active-warning .stepper-icon {
+        box-shadow: 0 0 0 1.5px #f59e0b, 0 0 6px rgba(245, 158, 11, 0.4) !important;
+    }
+    .stepper-item.active-success .stepper-icon {
+        box-shadow: 0 0 0 1.5px #10b981, 0 0 6px rgba(16, 185, 129, 0.4) !important;
+    }
+    .stepper-label {
+        font-size: 8px !important;
+        margin-top: 4px !important;
+    }
+}
 </style>
 
 <script>
