@@ -18,6 +18,7 @@
     <!-- Feather Icons -->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/vendors.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom.css') }}" />
     
     <style>
         :root {
@@ -393,5 +394,9 @@
             }
         }
     </script>
+
+    <!-- Wings Global Flight Aviation Loader -->
+    @include('partials.loader')
+    <script src="{{ asset('assets/js/wings-loader.js') }}"></script>
 </body>
 </html>

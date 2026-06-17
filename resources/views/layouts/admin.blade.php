@@ -499,6 +499,10 @@
     <!--! BEGIN: Theme Customizer  !-->
     <script src="{{ asset('assets/js/theme-customizer-init.min.js') }}"></script>
     <!--! END: Theme Customizer !-->
+
+    <!-- Wings Global Flight Aviation Loader -->
+    @include('partials.loader')
+    <script src="{{ asset('assets/js/wings-loader.js') }}"></script>
 	
 </body>
 <!-- Mirrored from bestwpware.com/html/tf/duralux-php/index.php by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 24 Oct 2025 07:04:58 GMT -->
