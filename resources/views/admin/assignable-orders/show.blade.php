@@ -2,6 +2,11 @@
 
 @section('title', 'Order Details || ' . ($appSettings->application_name ?? 'Wings'))
 
+@push('head')
+{{-- Leaflet.js Map CSS -- required for embedded navigation map --}}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+@endpush
+
 @section('content')
 <div class="nxl-content">
     <div class="main-content py-4">
@@ -159,9 +164,16 @@
                                         </button>
                                     </form>
                                 @elseif($assignment->status === 'Pickup')
-                                    <button type="button" class="btn btn-lg btn-warning text-white w-100 py-3 rounded-3 fw-extrabold text-uppercase text-white d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#deliveryModal" style="font-size: 13px; letter-spacing: 0.5px; background-color: #f59e0b; border-color: #f59e0b;">
-                                        <i class="feather-check-circle fs-14"></i> Mark as Delivered
-                                    </button>
+                                    <div class="d-flex flex-column gap-2">
+                                        {{-- Navigate Button: Opens embedded map for route navigation --}}
+                                        <button type="button" id="navigate-toggle-btn" class="btn btn-lg w-100 py-3 rounded-3 fw-extrabold text-uppercase text-white d-flex align-items-center justify-content-center gap-2" onclick="toggleNavigationMap()" style="font-size: 13px; letter-spacing: 0.5px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
+                                            <i class="feather-map-pin fs-14" id="nav-btn-icon"></i>
+                                            <span id="nav-btn-label">Navigate to Delivery</span>
+                                        </button>
+                                        <button type="button" class="btn btn-lg btn-warning text-white w-100 py-3 rounded-3 fw-extrabold text-uppercase text-white d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#deliveryModal" style="font-size: 13px; letter-spacing: 0.5px; background-color: #f59e0b; border-color: #f59e0b;">
+                                            <i class="feather-check-circle fs-14"></i> Mark as Delivered
+                                        </button>
+                                    </div>
                                 @endif
                             </div>
                         @endif
@@ -217,6 +229,87 @@
                     </div>
                 </div> <!-- closes col-12 col-md-5 col-lg-4 (line 163) -->
             </div> <!-- closes row (line 79) -->
+
+            @if($assignment->status === 'Pickup')
+            {{-- ===== EMBEDDED NAVIGATION MAP PANEL ===== --}}
+            <div id="navigation-map-panel" class="nav-map-panel" style="display: none;">
+                <!-- Map Panel Header with Route Summary -->
+                <div class="nav-map-header">
+                    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="nav-header-icon">
+                                <i class="feather-navigation"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-extrabold text-dark mb-0" style="font-size: 14px;">Live Navigation</h6>
+                                <span class="text-muted fs-11">Real-time route to delivery point</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-3" onclick="toggleNavigationMap()" style="font-size: 11px;">
+                            <i class="feather-x me-1"></i> Close Map
+                        </button>
+                    </div>
+
+                    <!-- Route Info Stats Strip -->
+                    <div class="nav-stats-strip">
+                        <div class="nav-stat-item">
+                            <i class="feather-map text-primary"></i>
+                            <div>
+                                <span class="nav-stat-label">Distance</span>
+                                <span class="nav-stat-value" id="nav-distance">Calculating...</span>
+                            </div>
+                        </div>
+                        <div class="nav-stat-divider"></div>
+                        <div class="nav-stat-item">
+                            <i class="feather-clock text-warning"></i>
+                            <div>
+                                <span class="nav-stat-label">Est. Travel Time</span>
+                                <span class="nav-stat-value" id="nav-duration">Calculating...</span>
+                            </div>
+                        </div>
+                        <div class="nav-stat-divider"></div>
+                        <div class="nav-stat-item">
+                            <i class="feather-radio text-success" id="gps-status-icon"></i>
+                            <div>
+                                <span class="nav-stat-label">GPS Status</span>
+                                <span class="nav-stat-value" id="nav-gps-status">Locating...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Route Addresses -->
+                    <div class="nav-route-addresses mt-3">
+                        <div class="nav-route-point pickup-point">
+                            <div class="nav-route-dot pickup-dot"></div>
+                            <div class="nav-route-text">
+                                <span class="nav-route-label">Pickup</span>
+                                <span class="nav-route-addr">{{ $assignment->pickup_location }}</span>
+                            </div>
+                        </div>
+                        <div class="nav-route-connector"></div>
+                        <div class="nav-route-point drop-point">
+                            <div class="nav-route-dot drop-dot"></div>
+                            <div class="nav-route-text">
+                                <span class="nav-route-label">Destination</span>
+                                <span class="nav-route-addr">{{ $assignment->drop_location }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leaflet Map Container -->
+                <div id="delivery-map" class="nav-map-canvas"></div>
+
+                <!-- Map Legend -->
+                <div class="nav-map-legend">
+                    <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span> Pickup Point</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Delivery Point</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#f59e0b; border-radius: 50%;"></span> Your Location</div>
+                    <div class="legend-item"><span class="legend-line"></span> Route</div>
+                </div>
+            </div>
+            @endif
+
         </div> <!-- closes container-fluid (line 8) -->
     </div> <!-- closes main-content (line 7) -->
 </div> <!-- closes nxl-content (line 6) -->
@@ -310,9 +403,261 @@
 </div>
 @endif
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 let selectedFilesArray = [];
 let webcamStream = null;
+
+// =========================================================
+// NAVIGATION MAP – Global State
+// =========================================================
+let navMap = null;                 // Leaflet map instance
+let navRouteLayer = null;          // Polyline for OSRM route
+let driverMarker = null;           // Live driver position marker
+let geoWatchId = null;             // geolocation watcher ID
+let mapInitialised = false;
+
+// Coordinates from server (passed as PHP variables)
+const PICKUP_LAT  = {{ $assignment->pickup_latitude  ?? 'null' }};
+const PICKUP_LNG  = {{ $assignment->pickup_longitude ?? 'null' }};
+const DROP_LAT    = {{ $assignment->drop_latitude    ?? 'null' }};
+const DROP_LNG    = {{ $assignment->drop_longitude   ?? 'null' }};
+
+/**
+ * Toggle the visibility of the embedded navigation map panel.
+ */
+function toggleNavigationMap() {
+    const panel = document.getElementById('navigation-map-panel');
+    const btnLabel = document.getElementById('nav-btn-label');
+    const btnIcon  = document.getElementById('nav-btn-icon');
+
+    if (!panel) return;
+
+    const isHidden = panel.style.display === 'none' || panel.style.display === '';
+
+    if (isHidden) {
+        panel.style.display = 'block';
+        // Scroll smoothly to map
+        setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+        btnLabel.textContent = 'Hide Map';
+        btnIcon.className = 'feather-x fs-14';
+        initNavigationMap();
+    } else {
+        panel.style.display = 'none';
+        btnLabel.textContent = 'Navigate to Delivery';
+        btnIcon.className = 'feather-map-pin fs-14';
+        stopGeoWatch();
+    }
+}
+
+/**
+ * Initialise the Leaflet map (runs only once).
+ */
+function initNavigationMap() {
+    if (mapInitialised) {
+        // Map already created – just resume geo tracking
+        startGeoWatch();
+        return;
+    }
+
+    // Fallback centre: use pickup coords or world centre
+    const centreLat = PICKUP_LAT || 20;
+    const centreLng = PICKUP_LNG || 0;
+
+    navMap = L.map('delivery-map', {
+        center: [centreLat, centreLng],
+        zoom: PICKUP_LAT ? 13 : 2,
+        zoomControl: true,
+        attributionControl: true
+    });
+
+    // OpenStreetMap tile layer (free, no API key)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
+    }).addTo(navMap);
+
+    // ---------- Pickup Marker ----------
+    if (PICKUP_LAT && PICKUP_LNG) {
+        const pickupIcon = L.divIcon({
+            className: '',
+            html: `<div class="map-marker pickup-marker"><i class="feather-navigation"></i></div>`,
+            iconSize: [36, 36],
+            iconAnchor: [18, 36]
+        });
+        L.marker([PICKUP_LAT, PICKUP_LNG], { icon: pickupIcon })
+            .addTo(navMap)
+            .bindPopup(`<b>📦 Pickup Point</b><br><small>{{ $assignment->pickup_location }}</small>`);
+    }
+
+    // ---------- Drop / Delivery Marker ----------
+    if (DROP_LAT && DROP_LNG) {
+        const dropIcon = L.divIcon({
+            className: '',
+            html: `<div class="map-marker drop-marker"><i class="feather-map-pin"></i></div>`,
+            iconSize: [36, 36],
+            iconAnchor: [18, 36]
+        });
+        L.marker([DROP_LAT, DROP_LNG], { icon: dropIcon })
+            .addTo(navMap)
+            .bindPopup(`<b>🏁 Delivery Destination</b><br><small>{{ $assignment->drop_location }}</small>`);
+    }
+
+    // Fit map bounds to show both markers
+    if (PICKUP_LAT && PICKUP_LNG && DROP_LAT && DROP_LNG) {
+        navMap.fitBounds(
+            [[PICKUP_LAT, PICKUP_LNG], [DROP_LAT, DROP_LNG]],
+            { padding: [48, 48] }
+        );
+        // Fetch OSRM driving route
+        fetchOSRMRoute(PICKUP_LAT, PICKUP_LNG, DROP_LAT, DROP_LNG);
+    }
+
+    mapInitialised = true;
+    startGeoWatch();
+}
+
+/**
+ * Fetch a driving route from OSRM (free, open-source routing engine)
+ * and draw it on the map as a styled polyline.
+ */
+function fetchOSRMRoute(fromLat, fromLng, toLat, toLng) {
+    const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+                console.warn('OSRM route not found:', data);
+                setNavStats('N/A', 'N/A');
+                return;
+            }
+            const route = data.routes[0];
+
+            // Draw route polyline
+            if (navRouteLayer) navMap.removeLayer(navRouteLayer);
+            navRouteLayer = L.geoJSON(route.geometry, {
+                style: {
+                    color: '#3b82f6',
+                    weight: 5,
+                    opacity: 0.85,
+                    lineCap: 'round',
+                    lineJoin: 'round',
+                    dashArray: null
+                }
+            }).addTo(navMap);
+
+            // Distance & duration
+            const distKm = (route.distance / 1000).toFixed(1);
+            const durationMin = Math.round(route.duration / 60);
+            const durationText = durationMin >= 60
+                ? `${Math.floor(durationMin / 60)}h ${durationMin % 60}m`
+                : `${durationMin} min`;
+
+            setNavStats(`${distKm} km`, durationText);
+        })
+        .catch(err => {
+            console.warn('OSRM fetch error (offline or CORS):', err);
+            // Fallback: draw straight dashed line
+            if (navRouteLayer) navMap.removeLayer(navRouteLayer);
+            navRouteLayer = L.polyline(
+                [[fromLat, fromLng], [toLat, toLng]],
+                { color: '#3b82f6', weight: 3, dashArray: '8 6', opacity: 0.7 }
+            ).addTo(navMap);
+            setNavStats('See map', 'N/A (offline)');
+        });
+}
+
+/**
+ * Update the stats strip with computed distance and travel time.
+ */
+function setNavStats(distance, duration) {
+    const distEl = document.getElementById('nav-distance');
+    const durEl  = document.getElementById('nav-duration');
+    if (distEl) distEl.textContent = distance;
+    if (durEl)  durEl.textContent  = duration;
+}
+
+/**
+ * Start watching the driver's GPS location and update the map in real time.
+ */
+function startGeoWatch() {
+    if (!navigator.geolocation) {
+        updateGpsStatus('Not supported', false);
+        return;
+    }
+
+    updateGpsStatus('Acquiring...', null);
+
+    geoWatchId = navigator.geolocation.watchPosition(
+        function(pos) {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const accuracy = Math.round(pos.coords.accuracy);
+
+            updateGpsStatus(`Active (±${accuracy}m)`, true);
+            updateDriverMarker(lat, lng);
+
+            // Recalculate route from driver's live position to destination
+            if (DROP_LAT && DROP_LNG && navMap) {
+                fetchOSRMRoute(lat, lng, DROP_LAT, DROP_LNG);
+            }
+        },
+        function(err) {
+            console.warn('Geolocation error:', err.message);
+            updateGpsStatus('Unavailable', false);
+        },
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+    );
+}
+
+/**
+ * Stop the geolocation watcher.
+ */
+function stopGeoWatch() {
+    if (geoWatchId !== null) {
+        navigator.geolocation.clearWatch(geoWatchId);
+        geoWatchId = null;
+    }
+}
+
+/**
+ * Place or update the animated driver marker on the map.
+ */
+function updateDriverMarker(lat, lng) {
+    if (!navMap) return;
+
+    if (!driverMarker) {
+        const driverIcon = L.divIcon({
+            className: '',
+            html: `<div class="map-marker driver-marker"><div class="driver-pulse"></div><i class="feather-navigation"></i></div>`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+        driverMarker = L.marker([lat, lng], { icon: driverIcon, zIndexOffset: 1000 })
+            .addTo(navMap)
+            .bindPopup('<b>🚗 Your Location</b><br><small>Live GPS</small>');
+    } else {
+        driverMarker.setLatLng([lat, lng]);
+    }
+}
+
+/**
+ * Update the GPS status label and icon in the stats strip.
+ */
+function updateGpsStatus(text, active) {
+    const el   = document.getElementById('nav-gps-status');
+    const icon = document.getElementById('gps-status-icon');
+    if (el) el.textContent = text;
+    if (icon) {
+        icon.className = active === true
+            ? 'feather-radio text-success'
+            : (active === false ? 'feather-wifi-off text-danger' : 'feather-loader text-muted');
+    }
+}
+
+// Stop geo watcher when user navigates away
+window.addEventListener('beforeunload', stopGeoWatch);
 
 function triggerCamera() {
     document.getElementById('camera-input').click();
@@ -530,6 +875,265 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+/* =========================================================
+   NAVIGATION MAP PANEL STYLES
+   ========================================================= */
+.nav-map-panel {
+    margin-top: 24px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.14), 0 2px 8px rgba(0,0,0,0.08);
+    border: 1.5px solid rgba(16, 185, 129, 0.22);
+    background: #ffffff;
+    animation: navPanelSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html.app-skin-dark .nav-map-panel {
+    background: #1e293b;
+    border-color: rgba(16, 185, 129, 0.28);
+}
+@keyframes navPanelSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.nav-map-header {
+    padding: 20px 20px 16px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border-bottom: 1px solid rgba(16, 185, 129, 0.18);
+}
+html.app-skin-dark .nav-map-header {
+    background: linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(5,150,105,0.08) 100%);
+    border-bottom-color: rgba(16, 185, 129, 0.2);
+}
+
+.nav-header-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* Stats Strip */
+.nav-stats-strip {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+html.app-skin-dark .nav-stats-strip {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+.nav-stat-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+}
+.nav-stat-item i {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.nav-stat-label {
+    display: block;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+.nav-stat-value {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #0f172a;
+}
+html.app-skin-dark .nav-stat-value {
+    color: #f1f5f9;
+}
+.nav-stat-divider {
+    width: 1px;
+    height: 36px;
+    background: #e2e8f0;
+    flex-shrink: 0;
+}
+html.app-skin-dark .nav-stat-divider {
+    background: #334155;
+}
+
+/* Route address display */
+.nav-route-addresses {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0 4px;
+}
+.nav-route-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+.nav-route-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.8), 0 0 0 4px currentColor;
+}
+.pickup-dot  { background: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+.drop-dot    { background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+.nav-route-connector {
+    width: 1.5px;
+    height: 18px;
+    background: repeating-linear-gradient(to bottom, #cbd5e1 0px, #cbd5e1 4px, transparent 4px, transparent 8px);
+    margin-left: 5.5px;
+}
+.nav-route-label {
+    display: block;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.4px;
+    margin-bottom: 1px;
+}
+.nav-route-addr {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.35;
+}
+html.app-skin-dark .nav-route-addr {
+    color: #e2e8f0;
+}
+
+/* Map Canvas */
+.nav-map-canvas {
+    width: 100%;
+    height: 380px;
+    background: #e8f4f8;
+}
+@media (max-width: 576px) {
+    .nav-map-canvas { height: 280px; }
+    .nav-stats-strip { flex-direction: column; }
+    .nav-stat-divider { width: 100%; height: 1px; }
+    .nav-stat-item { padding: 10px 12px; }
+}
+
+/* Map Legend */
+.nav-map-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #64748b;
+}
+html.app-skin-dark .nav-map-legend {
+    background: #1e293b;
+    border-top-color: #334155;
+    color: #94a3b8;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.legend-line {
+    display: inline-block;
+    width: 18px;
+    height: 3px;
+    background: #3b82f6;
+    border-radius: 2px;
+}
+
+/* Custom Leaflet Markers */
+.map-marker {
+    width: 36px;
+    height: 36px;
+    border-radius: 50% 50% 50% 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    transform: rotate(-45deg);
+    border: 2.5px solid rgba(255,255,255,0.9);
+    transition: transform 0.2s ease;
+}
+.map-marker i {
+    transform: rotate(45deg);
+}
+.pickup-marker {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+.drop-marker {
+    background: linear-gradient(135deg, #10b981, #047857);
+}
+.driver-marker {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transform: none;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    position: relative;
+    overflow: visible;
+    box-shadow: 0 4px 14px rgba(245,158,11,0.4);
+}
+.driver-marker i {
+    transform: none;
+    font-size: 16px;
+}
+.driver-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(245, 158, 11, 0.4);
+    animation: driverPulse 1.8s ease-out infinite;
+    top: 0;
+    left: 0;
+}
+@keyframes driverPulse {
+    0%   { transform: scale(1);   opacity: 0.8; }
+    70%  { transform: scale(2.2); opacity: 0; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Navigate Toggle Button Hover State */
+#navigate-toggle-btn:hover {
+    box-shadow: 0 6px 20px rgba(16,185,129,0.45) !important;
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
 /* Premium Stepper Progress Tracker */
 .stepper-container {
     position: relative;
