@@ -116,13 +116,6 @@
                             <span class="nxl-mtext">Stations</span>
                         </a>
                     </li>
-
-                    <li class="nxl-item {{ Request::routeIs('reports.*') ? 'active' : '' }}">
-                        <a href="{{ route('reports.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-bar-chart-2"></i></span>
-                            <span class="nxl-mtext">Reports</span>
-                        </a>
-                    </li>
                     @endif
 
                     @if($isAdmin || $isManager)
@@ -163,6 +156,12 @@
                         <a href="{{ route('users.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-users"></i></span>
                             <span class="nxl-mtext">User Management</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item {{ Request::routeIs('reports.*') ? 'active' : '' }}">
+                        <a href="{{ route('reports.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-bar-chart-2"></i></span>
+                            <span class="nxl-mtext">Reports</span>
                         </a>
                     </li>
                     <li class="nxl-item {{ Request::routeIs('settings.*') ? 'active' : '' }}">

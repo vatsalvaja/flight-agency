@@ -33,9 +33,7 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::resource('stations', \App\Http\Controllers\StationController::class);
 
     
-    Route::get('reports', function () {
-        return view('admin.reports.index');
-    })->name('reports.index');
+    Route::get('reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
 
     Route::resource('assign-luggage', \App\Http\Controllers\AssignLuggageController::class);
 
