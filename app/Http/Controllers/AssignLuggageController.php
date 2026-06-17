@@ -84,6 +84,7 @@ class AssignLuggageController extends Controller
 
         $data['images'] = $images;
         $data['created_by'] = session('user_id');
+        $data['status'] = 'In Progress'; // Automatically set to In Progress on creation
 
         AssignLuggage::create($data);
 
@@ -124,6 +125,9 @@ class AssignLuggageController extends Controller
     {
         $assignment = AssignLuggage::findOrFail($id);
         $data = $request->validated();
+        
+        // Status is managed by the driver workflow; do not let manager edit it.
+        $data['status'] = $assignment->status;
 
         $existingImages = $assignment->images ?? [];
         

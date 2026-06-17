@@ -39,7 +39,10 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
 
     Route::resource('assign-luggage', \App\Http\Controllers\AssignLuggageController::class);
 
-    Route::get('assignable-orders', function () {
-        return view('admin.assignable-orders.index');
-    })->name('assignable-orders.index');
+    Route::get('driver-activities', [\App\Http\Controllers\DriverActivitiesController::class, 'index'])->name('driver-activities.index');
+
+    Route::get('assignable-orders', [\App\Http\Controllers\AssignableOrdersController::class, 'index'])->name('assignable-orders.index');
+    Route::get('assignable-orders/{id}', [\App\Http\Controllers\AssignableOrdersController::class, 'show'])->name('assignable-orders.show');
+    Route::post('assignable-orders/{id}/pickup', [\App\Http\Controllers\AssignableOrdersController::class, 'pickup'])->name('assignable-orders.pickup');
+    Route::post('assignable-orders/{id}/deliver', [\App\Http\Controllers\AssignableOrdersController::class, 'deliver'])->name('assignable-orders.deliver');
 });

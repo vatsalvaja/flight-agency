@@ -132,7 +132,16 @@
                     </li>
                     @endif
 
-                    @if($isAdmin || $isDriver)
+                    @if($isAdmin || $isManager)
+                    <li class="nxl-item {{ Request::routeIs('driver-activities.*') ? 'active' : '' }}">
+                        <a href="{{ route('driver-activities.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-activity"></i></span>
+                            <span class="nxl-mtext">Driver Activities</span>
+                        </a>
+                    </li>
+                    @endif
+
+                    @if($isDriver)
                     <li class="nxl-item {{ Request::routeIs('assignable-orders.*') ? 'active' : '' }}">
                         <a href="{{ route('assignable-orders.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-truck"></i></span>
@@ -297,6 +306,7 @@
     <!--! ================================================================ !-->
     <!--! [End] Main Content !-->
     <!--! ================================================================ !-->
+    @yield('modals')
 	<!--<< Footer Section Start >>-->
 	    <!--! ================================================================ !-->
     <!--! BEGIN: Theme Customizer !-->

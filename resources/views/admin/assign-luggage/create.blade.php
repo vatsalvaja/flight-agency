@@ -134,15 +134,11 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold" for="status">Status <span class="text-danger">*</span></label>
-                                    <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
-                                        <option value="Pickup" {{ old('status', 'Pickup') == 'Pickup' ? 'selected' : '' }}>Pickup</option>
-                                        <option value="In Progress" {{ old('status') == 'In Progress' ? 'selected' : '' }}>In Progress</option>
-                                        <option value="Delivered" {{ old('status') == 'Delivered' ? 'selected' : '' }}>Delivered</option>
-                                    </select>
-                                    @error('status')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <label class="form-label fw-semibold">Status</label>
+                                    <div class="form-control-plaintext">
+                                        <span class="badge bg-soft-info text-info px-3 py-2 fs-12 fw-semibold">In Progress (Auto Assigned)</span>
+                                    </div>
+                                    <input type="hidden" name="status" value="In Progress">
                                 </div>
                             </div>
 

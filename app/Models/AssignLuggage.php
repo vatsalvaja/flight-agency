@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Model;
     'notes',
     'images',
     'created_by',
+    'delivered_at',
+    'delivery_proof_images',
 ])]
 class AssignLuggage extends Model
 {
@@ -44,6 +46,8 @@ class AssignLuggage extends Model
             'drop_latitude' => 'decimal:8',
             'drop_longitude' => 'decimal:8',
             'distance_km' => 'decimal:2',
+            'delivered_at' => 'datetime',
+            'delivery_proof_images' => 'array',
         ];
     }
 
