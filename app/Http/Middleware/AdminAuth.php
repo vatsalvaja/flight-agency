@@ -67,7 +67,8 @@ class AdminAuth
             if (in_array($path, $allowedCommonPaths) || 
                 $path === 'admin/assign-luggage' || 
                 str_starts_with($path, 'admin/assign-luggage/') ||
-                $path === 'admin/driver-activities') {
+                $path === 'admin/driver-activities' ||
+                $path === 'admin/reports') {
                 return $next($request);
             }
             return redirect('/admin')->with('error', 'Unauthorized access.');

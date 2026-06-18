@@ -158,12 +158,18 @@
                             <span class="nxl-mtext">User Management</span>
                         </a>
                     </li>
+                    @endif
+
+                    @if($isAdmin || $isManager)
                     <li class="nxl-item {{ Request::routeIs('reports.*') ? 'active' : '' }}">
                         <a href="{{ route('reports.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-bar-chart-2"></i></span>
                             <span class="nxl-mtext">Reports</span>
                         </a>
                     </li>
+                    @endif
+
+                    @if($isAdmin)
                     <li class="nxl-item {{ Request::routeIs('settings.*') ? 'active' : '' }}">
                         <a href="{{ route('settings.edit') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-settings"></i></span>

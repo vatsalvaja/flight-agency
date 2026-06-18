@@ -80,6 +80,7 @@
                         </div>
 
                         <!-- Manager Select -->
+                        @if($isAdmin)
                         <div class="col-sm-6 col-md-4 col-lg-2">
                             <label class="form-label fw-bold text-dark fs-12">Manager</label>
                             <select name="manager_id" class="form-select select2-select">
@@ -89,6 +90,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        @endif
 
                         <!-- Driver Select -->
                         <div class="col-sm-6 col-md-4 col-lg-2">
@@ -240,6 +242,7 @@
             <!-- TAB 2: TEAM PERFORMANCE -->
             <div class="tab-pane fade" id="team-pane" role="tabpanel" aria-labelledby="team-tab">
                 <div class="row g-4">
+                    @if($isAdmin)
                     <!-- Manager-wise assignments -->
                     <div class="col-lg-6">
                         <div class="card">
@@ -315,6 +318,47 @@
                             </div>
                         </div>
                     </div>
+                    @else
+                    <!-- Driver performance (Full-width for Manager view) -->
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header border-bottom d-flex align-items-center justify-content-between">
+                                <h6 class="card-title text-dark fw-bold mb-0"><i class="feather-truck text-primary me-2"></i>Driver Logistics Performance</h6>
+                                <span class="badge bg-soft-success text-success">{{ $driverWise->count() }} Drivers</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Driver Name</th>
+                                                <th class="text-center">Total Orders</th>
+                                                <th class="text-center">Delivered</th>
+                                                <th class="text-center">Completion Rate</th>
+                                                <th class="text-end">Distance Travelled</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($driverWise as $dw)
+                                                <tr>
+                                                    <td class="fw-semibold text-dark">{{ $dw['name'] }}</td>
+                                                    <td class="text-center"><span class="badge bg-light text-dark px-2.5 py-1">{{ $dw['total'] }}</span></td>
+                                                    <td class="text-center"><span class="badge bg-soft-success text-success px-2.5 py-1">{{ $dw['completed'] }}</span></td>
+                                                    <td class="text-center font-weight-bold text-dark">{{ $dw['rate'] }}%</td>
+                                                    <td class="text-end text-dark fw-medium">{{ $dw['distance'] }} km</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted py-4">No driver data found for this range</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -613,6 +657,7 @@
     <!-- Section 2: Management Breakdowns -->
     <h5 class="fw-bold text-dark mb-2 border-bottom pb-1">2. Team Performance Breakdowns</h5>
     
+    @if($isAdmin)
     <h6 class="fw-bold text-muted mb-2 mt-3">Manager-wise Order Creation</h6>
     <table class="table table-sm table-bordered mb-4 fs-11">
         <thead class="table-light">
@@ -636,6 +681,7 @@
             @endforelse
         </tbody>
     </table>
+    @endif
 
     <h6 class="fw-bold text-muted mb-2">Driver Logistics Efficiency</h6>
     <table class="table table-sm table-bordered mb-4 fs-11">
