@@ -3,14 +3,14 @@
 @section('title', 'Operations Reports Center || ' . ($appSettings->application_name ?? 'Wings'))
 
 @section('content')
-<div class="nxl-content d-print-none">
+<div class="nxl-content d-print-none reports-page">
     <!-- Page Header (Screen) -->
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
             <div class="page-header-title">
                 <h5 class="m-b-10 text-dark fw-bold">Logistics Reports Center</h5>
             </div>
-            <ul class="breadcrumb">
+            <ul class="breadcrumb d-none d-md-flex">
                 <li class="breadcrumb-item"><a href="{{ url('/admin') }}">Home</a></li>
                 <li class="breadcrumb-item">Operations Reports</li>
             </ul>

@@ -749,3 +749,235 @@ html.app-skin-dark .wings-loader-status {
         min-height: 70px !important;
     }
 }
+
+/* ==========================================================================
+   REPORTS PAGE — MOBILE RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 767.98px) {
+
+    /* ---- Header: stack title above action buttons ---- */
+    .reports-page .page-header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 0.875rem 0.75rem !important;
+        gap: 0.75rem !important;
+        border-bottom: none !important;
+    }
+
+    .reports-page .page-header-left {
+        display: flex !important;
+        align-items: center !important;
+        border-right: none !important;
+        padding-right: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .reports-page .page-header-left::after,
+    .reports-page .page-header-title::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    .reports-page .page-header-title {
+        border-right: none !important;
+        padding-right: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .reports-page .page-header-title h5 {
+        font-size: 1.15rem !important;
+        font-weight: 800 !important;
+        margin-bottom: 0 !important;
+        letter-spacing: -0.25px !important;
+    }
+
+    .reports-page .page-header-right {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .reports-page .page-header-right > .d-flex {
+        display: flex !important;
+        width: 100% !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+    }
+
+    .reports-page .page-header-right .btn {
+        flex: 0 0 auto !important;
+        padding: 0 0.65rem !important;
+        font-size: 0.65rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        height: 32px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        white-space: nowrap !important;
+        text-transform: none !important;
+    }
+
+    .reports-page .page-header-right .btn i {
+        font-size: 12px !important;
+    }
+
+    /* ---- Filter Card: compact on mobile ---- */
+    .reports-page .filter-card .card-body {
+        padding: 0.75rem !important;
+    }
+
+    .reports-page .filter-card .form-label {
+        font-size: 0.65rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .reports-page .filter-card .form-select,
+    .reports-page .filter-card .form-control {
+        font-size: 0.8rem !important;
+        padding: 0.35rem 0.5rem !important;
+        height: 36px !important;
+    }
+
+    /* ---- Tab Navigation: horizontal scroll ---- */
+    .reports-page .nav-tabs {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        padding-bottom: 2px !important;
+        margin-left: -0.25rem !important;
+        margin-right: -0.25rem !important;
+    }
+
+    .reports-page .nav-tabs::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    .reports-page .nav-tabs .nav-item {
+        flex: 0 0 auto !important;
+    }
+
+    .reports-page .nav-tabs .nav-link {
+        font-size: 0.7rem !important;
+        padding: 0.5rem 0.75rem !important;
+        white-space: nowrap !important;
+    }
+
+    .reports-page .nav-tabs .nav-link i {
+        font-size: 12px !important;
+        margin-right: 4px !important;
+    }
+
+    /* ---- Metric Cards: 2-col grid with compact sizing ---- */
+    .reports-page .row-deck .card {
+        padding: 0.75rem !important;
+        gap: 0.5rem !important;
+    }
+
+    .reports-page .row-deck .card .avatar {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+    }
+
+    .reports-page .row-deck .card .avatar i {
+        font-size: 1rem !important;
+    }
+
+    .reports-page .row-deck .card h4 {
+        font-size: 1.1rem !important;
+        margin-bottom: 0 !important;
+    }
+
+    .reports-page .row-deck .card span.text-muted {
+        font-size: 0.6rem !important;
+    }
+
+    /* ---- Chart Cards: prevent overflow ---- */
+    .reports-page .card-body [id$="-chart"] {
+        max-width: 100% !important;
+        overflow-x: auto !important;
+    }
+
+    /* ---- Card general spacing ---- */
+    .reports-page .main-content .card {
+        border-radius: 12px !important;
+    }
+
+    .reports-page .main-content .card-header {
+        padding: 0.75rem 0.875rem !important;
+    }
+
+    .reports-page .main-content .card-header h6 {
+        font-size: 0.8rem !important;
+    }
+
+    .reports-page .main-content .card-body {
+        padding: 0.75rem 0.875rem !important;
+    }
+
+    /* ---- Tables: ensure visibility and proper scrolling ---- */
+    .reports-page .table-responsive {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .reports-page .table {
+        width: 100% !important;
+        min-width: 400px !important;
+    }
+
+    .reports-page .table th,
+    .reports-page .table td {
+        font-size: 0.75rem !important;
+        padding: 0.5rem 0.5rem !important;
+        white-space: nowrap !important;
+    }
+
+    .reports-page .table th:first-child,
+    .reports-page .table td:first-child {
+        white-space: normal !important;
+        word-break: break-word !important;
+        min-width: 100px !important;
+    }
+
+    /* ---- Companies & Stations tab cards: ensure visible ---- */
+    .reports-page #entities-pane .card {
+        overflow: visible !important;
+    }
+
+    .reports-page #entities-pane .card-body.p-0 {
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    /* ---- Audit Log tab: wider min-width for many columns ---- */
+    .reports-page #logs-pane .table {
+        min-width: 700px !important;
+    }
+
+    .reports-page #logs-pane .card-body.p-0 {
+        padding: 0 !important;
+    }
+
+    /* ---- Pagination inside cards ---- */
+    .reports-page .card-footer {
+        padding: 0.5rem 0.75rem !important;
+    }
+
+    .reports-page .card-footer .pagination {
+        flex-wrap: wrap !important;
+        gap: 2px !important;
+    }
+
+    .reports-page .card-footer .page-link {
+        font-size: 0.7rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+}
