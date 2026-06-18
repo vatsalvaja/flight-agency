@@ -8,12 +8,12 @@
 @endpush
 
 @section('content')
-<div class="nxl-content">
+<div class="nxl-content order-details-page">
     <div class="main-content py-4">
         <div class="container-fluid px-4" style="max-width: 900px; margin: 0 auto;">
             
             <!-- Header bar with Back button -->
-            <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-4 page-detail-header flex-wrap gap-2">
                 <a href="{{ route('assignable-orders.index') }}" class="btn btn-sm btn-light rounded-pill border">
                     <i class="feather-arrow-left me-1"></i> Dashboard
                 </a>
@@ -96,22 +96,22 @@
                 <div class="col-12 col-md-7 col-lg-8 mb-4">
                     <div class="card border border-gray-3 shadow-sm h-100 overflow-hidden d-flex flex-column" style="border-radius: 16px;">
                         
-                        <div class="card-header bg-transparent border-bottom border-gray-2 py-3 px-4 d-flex justify-content-between align-items-center">
+                        <div class="card-header bg-transparent border-bottom border-gray-2 py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <h5 class="card-title mb-0 fw-extrabold text-dark">Order Information</h5>
-                            <span class="fs-15 fw-extrabold text-primary">#ORD-{{ str_pad($assignment->id, 5, '0', STR_PAD_LEFT) }}</span>
+                            <span class="fs-15 fw-extrabold text-primary order-id-badge">#ORD-{{ str_pad($assignment->id, 5, '0', STR_PAD_LEFT) }}</span>
                         </div>
 
                         <div class="card-body p-4 flex-grow-1">
                             <!-- Company banner -->
-                            <div class="d-flex align-items-center mb-4 bg-light p-3 rounded-3 border border-gray-2">
+                            <div class="d-flex align-items-center mb-4 bg-light p-3 rounded-3 border border-gray-2 company-info-banner">
                                 @if($assignment->company->logo)
-                                    <img src="{{ asset('storage/' . $assignment->company->logo) }}" alt="logo" class="rounded me-3" style="height: 38px; width: 38px; object-fit: cover;">
+                                    <img src="{{ asset('storage/' . $assignment->company->logo) }}" alt="logo" class="rounded me-3 flex-shrink-0" style="height: 38px; width: 38px; object-fit: cover;">
                                 @else
-                                    <div class="avatar-text bg-soft-primary text-primary rounded me-3 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; font-weight: 700; font-size: 14px;">
+                                    <div class="avatar-text bg-soft-primary text-primary rounded me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px; font-weight: 700; font-size: 14px;">
                                         {{ substr($assignment->company->company_name, 0, 1) }}
                                     </div>
                                 @endif
-                                <div style="line-height: 1.3;">
+                                <div class="company-info-text" style="line-height: 1.3; min-width: 0;">
                                     <h6 class="fw-extrabold text-dark mb-0.5">{{ $assignment->company->company_name }}</h6>
                                     <span class="text-muted fs-11.5">Station: {{ $assignment->station->station_name }} ({{ $assignment->station->station_code }})</span>
                                 </div>
@@ -131,23 +131,51 @@
                             </div>
 
                             <!-- Numerical Details Grid -->
-                            <div class="row g-3 border-top border-gray-2 pt-3">
-                                <div class="col-6">
-                                    <span class="text-muted fs-10 d-block text-uppercase mb-0.5">Distance</span>
-                                    <span class="fw-bold text-dark fs-13"><i class="feather-map text-primary me-1.5"></i>{{ $assignment->distance_km ?? '0.00' }} km</span>
+                            <div class="row g-3 border-top border-gray-2 pt-3 order-details-grid">
+                                <div class="col-12 col-sm-6">
+                                    <div class="order-detail-item">
+                                        <div class="order-detail-icon">
+                                            <i class="feather-map text-primary"></i>
+                                        </div>
+                                        <div class="order-detail-content">
+                                            <span class="order-detail-label">Distance</span>
+                                            <span class="order-detail-value">{{ $assignment->distance_km ?? '0.00' }} km</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-6">
-                                    <span class="text-muted fs-10 d-block text-uppercase mb-0.5">Expected Date</span>
-                                    <span class="fw-bold text-dark fs-13"><i class="feather-calendar text-primary me-1.5"></i>{{ $assignment->expected_delivery_date->format('d M, Y') }}</span>
+                                <div class="col-12 col-sm-6">
+                                    <div class="order-detail-item">
+                                        <div class="order-detail-icon">
+                                            <i class="feather-calendar text-primary"></i>
+                                        </div>
+                                        <div class="order-detail-content">
+                                            <span class="order-detail-label">Expected Date</span>
+                                            <span class="order-detail-value">{{ $assignment->expected_delivery_date->format('d M, Y') }}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-6">
-                                    <span class="text-muted fs-10 d-block text-uppercase mb-0.5">Assigned Date</span>
-                                    <span class="fw-bold text-dark fs-13"><i class="feather-clock text-primary me-1.5"></i>{{ $assignment->created_at->format('d M, Y H:i A') }}</span>
+                                <div class="col-12 col-sm-6">
+                                    <div class="order-detail-item">
+                                        <div class="order-detail-icon">
+                                            <i class="feather-clock text-primary"></i>
+                                        </div>
+                                        <div class="order-detail-content">
+                                            <span class="order-detail-label">Assigned Date</span>
+                                            <span class="order-detail-value">{{ $assignment->created_at->format('d M, Y H:i A') }}</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 @if($assignment->delivered_at)
-                                    <div class="col-6">
-                                        <span class="text-muted fs-10 d-block text-uppercase mb-0.5">Delivered Date</span>
-                                        <span class="fw-bold text-success fs-13"><i class="feather-check-circle text-success me-1.5"></i>{{ $assignment->delivered_at->format('d M, Y H:i A') }}</span>
+                                    <div class="col-12 col-sm-6">
+                                        <div class="order-detail-item">
+                                            <div class="order-detail-icon order-detail-icon-success">
+                                                <i class="feather-check-circle text-success"></i>
+                                            </div>
+                                            <div class="order-detail-content">
+                                                <span class="order-detail-label">Delivered Date</span>
+                                                <span class="order-detail-value text-success">{{ $assignment->delivered_at->format('d M, Y H:i A') }}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 @endif
                             </div>
@@ -239,21 +267,21 @@
             <div id="navigation-map-panel" class="nav-map-panel" style="display: none;">
                 <!-- Map Panel Header with Route Summary -->
                 <div class="nav-map-header">
-                    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-                        <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3 nav-map-header-top">
+                        <div class="d-flex align-items-center gap-2 nav-map-title-group">
                             <div class="nav-header-icon">
                                 <i class="feather-navigation"></i>
                             </div>
-                            <div>
+                            <div class="nav-map-title-text">
                                 <h6 class="fw-extrabold text-dark mb-0" style="font-size: 14px;">Live Navigation</h6>
                                 <span class="text-muted fs-11">Real-time route to delivery point</span>
                             </div>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-primary border rounded-pill px-3 text-white d-flex align-items-center gap-1" onclick="openGoogleMapsDirections()" style="font-size: 11px; background-color: #3b82f6; border-color: #3b82f6;">
+                        <div class="d-flex gap-2 nav-map-header-actions">
+                            <button type="button" class="btn btn-sm btn-primary border rounded-pill px-3 text-white d-flex align-items-center justify-content-center gap-1" onclick="openGoogleMapsDirections()" style="font-size: 11px; background-color: #3b82f6; border-color: #3b82f6;">
                                 <i class="feather-map"></i> Open Google Maps
                             </button>
-                            <button type="button" class="btn btn-sm btn-light border rounded-pill px-3" onclick="toggleNavigationMap()" style="font-size: 11px;">
+                            <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 d-flex align-items-center justify-content-center" onclick="toggleNavigationMap()" style="font-size: 11px;">
                                 <i class="feather-x me-1"></i> Close Map
                             </button>
                         </div>
@@ -913,6 +941,117 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <style>
 /* =========================================================
+   ORDER DETAILS PAGE – SHARED COMPONENTS
+   ========================================================= */
+.order-details-page {
+    overflow-x: hidden;
+}
+
+/* Route timeline */
+.route-timeline {
+    position: relative;
+    padding-left: 20px;
+}
+.route-timeline::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    border-left: 2px dotted #94a3b8;
+}
+.timeline-item {
+    position: relative;
+}
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #3b82f6;
+    background: #ffffff;
+    z-index: 2;
+}
+.timeline-item.drop::before {
+    border-color: #10b981;
+    background: #10b981;
+}
+html.app-skin-dark .timeline-item::before {
+    background: #1e293b;
+}
+html.app-skin-dark .timeline-item.drop::before {
+    background: #10b981;
+}
+
+/* Numerical details grid */
+.order-detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    height: 100%;
+}
+html.app-skin-dark .order-detail-item {
+    background: rgba(15, 23, 42, 0.45);
+    border-color: #334155;
+}
+.order-detail-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(59, 130, 246, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.order-detail-icon i {
+    font-size: 16px;
+    line-height: 1;
+}
+.order-detail-icon-success {
+    background: rgba(16, 185, 129, 0.12);
+}
+.order-detail-content {
+    min-width: 0;
+    flex: 1;
+}
+.order-detail-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+.order-detail-value {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.35;
+    word-break: break-word;
+}
+html.app-skin-dark .order-detail-value {
+    color: #f1f5f9;
+}
+
+.company-info-text h6,
+.company-info-text span,
+.nav-route-addr {
+    word-break: break-word;
+}
+
+/* =========================================================
    NAVIGATION MAP PANEL STYLES
    ========================================================= */
 .nav-map-panel {
@@ -977,13 +1116,28 @@ html.app-skin-dark .nav-stats-strip {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     padding: 12px 14px;
+    min-width: 0;
+}
+.nav-stat-item > div {
+    min-width: 0;
+    flex: 1;
 }
 .nav-stat-item i {
     font-size: 18px;
     flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(59, 130, 246, 0.08);
 }
+.nav-stat-item:nth-child(1) i { background: rgba(59, 130, 246, 0.1); }
+.nav-stat-item:nth-child(3) i { background: rgba(245, 158, 11, 0.12); }
+.nav-stat-item:nth-child(5) i { background: rgba(16, 185, 129, 0.12); }
 .nav-stat-label {
     display: block;
     font-size: 9.5px;
@@ -998,6 +1152,8 @@ html.app-skin-dark .nav-stats-strip {
     font-size: 12.5px;
     font-weight: 700;
     color: #0f172a;
+    line-height: 1.35;
+    word-break: break-word;
 }
 html.app-skin-dark .nav-stat-value {
     color: #f1f5f9;
@@ -1066,11 +1222,86 @@ html.app-skin-dark .nav-route-addr {
     height: 380px;
     background: #e8f4f8;
 }
-@media (max-width: 576px) {
+@media (max-width: 767.98px) {
     .nav-map-canvas { height: 280px; }
-    .nav-stats-strip { flex-direction: column; }
-    .nav-stat-divider { width: 100%; height: 1px; }
-    .nav-stat-item { padding: 10px 12px; }
+
+    .nav-map-header {
+        padding: 16px 14px 14px;
+    }
+
+    .nav-map-header-top {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .nav-map-title-group {
+        width: 100%;
+    }
+
+    .nav-map-header-actions {
+        width: 100%;
+    }
+
+    .nav-map-header-actions .btn {
+        flex: 1;
+        min-height: 38px;
+        white-space: nowrap;
+    }
+
+    .nav-stats-strip {
+        flex-direction: column;
+        align-items: stretch;
+        overflow: visible;
+    }
+
+    .nav-stat-divider {
+        display: none;
+    }
+
+    .nav-stat-item {
+        width: 100%;
+        padding: 14px 16px;
+        gap: 14px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    html.app-skin-dark .nav-stat-item {
+        border-bottom-color: #334155;
+    }
+
+    .nav-stat-item:last-child {
+        border-bottom: none;
+    }
+
+    .nav-stat-item i {
+        width: 40px;
+        height: 40px;
+        font-size: 17px;
+    }
+
+    .nav-stat-label {
+        font-size: 10px;
+        margin-bottom: 3px;
+    }
+
+    .nav-stat-value {
+        font-size: 13px;
+    }
+
+    .nav-map-legend {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 12px;
+        padding: 12px 14px;
+    }
+
+    .nav-route-addresses {
+        padding: 0;
+    }
+
+    .nav-route-addr {
+        font-size: 11.5px;
+    }
 }
 
 /* Map Legend */
@@ -1299,7 +1530,7 @@ html.app-skin-dark .stepper-label {
     color: #10b981;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 767.98px) {
     /* Reduce page container paddings to 12px margins */
     .nxl-container {
         padding-left: 0 !important;
@@ -1312,6 +1543,15 @@ html.app-skin-dark .stepper-label {
     .container-fluid {
         padding-left: 12px !important;
         padding-right: 12px !important;
+        max-width: 100% !important;
+    }
+
+    .page-detail-header {
+        width: 100%;
+    }
+
+    .order-id-badge {
+        font-size: 13px !important;
     }
     
     /* Optimize the details page cards paddings on mobile */
@@ -1323,6 +1563,42 @@ html.app-skin-dark .stepper-label {
     }
     .card .card-header, .card .card-footer {
         padding: 12px 16px !important;
+    }
+
+    .order-detail-item {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .order-detail-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    .order-detail-value {
+        font-size: 12.5px;
+    }
+
+    .card-footer .btn-lg {
+        font-size: 12px !important;
+        padding-top: 0.85rem !important;
+        padding-bottom: 0.85rem !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    .nav-map-panel {
+        margin-top: 16px;
+        border-radius: 16px;
+    }
+
+    #deliveryModal .modal-footer {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    #deliveryModal .modal-footer .btn {
+        flex: 1 1 auto;
+        min-width: 120px;
     }
     
     /* Adapt details progress stepper for mobile screens */
@@ -1365,6 +1641,12 @@ html.app-skin-dark .stepper-label {
     .stepper-label {
         font-size: 8px !important;
         margin-top: 4px !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .order-details-grid {
+        --bs-gutter-y: 0.75rem;
     }
 }
 </style>
