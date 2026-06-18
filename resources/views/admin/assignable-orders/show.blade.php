@@ -170,6 +170,10 @@
                                             <i class="feather-map-pin fs-14" id="nav-btn-icon"></i>
                                             <span id="nav-btn-label">Navigate to Delivery</span>
                                         </button>
+                                        {{-- Google Maps Button: Direct external navigation --}}
+                                        <button type="button" class="btn btn-lg w-100 py-3 rounded-3 fw-extrabold text-uppercase text-white d-flex align-items-center justify-content-center gap-2" onclick="openGoogleMapsDirections()" style="font-size: 13px; letter-spacing: 0.5px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">
+                                            <i class="feather-map fs-14"></i> Open in Google Maps
+                                        </button>
                                         <button type="button" class="btn btn-lg btn-warning text-white w-100 py-3 rounded-3 fw-extrabold text-uppercase text-white d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#deliveryModal" style="font-size: 13px; letter-spacing: 0.5px; background-color: #f59e0b; border-color: #f59e0b;">
                                             <i class="feather-check-circle fs-14"></i> Mark as Delivered
                                         </button>
@@ -245,9 +249,14 @@
                                 <span class="text-muted fs-11">Real-time route to delivery point</span>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-3" onclick="toggleNavigationMap()" style="font-size: 11px;">
-                            <i class="feather-x me-1"></i> Close Map
-                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-primary border rounded-pill px-3 text-white d-flex align-items-center gap-1" onclick="openGoogleMapsDirections()" style="font-size: 11px; background-color: #3b82f6; border-color: #3b82f6;">
+                                <i class="feather-map"></i> Open Google Maps
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border rounded-pill px-3" onclick="toggleNavigationMap()" style="font-size: 11px;">
+                                <i class="feather-x me-1"></i> Close Map
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Route Info Stats Strip -->
@@ -417,11 +426,39 @@ let driverMarker = null;           // Live driver position marker
 let geoWatchId = null;             // geolocation watcher ID
 let mapInitialised = false;
 
-// Coordinates from server (passed as PHP variables)
+// Coordinates and addresses from server (passed as PHP variables)
 const PICKUP_LAT  = {{ $assignment->pickup_latitude  ?? 'null' }};
 const PICKUP_LNG  = {{ $assignment->pickup_longitude ?? 'null' }};
 const DROP_LAT    = {{ $assignment->drop_latitude    ?? 'null' }};
 const DROP_LNG    = {{ $assignment->drop_longitude   ?? 'null' }};
+const PICKUP_ADDR = {!! json_encode($assignment->pickup_location) !!};
+const DROP_ADDR   = {!! json_encode($assignment->drop_location) !!};
+
+/**
+ * Opens Google Maps directions in a new tab.
+ */
+function openGoogleMapsDirections() {
+    var url = 'https://www.google.com/maps/dir/?api=1';
+    
+    // Set destination
+    if (DROP_LAT !== null && DROP_LNG !== null) {
+        url += '&destination=' + DROP_LAT + ',' + DROP_LNG;
+    } else {
+        url += '&destination=' + encodeURIComponent(DROP_ADDR);
+    }
+    
+    // Set origin (use live position if driver marker is active)
+    if (driverMarker) {
+        var latlng = driverMarker.getLatLng();
+        url += '&origin=' + latlng.lat + ',' + latlng.lng;
+    } else if (PICKUP_LAT !== null && PICKUP_LNG !== null) {
+        url += '&origin=' + PICKUP_LAT + ',' + PICKUP_LNG;
+    } else {
+        url += '&origin=' + encodeURIComponent(PICKUP_ADDR);
+    }
+    
+    window.open(url, '_blank');
+}
 
 /**
  * Toggle the visibility of the embedded navigation map panel.
