@@ -113,13 +113,16 @@
                         }
                     @endphp
 
-                    @if($isAdmin)
+                    @if($isAdmin || $isManager || $isDriver)
                     <li class="nxl-item {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
                         <a href="{{ route('admin.dashboard') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-airplay"></i></span>
                             <span class="nxl-mtext">Dashboard</span>
                         </a>
                     </li>
+                    @endif
+
+                    @if($isAdmin)
                     <li class="nxl-item {{ Request::routeIs('companies.*') ? 'active' : '' }}">
                         <a href="{{ route('companies.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-briefcase"></i></span>

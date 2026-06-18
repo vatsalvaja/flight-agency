@@ -13,23 +13,37 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     /**
-     * Display the admin dashboard.
+     * Display the admin/manager/driver dashboard.
      */
     public function index()
     {
         $userId = session('user_id');
         $user = User::find($userId);
 
-        if ($user && $user->role_id !== 0 && $user->role) {
-            if (stripos($user->role->role_name, 'manager') !== false) {
-                return redirect()->route('assign-luggage.index');
-            }
-            if (stripos($user->role->role_name, 'driver') !== false) {
-                return redirect()->route('assignable-orders.index');
-            }
+        if (!$user) {
+            return redirect('/');
         }
 
-        // Core counts
+        // Determine user roles
+        $isAdmin = $user->role_id === 0;
+        $isManager = false;
+        $isDriver = false;
+        if ($user->role_id > 0 && $user->role) {
+            $isManager = (stripos($user->role->role_name, 'manager') !== false);
+            $isDriver = (stripos($user->role->role_name, 'driver') !== false);
+        }
+
+        // Setup base query for luggage assignments scoped by role
+        if ($isAdmin) {
+            $baseQuery = AssignLuggage::query();
+        } elseif ($isManager) {
+            $baseQuery = AssignLuggage::where('created_by', $user->id);
+        } else {
+            // Driver
+            $baseQuery = AssignLuggage::where('driver_id', $user->id);
+        }
+
+        // Core KPI counts (role-scoped metrics)
         $companiesCount = Company::count();
         $stationsCount = Station::count();
         $usersCount = User::count();
@@ -40,15 +54,15 @@ class DashboardController extends Controller
             $q->where('role_name', 'like', '%manager%');
         })->count();
 
-        // Luggage shipment statistics
-        $assignmentsCount = AssignLuggage::count();
-        $pickupCount = AssignLuggage::where('status', 'Pickup')->count();
-        $inProgressCount = AssignLuggage::where('status', 'In Progress')->count();
-        $deliveredCount = AssignLuggage::where('status', 'Delivered')->count();
-        $totalDistance = round(AssignLuggage::sum('distance_km'), 2);
+        // Scoped stats counters
+        $assignmentsCount = (clone $baseQuery)->count();
+        $pickupCount = (clone $baseQuery)->where('status', 'Pickup')->count();
+        $inProgressCount = (clone $baseQuery)->where('status', 'In Progress')->count();
+        $deliveredCount = (clone $baseQuery)->where('status', 'Delivered')->count();
+        $totalDistance = round((clone $baseQuery)->sum('distance_km'), 2);
 
         // Average delivery speed/time logic
-        $deliveredOrders = AssignLuggage::where('status', 'Delivered')
+        $deliveredOrders = (clone $baseQuery)->where('status', 'Delivered')
             ->whereNotNull('delivered_at')
             ->get();
         $avgTimeHours = 0;
@@ -61,7 +75,7 @@ class DashboardController extends Controller
         }
 
         // Recent luggage assignments list
-        $recentAssignments = AssignLuggage::with(['company', 'station', 'driver'])
+        $recentAssignments = (clone $baseQuery)->with(['company', 'station', 'driver'])
             ->orderBy('id', 'desc')
             ->take(5)
             ->get();
@@ -69,7 +83,7 @@ class DashboardController extends Controller
         // Outbound shipping trend for last 15 days
         $startDate = Carbon::now()->subDays(14)->startOfDay();
         $endDate = Carbon::now()->endOfDay();
-        $dailyTrendRaw = AssignLuggage::whereBetween('created_at', [$startDate, $endDate])
+        $dailyTrendRaw = (clone $baseQuery)->whereBetween('created_at', [$startDate, $endDate])
             ->select(DB::raw('DATE(created_at) as date_label'), 'status', DB::raw('count(*) as count'))
             ->groupBy('date_label', 'status')
             ->orderBy('date_label', 'asc')
@@ -94,7 +108,7 @@ class DashboardController extends Controller
         }
 
         // Shipments by flight company (Top 5)
-        $companyWise = AssignLuggage::select('company_id', DB::raw('count(*) as count'))
+        $companyWise = (clone $baseQuery)->select('company_id', DB::raw('count(*) as count'))
             ->groupBy('company_id')
             ->orderBy('count', 'desc')
             ->with('company')
@@ -121,8 +135,10 @@ class DashboardController extends Controller
             'avgTimeHours',
             'recentAssignments',
             'dailyTrend',
-            'companyWise'
+            'companyWise',
+            'isAdmin',
+            'isManager',
+            'isDriver'
         ));
     }
 }
-

@@ -1,6 +1,15 @@
 @extends('layouts.admin')
 
-@section('title', 'Admin Dashboard || ' . ($appSettings->application_name ?? 'Wings'))
+@php
+    $dashboardTitle = 'Wings Control Center';
+    if ($isManager) {
+        $dashboardTitle = 'Manager Operations Dashboard';
+    } elseif ($isDriver) {
+        $dashboardTitle = 'Driver Logistics Dashboard';
+    }
+@endphp
+
+@section('title', $dashboardTitle . ' || ' . ($appSettings->application_name ?? 'Wings'))
 
 @section('content')
 <div class="nxl-content">
@@ -8,7 +17,7 @@
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
             <div class="page-header-title">
-                <h5 class="m-b-10 text-dark fw-bold">Wings Control Center</h5>
+                <h5 class="m-b-10 text-dark fw-bold">{{ $dashboardTitle }}</h5>
             </div>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ url('/admin') }}">Home</a></li>
@@ -27,136 +36,260 @@
 
     <!-- [ Main Content ] start -->
     <div class="main-content">
-        <!-- Row 1: Core Entity KPI Cards -->
+        <!-- Row 1: KPI Cards Grid -->
         <div class="row g-4 mb-4">
-            <!-- Flight Companies -->
-            <div class="col-md-3 col-sm-6">
-                <a href="{{ route('companies.index') }}" class="card-link-wrapper text-decoration-none">
-                    <div class="card stretch stretch-full h-100 kpi-card hover-animate">
+            @if($isAdmin)
+                <!-- Admin KPIs -->
+                <div class="col-md-3 col-sm-6">
+                    <a href="{{ route('companies.index') }}" class="card-link-wrapper text-decoration-none">
+                        <div class="card stretch stretch-full h-100 kpi-card hover-animate">
+                            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                                <div>
+                                    <span class="fs-12 text-muted text-uppercase d-block mb-1">Flight Companies</span>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $companiesCount }}</h3>
+                                </div>
+                                <div class="avatar-text avatar-md bg-soft-primary text-primary rounded p-3 fs-4 shadow-sm">
+                                    <i class="feather-briefcase"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="col-md-3 col-sm-6">
+                    <a href="{{ route('stations.index') }}" class="card-link-wrapper text-decoration-none">
+                        <div class="card stretch stretch-full h-100 kpi-card hover-animate">
+                            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                                <div>
+                                    <span class="fs-12 text-muted text-uppercase d-block mb-1">Active Stations</span>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $stationsCount }}</h3>
+                                </div>
+                                <div class="avatar-text avatar-md bg-soft-info text-info rounded p-3 fs-4 shadow-sm">
+                                    <i class="feather-map-pin"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <a href="{{ route('assign-luggage.index') }}" class="card-link-wrapper text-decoration-none">
+                        <div class="card stretch stretch-full h-100 kpi-card hover-animate">
+                            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                                <div>
+                                    <span class="fs-12 text-muted text-uppercase d-block mb-1">Total Shipments</span>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $assignmentsCount }}</h3>
+                                </div>
+                                <div class="avatar-text avatar-md bg-soft-success text-success rounded p-3 fs-4 shadow-sm">
+                                    <i class="feather-package"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <a href="{{ route('users.index') }}" class="card-link-wrapper text-decoration-none">
+                        <div class="card stretch stretch-full h-100 kpi-card hover-animate">
+                            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                                <div>
+                                    <span class="fs-12 text-muted text-uppercase d-block mb-1">Staff Directory</span>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $usersCount }}</h3>
+                                    <div class="mt-1 fs-11 text-muted">
+                                        <span class="badge bg-light text-dark me-1">{{ $managersCount }} Mgr</span>
+                                        <span class="badge bg-light text-dark">{{ $driversCount }} Dvr</span>
+                                    </div>
+                                </div>
+                                <div class="avatar-text avatar-md bg-soft-warning text-warning rounded p-3 fs-4 shadow-sm">
+                                    <i class="feather-users"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            @elseif($isManager)
+                <!-- Manager KPIs -->
+                <div class="col-md-3 col-sm-6">
+                    <a href="{{ route('assign-luggage.index') }}" class="card-link-wrapper text-decoration-none">
+                        <div class="card stretch stretch-full h-100 kpi-card hover-animate">
+                            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                                <div>
+                                    <span class="fs-12 text-muted text-uppercase d-block mb-1">My Created Jobs</span>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $assignmentsCount }}</h3>
+                                </div>
+                                <div class="avatar-text avatar-md bg-soft-primary text-primary rounded p-3 fs-4 shadow-sm">
+                                    <i class="feather-package"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card stretch stretch-full h-100 kpi-card">
                         <div class="card-body d-flex align-items-center justify-content-between p-4">
                             <div>
                                 <span class="fs-12 text-muted text-uppercase d-block mb-1">Flight Companies</span>
                                 <h3 class="fw-bold mb-0 text-dark">{{ $companiesCount }}</h3>
                             </div>
-                            <div class="avatar-text avatar-md bg-soft-primary text-primary rounded p-3 fs-4 shadow-sm">
+                            <div class="avatar-text avatar-md bg-soft-info text-info rounded p-3 fs-4 shadow-sm">
                                 <i class="feather-briefcase"></i>
                             </div>
                         </div>
                     </div>
-                </a>
-            </div>
-            
-            <!-- Stations -->
-            <div class="col-md-3 col-sm-6">
-                <a href="{{ route('stations.index') }}" class="card-link-wrapper text-decoration-none">
-                    <div class="card stretch stretch-full h-100 kpi-card hover-animate">
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card stretch stretch-full h-100 kpi-card">
                         <div class="card-body d-flex align-items-center justify-content-between p-4">
                             <div>
-                                <span class="fs-12 text-muted text-uppercase d-block mb-1">Active Stations</span>
+                                <span class="fs-12 text-muted text-uppercase d-block mb-1">Operating Stations</span>
                                 <h3 class="fw-bold mb-0 text-dark">{{ $stationsCount }}</h3>
                             </div>
-                            <div class="avatar-text avatar-md bg-soft-info text-info rounded p-3 fs-4 shadow-sm">
+                            <div class="avatar-text avatar-md bg-soft-success text-success rounded p-3 fs-4 shadow-sm">
                                 <i class="feather-map-pin"></i>
                             </div>
                         </div>
                     </div>
-                </a>
-            </div>
+                </div>
 
-            <!-- Total Assignments -->
-            <div class="col-md-3 col-sm-6">
-                <a href="{{ route('assign-luggage.index') }}" class="card-link-wrapper text-decoration-none">
-                    <div class="card stretch stretch-full h-100 kpi-card hover-animate">
-                        <div class="card-body d-flex align-items-center justify-content-between p-4">
-                            <div>
-                                <span class="fs-12 text-muted text-uppercase d-block mb-1">Total Assignments</span>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $assignmentsCount }}</h3>
-                            </div>
-                            <div class="avatar-text avatar-md bg-soft-success text-success rounded p-3 fs-4 shadow-sm">
-                                <i class="feather-package"></i>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Users Directory -->
-            <div class="col-md-3 col-sm-6">
-                <a href="{{ route('users.index') }}" class="card-link-wrapper text-decoration-none">
-                    <div class="card stretch stretch-full h-100 kpi-card hover-animate">
-                        <div class="card-body d-flex align-items-center justify-content-between p-4">
-                            <div>
-                                <span class="fs-12 text-muted text-uppercase d-block mb-1">Staff Directory</span>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $usersCount }}</h3>
-                                <div class="mt-1 fs-11 text-muted">
-                                    <span class="badge bg-light text-dark me-1">{{ $managersCount }} Mgrs</span>
-                                    <span class="badge bg-light text-dark">{{ $driversCount }} Dvr</span>
+                <div class="col-md-3 col-sm-6">
+                    <a href="{{ route('driver-activities.index') }}" class="card-link-wrapper text-decoration-none">
+                        <div class="card stretch stretch-full h-100 kpi-card hover-animate">
+                            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                                <div>
+                                    <span class="fs-12 text-muted text-uppercase d-block mb-1">Active Drivers</span>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $driversCount }}</h3>
+                                </div>
+                                <div class="avatar-text avatar-md bg-soft-warning text-warning rounded p-3 fs-4 shadow-sm">
+                                    <i class="feather-truck"></i>
                                 </div>
                             </div>
+                        </div>
+                    </a>
+                </div>
+            @else
+                <!-- Driver KPIs -->
+                <div class="col-md-3 col-sm-6">
+                    <a href="{{ route('assignable-orders.index') }}" class="card-link-wrapper text-decoration-none">
+                        <div class="card stretch stretch-full h-100 kpi-card hover-animate">
+                            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                                <div>
+                                    <span class="fs-12 text-muted text-uppercase d-block mb-1">My Allocated Jobs</span>
+                                    <h3 class="fw-bold mb-0 text-dark">{{ $assignmentsCount }}</h3>
+                                </div>
+                                <div class="avatar-text avatar-md bg-soft-primary text-primary rounded p-3 fs-4 shadow-sm">
+                                    <i class="feather-package"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card stretch stretch-full h-100 kpi-card">
+                        <div class="card-body d-flex align-items-center justify-content-between p-4">
+                            <div>
+                                <span class="fs-12 text-muted text-uppercase d-block mb-1">Pending Pickups</span>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $pickupCount }}</h3>
+                            </div>
                             <div class="avatar-text avatar-md bg-soft-warning text-warning rounded p-3 fs-4 shadow-sm">
-                                <i class="feather-users"></i>
+                                <i class="feather-clock"></i>
                             </div>
                         </div>
                     </div>
-                </a>
-            </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card stretch stretch-full h-100 kpi-card">
+                        <div class="card-body d-flex align-items-center justify-content-between p-4">
+                            <div>
+                                <span class="fs-12 text-muted text-uppercase d-block mb-1">Completed Jobs</span>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $deliveredCount }}</h3>
+                            </div>
+                            <div class="avatar-text avatar-md bg-soft-success text-success rounded p-3 fs-4 shadow-sm">
+                                <i class="feather-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card stretch stretch-full h-100 kpi-card">
+                        <div class="card-body d-flex align-items-center justify-content-between p-4">
+                            <div>
+                                <span class="fs-12 text-muted text-uppercase d-block mb-1">Travel Mileage</span>
+                                <h3 class="fw-bold mb-0 text-dark">{{ $totalDistance }} km</h3>
+                                @if($deliveredCount > 0)
+                                    <span class="text-purple fs-10 d-block mt-0.5"><i class="feather-clock me-0.5"></i>Avg Speed: {{ $avgTimeHours }}h</span>
+                                @endif
+                            </div>
+                            <div class="avatar-text avatar-md bg-soft-purple text-purple rounded p-3 fs-4 shadow-sm">
+                                <i class="feather-activity"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
 
-        <!-- Row 2: Logistics Operations Sub-metrics -->
-        <div class="row g-4 mb-4">
-            <!-- Pending Pickup -->
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm d-flex flex-row align-items-center gap-3 p-4 h-100 metric-border-pickup">
-                    <div class="avatar bg-soft-warning text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
-                        <i class="feather-clock fs-4"></i>
-                    </div>
-                    <div>
-                        <h4 class="fw-bold mb-0 text-dark">{{ $pickupCount }}</h4>
-                        <span class="text-muted fs-11 text-uppercase fw-semibold d-block">Pending Pickup</span>
+        <!-- Row 2: Secondary Status Metrics (Only for Admin & Manager) -->
+        @if(!$isDriver)
+            <div class="row g-4 mb-4">
+                <!-- Pending Pickup -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 shadow-sm d-flex flex-row align-items-center gap-3 p-4 h-100 metric-border-pickup">
+                        <div class="avatar bg-soft-warning text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
+                            <i class="feather-clock fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0 text-dark">{{ $pickupCount }}</h4>
+                            <span class="text-muted fs-11 text-uppercase fw-semibold d-block">Pending Pickups</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- In Progress -->
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm d-flex flex-row align-items-center gap-3 p-4 h-100 metric-border-progress">
-                    <div class="avatar bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
-                        <i class="feather-truck fs-4"></i>
-                    </div>
-                    <div>
-                        <h4 class="fw-bold mb-0 text-dark">{{ $inProgressCount }}</h4>
-                        <span class="text-muted fs-11 text-uppercase fw-semibold d-block">In Transit</span>
+                <!-- In Progress -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 shadow-sm d-flex flex-row align-items-center gap-3 p-4 h-100 metric-border-progress">
+                        <div class="avatar bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
+                            <i class="feather-truck fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0 text-dark">{{ $inProgressCount }}</h4>
+                            <span class="text-muted fs-11 text-uppercase fw-semibold d-block">In Transit</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Delivered -->
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm d-flex flex-row align-items-center gap-3 p-4 h-100 metric-border-delivered">
-                    <div class="avatar bg-soft-success text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
-                        <i class="feather-check-circle fs-4"></i>
-                    </div>
-                    <div>
-                        <h4 class="fw-bold mb-0 text-dark">{{ $deliveredCount }}</h4>
-                        <span class="text-muted fs-11 text-uppercase fw-semibold d-block">Delivered</span>
+                <!-- Delivered -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 shadow-sm d-flex flex-row align-items-center gap-3 p-4 h-100 metric-border-delivered">
+                        <div class="avatar bg-soft-success text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
+                            <i class="feather-check-circle fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0 text-dark">{{ $deliveredCount }}</h4>
+                            <span class="text-muted fs-11 text-uppercase fw-semibold d-block">Delivered</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Fleet Performance -->
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0 shadow-sm d-flex flex-row align-items-center gap-3 p-4 h-100 metric-border-distance">
-                    <div class="avatar bg-soft-purple text-purple rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
-                        <i class="feather-activity fs-4"></i>
-                    </div>
-                    <div class="w-100">
-                        <h4 class="fw-bold mb-0 text-dark">{{ $totalDistance }} km</h4>
-                        <span class="text-muted fs-11 text-uppercase fw-semibold d-block">Logged Mileage</span>
-                        <span class="text-purple fs-10 fw-semibold d-block mt-0.5"><i class="feather-clock me-0.5"></i>Avg: {{ $avgTimeHours }}h</span>
+                <!-- Total Distance Covered -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="card border-0 shadow-sm d-flex flex-row align-items-center gap-3 p-4 h-100 metric-border-distance">
+                        <div class="avatar bg-soft-purple text-purple rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
+                            <i class="feather-activity fs-4"></i>
+                        </div>
+                        <div class="w-100">
+                            <h4 class="fw-bold mb-0 text-dark">{{ $totalDistance }} km</h4>
+                            <span class="text-muted fs-11 text-uppercase fw-semibold d-block">Logged Mileage</span>
+                            <span class="text-purple fs-10 fw-semibold d-block mt-0.5"><i class="feather-clock me-0.5"></i>Avg Speed: {{ $avgTimeHours }}h</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
 
         <!-- Row 3: Analytical Charts Section -->
         <div class="row g-4 mb-4">
@@ -180,7 +313,7 @@
                 <div class="card h-100 shadow-sm">
                     <div class="card-header border-0 pb-0">
                         <h6 class="card-title text-dark fw-bold mb-0">Operational Status Ratio</h6>
-                        <span class="fs-12 text-muted">Proportional status analysis of all scheduled luggage</span>
+                        <span class="fs-12 text-muted">Proportional status analysis of scheduled luggage assignments</span>
                     </div>
                     <div class="card-body d-flex align-items-center justify-content-center">
                         <div id="dashboard-status-ratio-chart"></div>
@@ -195,8 +328,19 @@
             <div class="col-lg-8">
                 <div class="card stretch stretch-full shadow-sm h-100">
                     <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
-                        <h6 class="card-title text-dark fw-bold mb-0"><i class="feather-package text-primary me-2"></i>Recent Luggage Bookings</h6>
-                        <a href="{{ route('assign-luggage.index') }}" class="btn btn-sm btn-light-brand py-1 px-3 fs-11">View All</a>
+                        <h6 class="card-title text-dark fw-bold mb-0">
+                            <i class="feather-package text-primary me-2"></i>
+                            @if($isDriver)
+                                My Active Job Allocations
+                            @else
+                                My Recent Luggage Bookings
+                            @endif
+                        </h6>
+                        @if($isDriver)
+                            <a href="{{ route('assignable-orders.index') }}" class="btn btn-sm btn-light-brand py-1 px-3 fs-11">View All Orders</a>
+                        @else
+                            <a href="{{ route('assign-luggage.index') }}" class="btn btn-sm btn-light-brand py-1 px-3 fs-11">View All Bookings</a>
+                        @endif
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -206,7 +350,9 @@
                                         <th class="ps-4">ID</th>
                                         <th>Company</th>
                                         <th>Route</th>
-                                        <th>Driver</th>
+                                        @if(!$isDriver)
+                                            <th>Driver</th>
+                                        @endif
                                         <th>Distance</th>
                                         <th>Status</th>
                                         <th class="pe-4 text-end">Action</th>
@@ -234,9 +380,11 @@
                                                     <span class="fs-11 text-muted"><i class="feather-arrow-right text-muted me-1 fs-10"></i>{{ Str::limit($row->drop_location, 25) }}</span>
                                                 </div>
                                             </td>
-                                            <td>
-                                                <span class="text-dark fs-12 fw-medium">{{ $row->driver ? $row->driver->name : 'Unassigned' }}</span>
-                                            </td>
+                                            @if(!$isDriver)
+                                                <td>
+                                                    <span class="text-dark fs-12 fw-medium">{{ $row->driver ? $row->driver->name : 'Unassigned' }}</span>
+                                                </td>
+                                            @endif
                                             <td>{{ $row->distance_km }} km</td>
                                             <td>
                                                 @if($row->status === 'Delivered')
@@ -248,16 +396,22 @@
                                                 @endif
                                             </td>
                                             <td class="pe-4 text-end">
-                                                <a href="{{ route('assign-luggage.show', $row->id) }}" class="btn btn-xs btn-light-brand" title="View Booking">
-                                                    <i class="feather-eye"></i>
-                                                </a>
+                                                @if($isDriver)
+                                                    <a href="{{ route('assignable-orders.show', $row->id) }}" class="btn btn-xs btn-light-brand" title="Manage Order">
+                                                        <i class="feather-edit"></i>
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('assign-luggage.show', $row->id) }}" class="btn btn-xs btn-light-brand" title="View Booking">
+                                                        <i class="feather-eye"></i>
+                                                    </a>
+                                                @endif
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center text-muted py-5">
+                                            <td colspan="{{ $isDriver ? '6' : '7' }}" class="text-center text-muted py-5">
                                                 <i class="feather-alert-triangle fs-2 text-warning mb-2 d-block"></i>
-                                                No luggage assignments found.
+                                                No allocated shipments found.
                                             </td>
                                         </tr>
                                     @endforelse
@@ -268,16 +422,16 @@
                 </div>
             </div>
 
-            <!-- Quick Console & Admin Details -->
+            <!-- Quick Console -->
             <div class="col-lg-4">
-                <div class="d-flex flex-column gap-4 h-100">
-                    <!-- Quick Admin Controls -->
-                    <div class="card shadow-sm">
-                        <div class="card-header border-bottom py-3">
-                            <h6 class="card-title text-dark fw-bold mb-0"><i class="feather-sliders text-primary me-2"></i>Quick Actions Console</h6>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="d-flex flex-column gap-2">
+                <!-- Quick Controls -->
+                <div class="card shadow-sm h-100">
+                    <div class="card-header border-bottom py-3">
+                        <h6 class="card-title text-dark fw-bold mb-0"><i class="feather-sliders text-primary me-2"></i>Quick Console</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column gap-2">
+                            @if($isAdmin)
                                 <a href="{{ route('assign-luggage.create') }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 hover-shadow">
                                     <i class="feather-plus-circle"></i> New Luggage Assignment
                                 </a>
@@ -296,40 +450,34 @@
                                 <a href="{{ route('settings.edit') }}" class="btn btn-light w-100 d-flex align-items-center justify-content-center gap-2">
                                     <i class="feather-settings"></i> Edit Application Settings
                                 </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Session Overview -->
-                    <div class="card shadow-sm flex-fill">
-                        <div class="card-header border-bottom py-3">
-                            <h6 class="card-title text-dark fw-bold mb-0"><i class="feather-shield text-primary me-2"></i>Officer Account Profile</h6>
-                        </div>
-                        <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center text-center">
-                            @if(isset($loggedUser) && $loggedUser->profile_photo)
-                                <img src="{{ asset($loggedUser->profile_photo) }}" alt="profile" class="img-fluid rounded-circle mb-3 shadow-sm border border-2 border-primary" style="width: 72px; height: 72px; object-fit: cover;" />
-                            @elseif(isset($loggedUser))
-                                <div class="avatar-text bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 72px; height: 72px; font-weight: 700; font-size: 24px;">
-                                    {{ $loggedUser->getInitials() }}
-                                </div>
+                            @elseif($isManager)
+                                <a href="{{ route('assign-luggage.create') }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 hover-shadow">
+                                    <i class="feather-plus-circle"></i> New Luggage Assignment
+                                </a>
+                                <a href="{{ route('driver-activities.index') }}" class="btn btn-light-brand w-100 d-flex align-items-center justify-content-center gap-2">
+                                    <i class="feather-activity"></i> Track Driver Activities
+                                </a>
+                                <a href="{{ route('reports.index') }}" class="btn btn-light-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+                                    <i class="feather-bar-chart-2"></i> Operations Reports Center
+                                </a>
+                                <a href="{{ route('profile.edit') }}" class="btn btn-light w-100 d-flex align-items-center justify-content-center gap-2">
+                                    <i class="feather-user"></i> View My Profile Details
+                                </a>
+                            @else
+                                <!-- Driver Console -->
+                                <a href="{{ route('assignable-orders.index') }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 hover-shadow">
+                                    <i class="feather-truck"></i> My Assignable Orders
+                                </a>
+                                <a href="{{ route('reports.index') }}" class="btn btn-light-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+                                    <i class="feather-bar-chart-2"></i> My Performance Reports
+                                </a>
+                                <a href="{{ route('profile.edit') }}" class="btn btn-light-brand w-100 d-flex align-items-center justify-content-center gap-2">
+                                    <i class="feather-user"></i> Edit Profile Details
+                                </a>
+                                <a href="{{ route('account-settings.edit') }}" class="btn btn-light w-100 d-flex align-items-center justify-content-center gap-2">
+                                    <i class="feather-settings"></i> Account Password Settings
+                                </a>
                             @endif
-                            <h5 class="fw-bold text-dark mb-1">{{ $loggedUser->name ?? 'Administrator' }}</h5>
-                            <span class="badge bg-soft-primary text-primary px-3 py-1 fs-11 rounded-pill mb-3">{{ $loggedUser->designation ?? 'System Administrator' }}</span>
-                            
-                            <div class="border-top pt-3 w-100 text-start">
-                                <div class="d-flex justify-content-between mb-1.5 fs-12 text-muted">
-                                    <span>Last Login Time:</span>
-                                    <span class="fw-semibold text-dark">{{ $loggedUser->last_login_at ? \Carbon\Carbon::parse($loggedUser->last_login_at)->format('Y-m-d H:i') : now()->format('Y-m-d H:i') }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between fs-12 text-muted mb-1.5">
-                                    <span>Last Login IP:</span>
-                                    <span class="fw-semibold text-dark">{{ $loggedUser->last_login_ip ?? '127.0.0.1' }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between fs-12 text-muted">
-                                    <span>Contact Number:</span>
-                                    <span class="fw-semibold text-dark">{{ $loggedUser->phone ?? 'N/A' }}</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -338,6 +486,9 @@
     </div>
     <!-- [ Main Content ] end -->
 </div>
+@endsection
+
+@section('modals')
 @endsection
 
 @push('head')
@@ -398,7 +549,7 @@
 @push('scripts')
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // 1. Stacked Spline Area Chart: Outbound Shipping Trend for last 15 days
+        // 1. Stacked Spline Area Chart: Scoped Outbound Shipping Trend for last 15 days
         var trendData = @json($dailyTrend);
         
         var trendOptions = {
@@ -485,7 +636,7 @@
                             show: true,
                             total: {
                                 show: true,
-                                label: 'Total Volume',
+                                label: 'Total Jobs',
                                 formatter: function (w) {
                                     return {{ $assignmentsCount }};
                                 }
