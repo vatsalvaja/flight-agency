@@ -24,6 +24,8 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::delete('settings/logo', [SettingsController::class, 'removeLogo'])->name('settings.logo.destroy');
+    Route::delete('settings/favicon', [SettingsController::class, 'removeFavicon'])->name('settings.favicon.destroy');
     
     Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');

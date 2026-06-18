@@ -69,9 +69,19 @@
                                     @enderror
                                     
                                     @if($setting->application_logo)
-                                        <div class="mt-3 p-2 border rounded text-center bg-light" style="max-width: 250px;">
+                                        <div class="mt-3 position-relative d-inline-block p-2 border rounded bg-light text-center" style="max-width: 250px;">
                                             <div class="fs-12 text-muted mb-2">Current Logo:</div>
                                             <img src="{{ asset('storage/' . $setting->application_logo) }}" alt="Logo Preview" class="img-fluid rounded" style="max-height: 50px;">
+                                            <button type="button"
+                                                class="btn-remove-asset position-absolute bg-danger text-white border-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                                                style="top: -8px; right: -8px; width: 22px; height: 22px; font-size: 12px; cursor: pointer;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#removeAssetModal"
+                                                data-remove-url="{{ route('settings.logo.destroy') }}"
+                                                data-remove-message="Are you sure you want to remove the logo?"
+                                                aria-label="Remove logo">
+                                                <i class="feather-x"></i>
+                                            </button>
                                         </div>
                                     @endif
                                 </div>
@@ -85,9 +95,19 @@
                                     @enderror
 
                                     @if($setting->favicon)
-                                        <div class="mt-3 p-2 border rounded text-center bg-light" style="max-width: 150px;">
+                                        <div class="mt-3 position-relative d-inline-block p-2 border rounded bg-light text-center" style="max-width: 150px;">
                                             <div class="fs-12 text-muted mb-2">Current Favicon:</div>
                                             <img src="{{ asset('storage/' . $setting->favicon) }}" alt="Favicon Preview" class="img-fluid rounded" style="max-height: 32px; width: 32px;">
+                                            <button type="button"
+                                                class="btn-remove-asset position-absolute bg-danger text-white border-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                                                style="top: -8px; right: -8px; width: 22px; height: 22px; font-size: 12px; cursor: pointer;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#removeAssetModal"
+                                                data-remove-url="{{ route('settings.favicon.destroy') }}"
+                                                data-remove-message="Are you sure you want to remove the favicon?"
+                                                aria-label="Remove favicon">
+                                                <i class="feather-x"></i>
+                                            </button>
                                         </div>
                                     @endif
                                 </div>
@@ -105,3 +125,49 @@
     <!-- [ Main Content ] end -->
 </div>
 @endsection
+
+@section('modals')
+<div class="modal fade" id="removeAssetModal" tabindex="-1" aria-labelledby="removeAssetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header py-3 px-4 border-bottom border-gray-2">
+                <h5 class="modal-title fw-extrabold text-dark" id="removeAssetModalLabel">Confirm Removal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="mb-0 text-muted" id="removeAssetMessage">Are you sure you want to remove this item?</p>
+            </div>
+            <div class="modal-footer p-3 bg-light border-top border-gray-2">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">No</button>
+                <form id="removeAssetForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">Yes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const removeAssetModal = document.getElementById('removeAssetModal');
+    const removeAssetForm = document.getElementById('removeAssetForm');
+    const removeAssetMessage = document.getElementById('removeAssetMessage');
+
+    document.querySelectorAll('.btn-remove-asset').forEach(function (button) {
+        button.addEventListener('click', function () {
+            removeAssetForm.action = button.dataset.removeUrl;
+            removeAssetMessage.textContent = button.dataset.removeMessage;
+        });
+    });
+
+    removeAssetModal.addEventListener('hidden.bs.modal', function () {
+        removeAssetForm.action = '';
+        removeAssetMessage.textContent = 'Are you sure you want to remove this item?';
+    });
+});
+</script>
+@endpush

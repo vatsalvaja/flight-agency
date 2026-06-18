@@ -54,4 +54,38 @@ class SettingsController extends Controller
 
         return redirect()->route('settings.edit')->with('success', 'Application settings updated successfully.');
     }
+
+    /**
+     * Remove the application logo from storage and database.
+     */
+    public function removeLogo()
+    {
+        $setting = Setting::firstOrCreate([], [
+            'application_name' => 'Wings',
+        ]);
+
+        if ($setting->application_logo) {
+            Storage::disk('public')->delete($setting->application_logo);
+            $setting->update(['application_logo' => null]);
+        }
+
+        return redirect()->route('settings.edit')->with('success', 'Application logo removed successfully.');
+    }
+
+    /**
+     * Remove the favicon from storage and database.
+     */
+    public function removeFavicon()
+    {
+        $setting = Setting::firstOrCreate([], [
+            'application_name' => 'Wings',
+        ]);
+
+        if ($setting->favicon) {
+            Storage::disk('public')->delete($setting->favicon);
+            $setting->update(['favicon' => null]);
+        }
+
+        return redirect()->route('settings.edit')->with('success', 'Favicon removed successfully.');
+    }
 }
