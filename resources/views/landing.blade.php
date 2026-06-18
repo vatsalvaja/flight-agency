@@ -344,14 +344,14 @@
                         <div class="form-group-custom">
                             <label for="login_email" class="form-label-custom">Email Address</label>
                             <div class="input-container">
-                                <input type="email" name="email" id="login_email" class="form-control-custom" placeholder="name@company.com" value="{{ old('email', 'admin@gmail.com') }}" required autocomplete="email" autofocus>
+                                <input type="email" name="email" id="login_email" class="form-control-custom" placeholder="name@company.com" required autocomplete="email" autofocus>
                             </div>
                         </div>
                         
                         <div class="form-group-custom">
                             <label for="login_password" class="form-label-custom">Password</label>
                             <div class="input-container">
-                                <input type="password" name="password" id="login_password" class="form-control-custom password-input" placeholder="••••••••" value="Admin@123" required autocomplete="current-password">
+                                <input type="password" name="password" id="login_password" class="form-control-custom password-input" placeholder="••••••••" required autocomplete="current-password">
                                 <span class="password-toggle" id="password_eye_toggle" onclick="togglePassword()">
                                     <i class="feather-eye" id="password_eye_icon"></i>
                                 </span>
