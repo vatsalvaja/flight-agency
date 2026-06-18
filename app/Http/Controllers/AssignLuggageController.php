@@ -77,7 +77,7 @@ class AssignLuggageController extends Controller
         $images = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-                $path = $file->store('luggages', 'public');
+                $path = $this->storePublicUpload($file, 'luggages');
                 $images[] = $path;
             }
         }
@@ -149,7 +149,7 @@ class AssignLuggageController extends Controller
         $newImages = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-                $path = $file->store('luggages', 'public');
+                $path = $this->storePublicUpload($file, 'luggages');
                 $newImages[] = $path;
             }
         }

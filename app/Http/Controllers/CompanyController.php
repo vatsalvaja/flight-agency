@@ -42,7 +42,7 @@ class CompanyController extends Controller
         ]);
 
         if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('companies', 'public');
+            $path = $this->storePublicUpload($request->file('logo'), 'companies');
             $validated['logo'] = $path;
         }
 
@@ -88,7 +88,7 @@ class CompanyController extends Controller
             if ($company->logo) {
                 Storage::disk('public')->delete($company->logo);
             }
-            $path = $request->file('logo')->store('companies', 'public');
+            $path = $this->storePublicUpload($request->file('logo'), 'companies');
             $validated['logo'] = $path;
         }
 

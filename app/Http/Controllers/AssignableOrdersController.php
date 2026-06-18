@@ -86,7 +86,7 @@ class AssignableOrdersController extends Controller
         if ($request->hasFile('proof_images')) {
             foreach ($request->file('proof_images') as $file) {
                 // Store image in proofs folder
-                $path = $file->store('proofs', 'public');
+                $path = $this->storePublicUpload($file, 'proofs');
                 $proofImages[] = $path;
             }
         }

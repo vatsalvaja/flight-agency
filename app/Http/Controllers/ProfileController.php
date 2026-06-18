@@ -40,7 +40,7 @@ class ProfileController extends Controller
             if ($user->profile_photo) {
                 Storage::disk('public')->delete($user->profile_photo);
             }
-            $path = $request->file('profile_photo')->store('profiles', 'public');
+            $path = $this->storePublicUpload($request->file('profile_photo'), 'profiles');
             $validated['profile_photo'] = $path;
         }
 

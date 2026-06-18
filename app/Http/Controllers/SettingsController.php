@@ -38,7 +38,7 @@ class SettingsController extends Controller
             if ($setting->application_logo) {
                 Storage::disk('public')->delete($setting->application_logo);
             }
-            $path = $request->file('application_logo')->store('settings', 'public');
+            $path = $this->storePublicUpload($request->file('application_logo'), 'settings');
             $validated['application_logo'] = $path;
         }
 
@@ -46,7 +46,7 @@ class SettingsController extends Controller
             if ($setting->favicon) {
                 Storage::disk('public')->delete($setting->favicon);
             }
-            $path = $request->file('favicon')->store('settings', 'public');
+            $path = $this->storePublicUpload($request->file('favicon'), 'settings');
             $validated['favicon'] = $path;
         }
 
