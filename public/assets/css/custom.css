@@ -373,3 +373,196 @@ html.app-skin-dark .wings-loader-status {
         opacity: 1;
     }
 }
+
+/* ==========================================================================
+   MOBILE & MOBILE-FIRST RESPONSIVE OVERRIDES
+   ========================================================================== */
+
+@media (max-width: 991px) {
+    /* Remove outer card wrapper to eliminate box-inside-box layout */
+    .main-content .card:has(.dual-view-grid-container),
+    .main-content .card:has(.table-responsive) {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    .main-content .card:has(.dual-view-grid-container) > .card-header,
+    .main-content .card:has(.table-responsive) > .card-header {
+        background: transparent !important;
+        border-bottom: none !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        padding-bottom: 0.75rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .main-content .card:has(.dual-view-grid-container) > .card-body,
+    .main-content .card:has(.table-responsive) > .card-body {
+        background: transparent !important;
+        padding: 0 !important;
+    }
+
+    .main-content .card:has(.dual-view-grid-container) > .card-footer,
+    .main-content .card:has(.table-responsive) > .card-footer {
+        background: transparent !important;
+        border-top: none !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-top: 1rem !important;
+    }
+
+    /* Remove grid container double padding on mobile views */
+    .dual-view-grid-container {
+        padding: 0 !important;
+    }
+
+    /* Expand cards to utilize maximum viewport width */
+    .dual-view-grid-container .row {
+        margin-left: -8px !important;
+        margin-right: -8px !important;
+    }
+
+    .dual-view-grid-container [class*="col-"] {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        margin-bottom: 1rem !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    /* Clean, modern app-like header experience */
+    .page-header {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 1.25rem 0.25rem !important;
+        margin-bottom: 0.75rem !important;
+        border-bottom: none !important;
+        gap: 0.5rem !important;
+    }
+
+    .page-header-left {
+        display: flex !important;
+        align-items: center !important;
+        border-right: none !important;
+        padding-right: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .page-header-title {
+        border-right: none !important;
+        padding-right: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .page-header-left::after,
+    .page-header-title::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    .page-header-title h5 {
+        font-size: 1.25rem !important;
+        font-weight: 800 !important;
+        margin-bottom: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.25px !important;
+    }
+
+    .page-header-right {
+        margin-left: auto !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .page-header-right .btn {
+        padding: 0.5rem 0.85rem !important;
+        font-size: 0.775rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        border-radius: 8px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        height: 36px !important;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Premium mobile logistics cards adjustments */
+    .dual-view-card {
+        border-radius: 12px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    html.app-skin-dark .dual-view-card {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .dual-view-card .card-body {
+        padding: 1rem !important;
+    }
+
+    .dual-view-card-header {
+        margin-bottom: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+
+    .dual-view-card-detail-item {
+        padding: 0.5rem 0 !important;
+    }
+
+    /* Wrap long address fields elegantly on mobile */
+    .dual-view-card-detail-value {
+        max-width: 72% !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        text-align: right !important;
+        line-height: 1.35 !important;
+        font-size: 0.775rem !important;
+    }
+
+    .dual-view-card-detail-label {
+        font-size: 0.625rem !important;
+        color: #64748b !important;
+    }
+
+    html.app-skin-dark .dual-view-card-detail-label {
+        color: #94a3b8 !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    /* Stack search controls full width for native feel */
+    .card-header:has(form) {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        padding-top: 0.5rem !important;
+    }
+
+    .card-header:has(form) .card-title {
+        margin-bottom: 0 !important;
+    }
+
+    .card-header:has(form) form {
+        width: 100% !important;
+        display: flex !important;
+        gap: 8px !important;
+    }
+
+    .card-header:has(form) form .input-group {
+        max-width: none !important;
+        flex-grow: 1 !important;
+    }
+
+    .card-header:has(form) form .btn {
+        padding: 0 16px !important;
+        height: 38px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+}
