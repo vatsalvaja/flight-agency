@@ -26,15 +26,17 @@ class ReportController extends Controller
             $loggedUser = User::find($userId);
         }
 
-        // Authorization check: Only Admin (role_id = 0) or Manager (role name contains 'manager') can view reports
+        // Authorization check: Only Admin (role_id = 0), Manager, or Driver can view reports
         $isAdmin = $loggedUser && $loggedUser->role_id === 0;
         $isManager = false;
+        $isDriver = false;
         if ($loggedUser && $loggedUser->role_id > 0 && $loggedUser->role) {
             $isManager = (stripos($loggedUser->role->role_name, 'manager') !== false);
+            $isDriver = (stripos($loggedUser->role->role_name, 'driver') !== false);
         }
 
-        if (!$isAdmin && !$isManager) {
-            abort(403, 'Unauthorized action. The Reports module is restricted to Administrators and Managers.');
+        if (!$isAdmin && !$isManager && !$isDriver) {
+            abort(403, 'Unauthorized action. The Reports module is restricted to Administrators, Managers, and Drivers.');
         }
 
         // 1. Handle Date Presets
@@ -93,9 +95,11 @@ class ReportController extends Controller
         // 2. Build Base Query and Apply Filter Parameters
         $query = AssignLuggage::with(['company', 'station', 'driver', 'creator']);
 
-        // Scope data for Managers (only see assignments they created)
+        // Scope data for Managers (only see assignments they created) or Drivers (only see assignments assigned to them)
         if ($isManager) {
             $query->where('created_by', $loggedUser->id);
+        } elseif ($isDriver) {
+            $query->where('driver_id', $loggedUser->id);
         }
 
         // Apply date scope
@@ -112,12 +116,12 @@ class ReportController extends Controller
         }
 
         // Filter: Driver
-        if ($request->filled('driver_id')) {
+        if (!$isDriver && $request->filled('driver_id')) {
             $query->where('driver_id', $request->driver_id);
         }
 
         // Filter: Manager (created_by)
-        if (!$isManager && $request->filled('manager_id')) {
+        if (!$isManager && !$isDriver && $request->filled('manager_id')) {
             $query->where('created_by', $request->manager_id);
         }
 
@@ -148,7 +152,9 @@ class ReportController extends Controller
         }
 
         $selectedDriverName = 'All Drivers';
-        if ($request->filled('driver_id')) {
+        if ($isDriver) {
+            $selectedDriverName = $loggedUser->name;
+        } elseif ($request->filled('driver_id')) {
             $item = User::find($request->driver_id);
             if ($item) $selectedDriverName = $item->name;
         }
@@ -379,7 +385,8 @@ class ReportController extends Controller
             'appSettings',
             'loggedUser',
             'isAdmin',
-            'isManager'
+            'isManager',
+            'isDriver'
         ));
     }
 }

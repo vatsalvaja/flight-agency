@@ -75,7 +75,10 @@ class AdminAuth
         }
 
         if ($isDriver) {
-            if (in_array($path, $allowedCommonPaths) || $path === 'admin/assignable-orders' || str_starts_with($path, 'admin/assignable-orders/')) {
+            if (in_array($path, $allowedCommonPaths) || 
+                $path === 'admin/assignable-orders' || 
+                str_starts_with($path, 'admin/assignable-orders/') ||
+                $path === 'admin/reports') {
                 return $next($request);
             }
             return redirect('/admin')->with('error', 'Unauthorized access.');

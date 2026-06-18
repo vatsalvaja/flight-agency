@@ -160,7 +160,7 @@
                     </li>
                     @endif
 
-                    @if($isAdmin || $isManager)
+                    @if($isAdmin || $isManager || $isDriver)
                     <li class="nxl-item {{ Request::routeIs('reports.*') ? 'active' : '' }}">
                         <a href="{{ route('reports.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-bar-chart-2"></i></span>

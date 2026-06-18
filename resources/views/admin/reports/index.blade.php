@@ -93,6 +93,7 @@
                         @endif
 
                         <!-- Driver Select -->
+                        @if(!$isDriver)
                         <div class="col-sm-6 col-md-4 col-lg-2">
                             <label class="form-label fw-bold text-dark fs-12">Driver</label>
                             <select name="driver_id" class="form-select select2-select">
@@ -102,6 +103,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        @endif
 
                         <!-- Status Select -->
                         <div class="col-sm-6 col-md-4 col-lg-2">
@@ -130,9 +132,10 @@
         <ul class="nav nav-tabs card-header-tabs border-bottom mb-4" id="reportTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active fw-bold px-4" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-pane" type="button" role="tab" aria-controls="overview-pane" aria-selected="true">
-                    <i class="feather-grid me-2 text-primary"></i>Executive Summary
+                    <i class="feather-grid me-2 text-primary"></i>{{ $isDriver ? 'My Summary' : 'Executive Summary' }}
                 </button>
             </li>
+            @if(!$isDriver)
             <li class="nav-item" role="presentation">
                 <button class="nav-link fw-bold px-4" id="team-tab" data-bs-toggle="tab" data-bs-target="#team-pane" type="button" role="tab" aria-controls="team-pane" aria-selected="false">
                     <i class="feather-users me-2 text-primary"></i>Team Performance
@@ -143,9 +146,10 @@
                     <i class="feather-map me-2 text-primary"></i>Companies & Stations
                 </button>
             </li>
+            @endif
             <li class="nav-item" role="presentation">
                 <button class="nav-link fw-bold px-4" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs-pane" type="button" role="tab" aria-controls="logs-pane" aria-selected="false">
-                    <i class="feather-file-text me-2 text-primary"></i>Detailed Audit Log
+                    <i class="feather-file-text me-2 text-primary"></i>{{ $isDriver ? 'My Deliveries Log' : 'Detailed Audit Log' }}
                 </button>
             </li>
         </ul>
@@ -240,6 +244,7 @@
             </div>
 
             <!-- TAB 2: TEAM PERFORMANCE -->
+            @if(!$isDriver)
             <div class="tab-pane fade" id="team-pane" role="tabpanel" aria-labelledby="team-tab">
                 <div class="row g-4">
                     @if($isAdmin)
@@ -361,8 +366,10 @@
                     @endif
                 </div>
             </div>
+            @endif
 
             <!-- TAB 3: COMPANIES & STATIONS -->
+            @if(!$isDriver)
             <div class="tab-pane fade" id="entities-pane" role="tabpanel" aria-labelledby="entities-tab">
                 <!-- Companies and Stations Charts / lists -->
                 <div class="row g-4 mb-4">
@@ -473,6 +480,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- TAB 4: DETAILED AUDIT LOG -->
             <div class="tab-pane fade" id="logs-pane" role="tabpanel" aria-labelledby="logs-tab">
@@ -571,9 +579,9 @@
                 <p class="text-uppercase text-muted fs-10 letter-spacing-1 mb-0">Logistics & Operations Management</p>
             </div>
             <div class="col-6 text-end">
-                <h3 class="fw-bold mb-1 text-dark">MANAGEMENT REPORT</h3>
+                <h3 class="fw-bold mb-1 text-dark">{{ $isDriver ? 'DRIVER ACTIVITY REPORT' : 'MANAGEMENT REPORT' }}</h3>
                 <p class="mb-0 text-muted fs-11">Date Generated: {{ now()->format('Y-m-d H:i:s') }}</p>
-                <p class="mb-0 text-muted fs-11">Officer / Creator: {{ $loggedUser->name }}</p>
+                <p class="mb-0 text-muted fs-11">{{ $isDriver ? 'Driver' : 'Officer / Creator' }}: {{ $loggedUser->name }}</p>
             </div>
         </div>
     </div>
@@ -594,12 +602,19 @@
                 <td class="fw-bold">Transit Station:</td>
                 <td>{{ $selectedStationName }}</td>
             </tr>
+            @if(!$isDriver)
             <tr>
                 <td class="fw-bold">Staff Manager:</td>
                 <td>{{ $selectedDriverManagerName }}</td>
                 <td class="fw-bold">Assigned Driver:</td>
                 <td>{{ $selectedDriverName }}</td>
             </tr>
+            @else
+            <tr>
+                <td class="fw-bold">Assigned Driver:</td>
+                <td colspan="3">{{ $selectedDriverName }}</td>
+            </tr>
+            @endif
             <tr>
                 <td class="fw-bold">Logistics Status:</td>
                 <td colspan="3">{{ request('status') ?: 'All Statuses' }}</td>
@@ -652,6 +667,7 @@
         </tbody>
     </table>
 
+    @if(!$isDriver)
     <div class="page-break-print"></div>
 
     <!-- Section 2: Management Breakdowns -->
@@ -765,11 +781,12 @@
             </table>
         </div>
     </div>
+    @endif
 
     <div class="page-break-print"></div>
 
     <!-- Section 3: Detailed Auditable Log of Assignments -->
-    <h5 class="fw-bold text-dark mb-2 border-bottom pb-1">4. Detailed Auditable Log of Assignments</h5>
+    <h5 class="fw-bold text-dark mb-2 border-bottom pb-1">{{ $isDriver ? '2. Detailed Auditable Log of Deliveries' : '4. Detailed Auditable Log of Assignments' }}</h5>
     <table class="table table-bordered table-sm align-middle fs-9">
         <thead class="table-light">
             <tr>
@@ -1092,6 +1109,7 @@
         opsChart.render();
 
         // Redesigned Chart 2: Corporate Luggage volume comparison (Horizontal bar chart)
+        @if(!$isDriver)
         var companyOptions = {
             series: [{
                 name: 'Luggage Volume',
@@ -1134,6 +1152,7 @@
 
         var companyChart = new ApexCharts(document.querySelector("#company-volume-chart"), companyOptions);
         companyChart.render();
+        @endif
 
         // Redesigned Chart 3: Proportional Status Donut
         var donutOptions = {
