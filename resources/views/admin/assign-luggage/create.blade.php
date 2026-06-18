@@ -116,7 +116,7 @@
 
                                 <div class="col-md-2 mb-3">
                                     <label class="form-label fw-semibold" for="distance_km">Distance (km)</label>
-                                    <input type="number" step="0.01" name="distance_km" id="distance_km" class="form-control @error('distance_km') is-invalid @enderror" value="{{ old('distance_km') }}" placeholder="Distance" readonly>
+                                    <input type="number" step="0.01" name="distance_km" id="distance_km" class="form-control @error('distance_km') is-invalid @enderror" value="{{ old('distance_km') }}" placeholder="Distance">
                                     @error('distance_km')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
