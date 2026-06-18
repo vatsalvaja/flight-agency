@@ -32,7 +32,7 @@
     <!--! END:  Apps Title-->
     <!--! BEGIN: Favicon-->
     @if($appSettings->favicon)
-        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('storage/' . $appSettings->favicon) }}" />
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset($appSettings->favicon) }}" />
     @else
         <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/images/favicon.ico') }}" />
     @endif
@@ -85,13 +85,13 @@
             <div class="m-header">
                 <a href="{{ url('/admin') }}" class="b-brand">
                     @if($appSettings->application_logo)
-                        <img src="{{ asset('storage/' . $appSettings->application_logo) }}" alt="{{ $appSettings->application_name }}" class="logo logo-lg" style="max-height: 42px; max-width: 145px; object-fit: contain; -webkit-text-fill-color: initial; background: transparent;">
+                        <img src="{{ asset($appSettings->application_logo) }}" alt="{{ $appSettings->application_name }}" class="logo logo-lg" style="max-height: 42px; max-width: 145px; object-fit: contain; -webkit-text-fill-color: initial; background: transparent;">
                     @else
                         <span class="logo logo-lg fw-bolder fs-3 text-dark">{{ $appSettings->application_name }}</span>
                     @endif
 
                     @if($appSettings->favicon)
-                        <img src="{{ asset('storage/' . $appSettings->favicon) }}" alt="{{ $appSettings->application_name }}" class="logo logo-sm" style="max-height: 30px; max-width: 30px; object-fit: contain; -webkit-text-fill-color: initial; background: transparent;">
+                        <img src="{{ asset($appSettings->favicon) }}" alt="{{ $appSettings->application_name }}" class="logo logo-sm" style="max-height: 30px; max-width: 30px; object-fit: contain; -webkit-text-fill-color: initial; background: transparent;">
                     @else
                         <span class="logo logo-sm fw-bolder fs-4 text-dark">{{ substr($appSettings->application_name, 0, 1) }}</span>
                     @endif
@@ -251,7 +251,7 @@
                     <div class="dropdown nxl-h-item">
                         <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside">
                             @if(isset($loggedUser) && $loggedUser->profile_photo)
-                                <img src="{{ asset('storage/' . $loggedUser->profile_photo) }}" alt="user-image" class="img-fluid user-avtar me-0" style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;" />
+                                <img src="{{ asset($loggedUser->profile_photo) }}" alt="user-image" class="img-fluid user-avtar me-0" style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;" />
                             @elseif(isset($loggedUser))
                                 <div class="avatar-text bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center me-0" style="width: 35px; height: 35px; font-weight: 700; font-size: 14px;">
                                     {{ $loggedUser->getInitials() }}
@@ -264,7 +264,7 @@
                             <div class="dropdown-header">
                                 <div class="d-flex align-items-center">
                                     @if(isset($loggedUser) && $loggedUser->profile_photo)
-                                        <img src="{{ asset('storage/' . $loggedUser->profile_photo) }}" alt="user-image" class="img-fluid user-avtar" style="width: 45px; height: 45px; object-fit: cover; border-radius: 50%;" />
+                                        <img src="{{ asset($loggedUser->profile_photo) }}" alt="user-image" class="img-fluid user-avtar" style="width: 45px; height: 45px; object-fit: cover; border-radius: 50%;" />
                                     @elseif(isset($loggedUser))
                                         <div class="avatar-text bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px; font-weight: 700; font-size: 16px;">
                                             {{ $loggedUser->getInitials() }}

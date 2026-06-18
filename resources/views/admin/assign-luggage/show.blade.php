@@ -54,7 +54,7 @@
                                         <td class="py-3">
                                             <div class="d-flex align-items-center">
                                                 @if($assignment->company->logo)
-                                                    <img src="{{ asset('storage/' . $assignment->company->logo) }}" alt="logo" class="rounded me-2" style="height: 32px; width: 32px; object-fit: cover;">
+                                                    <img src="{{ asset($assignment->company->logo) }}" alt="logo" class="rounded me-2" style="height: 32px; width: 32px; object-fit: cover;">
                                                 @else
                                                     <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-weight: 700; font-size: 13px;">
                                                         {{ substr($assignment->company->company_name, 0, 1) }}
@@ -99,7 +99,7 @@
                                         <td class="py-3">
                                             <div class="d-flex align-items-center">
                                                 @if($assignment->driver->profile_photo)
-                                                    <img src="{{ asset('storage/' . $assignment->driver->profile_photo) }}" alt="avatar" class="rounded-circle me-2" style="height: 32px; width: 32px; object-fit: cover;">
+                                                    <img src="{{ asset($assignment->driver->profile_photo) }}" alt="avatar" class="rounded-circle me-2" style="height: 32px; width: 32px; object-fit: cover;">
                                                 @else
                                                     <div class="avatar-text avatar-sm bg-soft-info text-info rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-weight: 700; font-size: 13px;">
                                                         {{ $assignment->driver->getInitials() }}
@@ -148,8 +148,8 @@
                                     <div class="row g-2">
                                         @foreach($assignment->images as $img)
                                             <div class="col-4">
-                                                <a href="{{ asset('storage/' . $img) }}" target="_blank" class="d-block border rounded p-1 hover-image" style="height: 90px; overflow: hidden; background: #fff;">
-                                                    <img src="{{ asset('storage/' . $img) }}" class="w-100 h-100 rounded" style="object-fit: cover; transition: transform 0.2s ease;">
+                                                <a href="{{ asset($img) }}" target="_blank" class="d-block border rounded p-1 hover-image" style="height: 90px; overflow: hidden; background: #fff;">
+                                                    <img src="{{ asset($img) }}" class="w-100 h-100 rounded" style="object-fit: cover; transition: transform 0.2s ease;">
                                                 </a>
                                             </div>
                                         @endforeach

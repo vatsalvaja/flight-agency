@@ -105,7 +105,7 @@
                             <!-- Company banner -->
                             <div class="d-flex align-items-center mb-4 bg-light p-3 rounded-3 border border-gray-2 company-info-banner">
                                 @if($assignment->company->logo)
-                                    <img src="{{ asset('storage/' . $assignment->company->logo) }}" alt="logo" class="rounded me-3 flex-shrink-0" style="height: 38px; width: 38px; object-fit: cover;">
+                                    <img src="{{ asset($assignment->company->logo) }}" alt="logo" class="rounded me-3 flex-shrink-0" style="height: 38px; width: 38px; object-fit: cover;">
                                 @else
                                     <div class="avatar-text bg-soft-primary text-primary rounded me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px; font-weight: 700; font-size: 14px;">
                                         {{ substr($assignment->company->company_name, 0, 1) }}
@@ -238,8 +238,8 @@
                                         <div class="row g-2">
                                             @foreach($assignment->delivery_proof_images as $img)
                                                 <div class="col-6">
-                                                    <a href="{{ asset('storage/' . $img) }}" target="_blank" class="d-block border rounded-3 p-1 overflow-hidden hover-proof-image bg-white" style="height: 100px;">
-                                                        <img src="{{ asset('storage/' . $img) }}" class="w-100 h-100 rounded-2" style="object-fit: cover;">
+                                                    <a href="{{ asset($img) }}" target="_blank" class="d-block border rounded-3 p-1 overflow-hidden hover-proof-image bg-white" style="height: 100px;">
+                                                        <img src="{{ asset($img) }}" class="w-100 h-100 rounded-2" style="object-fit: cover;">
                                                     </a>
                                                 </div>
                                             @endforeach

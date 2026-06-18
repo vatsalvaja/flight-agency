@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -38,7 +37,7 @@ class ProfileController extends Controller
 
         if ($request->hasFile('profile_photo')) {
             if ($user->profile_photo) {
-                Storage::disk('public')->delete($user->profile_photo);
+                $this->deletePublicUpload($user->profile_photo);
             }
             $path = $this->storePublicUpload($request->file('profile_photo'), 'profiles');
             $validated['profile_photo'] = $path;

@@ -11,7 +11,7 @@
             <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
                 <div class="d-flex align-items-center">
                     @if(isset($loggedUser) && $loggedUser->profile_photo)
-                        <img src="{{ asset('storage/' . $loggedUser->profile_photo) }}" alt="driver photo" class="rounded-circle me-3 border border-2 border-primary" style="width: 46px; height: 46px; object-fit: cover;">
+                        <img src="{{ asset($loggedUser->profile_photo) }}" alt="driver photo" class="rounded-circle me-3 border border-2 border-primary" style="width: 46px; height: 46px; object-fit: cover;">
                     @elseif(isset($loggedUser))
                         <div class="avatar-text bg-soft-primary text-primary rounded-circle me-3 d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 46px; height: 46px; font-weight: 800; font-size: 15px;">
                             {{ $loggedUser->getInitials() }}
@@ -128,7 +128,7 @@
                                 <!-- Company Banner -->
                                 <div class="d-flex align-items-center mb-3 bg-light p-2.5 rounded-3 border border-gray-2">
                                     @if($assignment->company->logo)
-                                        <img src="{{ asset('storage/' . $assignment->company->logo) }}" alt="logo" class="rounded me-2.5" style="height: 30px; width: 30px; object-fit: cover;">
+                                        <img src="{{ asset($assignment->company->logo) }}" alt="logo" class="rounded me-2.5" style="height: 30px; width: 30px; object-fit: cover;">
                                     @else
                                         <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded me-2.5 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-weight: 700; font-size: 11px;">
                                             {{ substr($assignment->company->company_name, 0, 1) }}

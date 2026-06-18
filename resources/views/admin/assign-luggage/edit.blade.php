@@ -169,7 +169,7 @@
                                         @if($assignment->images && count($assignment->images) > 0)
                                             @foreach($assignment->images as $img)
                                                 <div class="position-relative border rounded p-1 d-inline-block bg-white shadow-sm existing-img-wrapper" data-path="{{ $img }}" style="width: 80px; height: 80px;">
-                                                    <img src="{{ asset('storage/' . $img) }}" class="w-100 h-100 rounded" style="object-fit: cover;">
+                                                    <img src="{{ asset($img) }}" class="w-100 h-100 rounded" style="object-fit: cover;">
                                                     <button type="button" class="btn-remove-existing position-absolute bg-danger text-white border-0 rounded-circle d-flex align-items-center justify-content-center" style="top: -5px; right: -5px; width: 20px; height: 20px; font-size: 12px; cursor: pointer;">
                                                         <i class="feather-x"></i>
                                                     </button>

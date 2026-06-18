@@ -71,7 +71,7 @@
                                     @if($setting->application_logo)
                                         <div class="mt-3 position-relative d-inline-block p-2 border rounded bg-light text-center" style="max-width: 250px;">
                                             <div class="fs-12 text-muted mb-2">Current Logo:</div>
-                                            <img src="{{ asset('storage/' . $setting->application_logo) }}" alt="Logo Preview" class="img-fluid rounded" style="max-height: 50px;">
+                                            <img src="{{ asset($setting->application_logo) }}" alt="Logo Preview" class="img-fluid rounded" style="max-height: 50px;">
                                             <button type="button"
                                                 class="btn-remove-asset position-absolute bg-danger text-white border-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm"
                                                 style="top: -8px; right: -8px; width: 22px; height: 22px; font-size: 12px; cursor: pointer;"
@@ -97,7 +97,7 @@
                                     @if($setting->favicon)
                                         <div class="mt-3 position-relative d-inline-block p-2 border rounded bg-light text-center" style="max-width: 150px;">
                                             <div class="fs-12 text-muted mb-2">Current Favicon:</div>
-                                            <img src="{{ asset('storage/' . $setting->favicon) }}" alt="Favicon Preview" class="img-fluid rounded" style="max-height: 32px; width: 32px;">
+                                            <img src="{{ asset($setting->favicon) }}" alt="Favicon Preview" class="img-fluid rounded" style="max-height: 32px; width: 32px;">
                                             <button type="button"
                                                 class="btn-remove-asset position-absolute bg-danger text-white border-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm"
                                                 style="top: -8px; right: -8px; width: 22px; height: 22px; font-size: 12px; cursor: pointer;"

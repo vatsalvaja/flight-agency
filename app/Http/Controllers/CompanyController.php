@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
 {
@@ -86,7 +85,7 @@ class CompanyController extends Controller
         if ($request->hasFile('logo')) {
             // Delete old logo if it exists
             if ($company->logo) {
-                Storage::disk('public')->delete($company->logo);
+                $this->deletePublicUpload($company->logo);
             }
             $path = $this->storePublicUpload($request->file('logo'), 'companies');
             $validated['logo'] = $path;
@@ -103,7 +102,7 @@ class CompanyController extends Controller
     public function destroy(Company $company)
     {
         if ($company->logo) {
-            Storage::disk('public')->delete($company->logo);
+            $this->deletePublicUpload($company->logo);
         }
         $company->delete();
 

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
@@ -36,7 +35,7 @@ class SettingsController extends Controller
 
         if ($request->hasFile('application_logo')) {
             if ($setting->application_logo) {
-                Storage::disk('public')->delete($setting->application_logo);
+                $this->deletePublicUpload($setting->application_logo);
             }
             $path = $this->storePublicUpload($request->file('application_logo'), 'settings');
             $validated['application_logo'] = $path;
@@ -44,7 +43,7 @@ class SettingsController extends Controller
 
         if ($request->hasFile('favicon')) {
             if ($setting->favicon) {
-                Storage::disk('public')->delete($setting->favicon);
+                $this->deletePublicUpload($setting->favicon);
             }
             $path = $this->storePublicUpload($request->file('favicon'), 'settings');
             $validated['favicon'] = $path;
@@ -65,7 +64,7 @@ class SettingsController extends Controller
         ]);
 
         if ($setting->application_logo) {
-            Storage::disk('public')->delete($setting->application_logo);
+            $this->deletePublicUpload($setting->application_logo);
             $setting->update(['application_logo' => null]);
         }
 
@@ -82,7 +81,7 @@ class SettingsController extends Controller
         ]);
 
         if ($setting->favicon) {
-            Storage::disk('public')->delete($setting->favicon);
+            $this->deletePublicUpload($setting->favicon);
             $setting->update(['favicon' => null]);
         }
 

@@ -147,7 +147,7 @@
                                     <td class="ps-4">
                                         <div class="d-flex align-items-center">
                                             @if($assignment->driver && $assignment->driver->profile_photo)
-                                                <img src="{{ asset('storage/' . $assignment->driver->profile_photo) }}" alt="driver avatar" class="rounded-circle me-3 border border-2 border-primary" style="width: 38px; height: 38px; object-fit: cover;">
+                                                <img src="{{ asset($assignment->driver->profile_photo) }}" alt="driver avatar" class="rounded-circle me-3 border border-2 border-primary" style="width: 38px; height: 38px; object-fit: cover;">
                                             @elseif($assignment->driver)
                                                 <div class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle me-3 d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 38px; height: 38px; font-weight: 700; font-size: 13px;">
                                                     {{ $assignment->driver->getInitials() }}
@@ -168,7 +168,7 @@
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             @if($assignment->company->logo)
-                                                <img src="{{ asset('storage/' . $assignment->company->logo) }}" alt="airline logo" class="rounded border p-0.5" style="width: 26px; height: 26px; object-fit: cover;">
+                                                <img src="{{ asset($assignment->company->logo) }}" alt="airline logo" class="rounded border p-0.5" style="width: 26px; height: 26px; object-fit: cover;">
                                             @else
                                                 <div class="bg-soft-primary text-primary rounded d-flex align-items-center justify-content-center border" style="width: 26px; height: 26px; font-size: 9px; font-weight: 800;">
                                                     {{ substr($assignment->company->company_name, 0, 1) }}
@@ -242,12 +242,12 @@
                                                     <div class="d-flex -space-x-8 hover-proof-container">
                                                         @foreach($assignment->delivery_proof_images as $idx => $img)
                                                             <a href="javascript:void(0);" 
-                                                               onclick="showProofImage('{{ asset('storage/' . $img) }}', 'Order #ORD-{{ str_pad($assignment->id, 5, '0', STR_PAD_LEFT) }} Proof Photo {{ $idx + 1 }}')"
+                                                               onclick="showProofImage('{{ asset($img) }}', 'Order #ORD-{{ str_pad($assignment->id, 5, '0', STR_PAD_LEFT) }} Proof Photo {{ $idx + 1 }}')"
                                                                data-bs-toggle="modal" 
                                                                data-bs-target="#proofImageModal"
                                                                class="proof-thumb-link rounded border shadow-sm p-0.5 bg-white overflow-hidden" 
                                                                style="width: 38px; height: 38px; margin-left: {{ $idx > 0 ? '-14px' : '0' }}; z-index: {{ 10 - $idx }};">
-                                                                <img src="{{ asset('storage/' . $img) }}" class="w-100 h-100 rounded" style="object-fit: cover;">
+                                                                <img src="{{ asset($img) }}" class="w-100 h-100 rounded" style="object-fit: cover;">
                                                             </a>
                                                         @endforeach
                                                     </div>

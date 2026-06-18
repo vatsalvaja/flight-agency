@@ -106,7 +106,7 @@
                                         <div class="fs-12 text-muted mb-2">Photo Preview:</div>
                                         <div id="imagePreviewContainer" class="d-flex justify-content-center align-items-center">
                                             @if($user->profile_photo)
-                                                <img id="imagePreview" src="{{ asset('storage/' . $user->profile_photo) }}" alt="Profile Photo" class="rounded-circle shadow-sm" style="height: 100px; width: 100px; object-fit: cover;">
+                                                <img id="imagePreview" src="{{ asset($user->profile_photo) }}" alt="Profile Photo" class="rounded-circle shadow-sm" style="height: 100px; width: 100px; object-fit: cover;">
                                             @else
                                                 <div id="initialsAvatar" class="avatar-text bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px; font-weight: 700; font-size: 32px;">
                                                     {{ $user->getInitials() }}

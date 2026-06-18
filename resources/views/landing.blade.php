@@ -7,7 +7,7 @@
     
     <!-- Favicon -->
     @if($appSettings->favicon)
-        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('storage/' . $appSettings->favicon) }}" />
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset($appSettings->favicon) }}" />
     @else
         <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/images/favicon.ico') }}" />
     @endif
@@ -302,7 +302,7 @@
                     <!-- Branding Block inside Card -->
                     <div class="card-brand-block">
                         @if($appSettings->application_logo)
-                            <img class="wings-logo" src="{{ asset('storage/' . $appSettings->application_logo) }}" alt="{{ $appSettings->application_name }}" style="max-height: 64px; max-width: 100%; object-fit: contain;">
+                            <img class="wings-logo" src="{{ asset($appSettings->application_logo) }}" alt="{{ $appSettings->application_name }}" style="max-height: 64px; max-width: 100%; object-fit: contain;">
                         @else
                             <svg class="wings-logo" width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <defs>

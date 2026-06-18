@@ -75,7 +75,7 @@
                                             <td class="ps-4">
                                                 <div class="d-flex align-items-center">
                                                     @if($assignment->company->logo)
-                                                        <img src="{{ asset('storage/' . $assignment->company->logo) }}" alt="logo" class="rounded me-2" style="height: 28px; width: 28px; object-fit: cover;">
+                                                        <img src="{{ asset($assignment->company->logo) }}" alt="logo" class="rounded me-2" style="height: 28px; width: 28px; object-fit: cover;">
                                                     @else
                                                         <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded me-2 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-weight: 700; font-size: 11px;">
                                                             {{ substr($assignment->company->company_name, 0, 1) }}
@@ -88,7 +88,7 @@
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     @if($assignment->driver->profile_photo)
-                                                        <img src="{{ asset('storage/' . $assignment->driver->profile_photo) }}" alt="avatar" class="rounded-circle me-2" style="height: 28px; width: 28px; object-fit: cover;">
+                                                        <img src="{{ asset($assignment->driver->profile_photo) }}" alt="avatar" class="rounded-circle me-2" style="height: 28px; width: 28px; object-fit: cover;">
                                                     @else
                                                         <div class="avatar-text avatar-sm bg-soft-info text-info rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-weight: 700; font-size: 11px;">
                                                             {{ $assignment->driver->getInitials() }}

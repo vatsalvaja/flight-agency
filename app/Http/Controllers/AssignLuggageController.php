@@ -10,7 +10,6 @@ use App\Models\User;
 use App\Http\Requests\StoreAssignLuggageRequest;
 use App\Http\Requests\UpdateAssignLuggageRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class AssignLuggageController extends Controller
 {
@@ -142,7 +141,7 @@ class AssignLuggageController extends Controller
         // Delete removed files from disk
         $deletedImages = array_diff($existingImages, $retainedImages);
         foreach ($deletedImages as $img) {
-            Storage::disk('public')->delete($img);
+            $this->deletePublicUpload($img);
         }
 
         // Upload any new images
@@ -171,7 +170,7 @@ class AssignLuggageController extends Controller
         $images = $assignment->images ?? [];
         
         foreach ($images as $img) {
-            Storage::disk('public')->delete($img);
+            $this->deletePublicUpload($img);
         }
 
         $assignment->delete();

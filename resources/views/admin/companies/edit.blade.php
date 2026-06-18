@@ -118,7 +118,7 @@
                                     @if($company->logo)
                                         <div class="mt-3 p-2 border rounded bg-light d-inline-block" style="max-width: 150px;">
                                             <div class="fs-11 text-muted mb-1">Current Logo:</div>
-                                            <img src="{{ asset('storage/' . $company->logo) }}" alt="Logo" class="img-fluid rounded" style="max-height: 48px;">
+                                            <img src="{{ asset($company->logo) }}" alt="Logo" class="img-fluid rounded" style="max-height: 48px;">
                                         </div>
                                     @endif
                                 </div>

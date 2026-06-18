@@ -59,7 +59,7 @@
                                         <tr>
                                             <td class="ps-4">
                                                 @if($company->logo)
-                                                    <img src="{{ asset('storage/' . $company->logo) }}" alt="logo" class="rounded" style="height: 36px; width: 36px; object-fit: cover;">
+                                                    <img src="{{ asset($company->logo) }}" alt="logo" class="rounded" style="height: 36px; width: 36px; object-fit: cover;">
                                                 @else
                                                     <div class="avatar-text avatar-sm bg-soft-secondary text-secondary rounded d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
                                                         {{ substr($company->company_name, 0, 1) }}

@@ -36,7 +36,7 @@
                 <div class="card stretch stretch-full h-100">
                     <div class="card-body text-center d-flex flex-column align-items-center justify-content-center py-5">
                         @if($company->logo)
-                            <img src="{{ asset('storage/' . $company->logo) }}" alt="Logo" class="img-fluid rounded mb-4 shadow-sm" style="max-height: 120px; object-fit: contain;">
+                            <img src="{{ asset($company->logo) }}" alt="Logo" class="img-fluid rounded mb-4 shadow-sm" style="max-height: 120px; object-fit: contain;">
                         @else
                             <div class="avatar-text avatar-xl bg-soft-primary text-primary rounded mb-4 d-flex align-items-center justify-content-center fs-1" style="width: 100px; height: 100px; background-color: rgba(59, 130, 246, 0.1);">
                                 {{ substr($company->company_name, 0, 1) }}
