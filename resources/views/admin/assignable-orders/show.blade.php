@@ -485,7 +485,9 @@ function openGoogleMapsDirections() {
         url += '&origin=' + encodeURIComponent(PICKUP_ADDR);
     }
     
-    window.open(url, '_blank');
+    // window.open(url, '_blank');
+    window.location.href = url;
+    
 }
 
 /**
