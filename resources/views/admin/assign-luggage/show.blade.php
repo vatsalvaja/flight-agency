@@ -3,14 +3,14 @@
 @section('title', 'Assignment Details || ' . ($appSettings->application_name ?? 'Wings'))
 
 @section('content')
-<div class="nxl-content">
+<div class="nxl-content assign-luggage-show">
     <!-- [ page-header ] start -->
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
             <div class="page-header-title">
                 <h5 class="m-b-10">Assign Luggage</h5>
             </div>
-            <ul class="breadcrumb">
+            <ul class="breadcrumb d-none d-md-flex">
                 <li class="breadcrumb-item"><a href="{{ url('/admin') }}">Home</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('assign-luggage.index') }}">Assign Luggage</a></li>
                 <li class="breadcrumb-item">Assignment Details</li>

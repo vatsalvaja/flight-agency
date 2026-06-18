@@ -10,7 +10,7 @@
             <div class="page-header-title">
                 <h5 class="m-b-10">Assign Luggage</h5>
             </div>
-            <ul class="breadcrumb">
+            <ul class="breadcrumb d-none d-md-flex">
                 <li class="breadcrumb-item"><a href="{{ url('/admin') }}">Home</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('assign-luggage.index') }}">Assign Luggage</a></li>
                 <li class="breadcrumb-item">New Assignment</li>
