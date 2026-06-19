@@ -28,10 +28,10 @@
     <meta name="author" content="maryinparis" />
     <!--! The above 6 meta tags *must* come first in the head; any other head content must come *after* these tags !-->
     <!--! BEGIN: Apps Title-->
-    <title>@yield('title', $appSettings->application_name . ' || Dashboard')</title>
+    <title>@yield('title', isset($appSettings->application_name) ? $appSettings->application_name . ' || Dashboard' : ' || Dashboard')</title>
     <!--! END:  Apps Title-->
     <!--! BEGIN: Favicon-->
-    @if($appSettings->favicon)
+    @if(isset($appSettings->favicon) && !empty($appSettings->favicon))
         <link rel="shortcut icon" type="image/x-icon" href="{{ asset($appSettings->favicon) }}" />
     @else
         <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/images/favicon.ico') }}" />
@@ -84,16 +84,16 @@
         <div class="navbar-wrapper">
             <div class="m-header">
                 <a href="{{ url('/admin') }}" class="b-brand">
-                    @if($appSettings->application_logo)
+                    @if(isset($appSettings->application_logo) && !empty($appSettings->application_logo))
                         <img src="{{ asset($appSettings->application_logo) }}" alt="{{ $appSettings->application_name }}" class="logo logo-lg" style="max-height: 42px; max-width: 145px; object-fit: contain; -webkit-text-fill-color: initial; background: transparent;">
                     @else
-                        <span class="logo logo-lg fw-bolder fs-3 text-dark">{{ $appSettings->application_name }}</span>
+                        <span class="logo logo-lg fw-bolder fs-3 text-dark">{{ isset($appSettings->application_name) ? $appSettings->application_name : 'Dashboard' }}</span>
                     @endif
 
-                    @if($appSettings->favicon)
+                    @if(isset($appSettings->favicon) && !empty($appSettings->favicon))
                         <img src="{{ asset($appSettings->favicon) }}" alt="{{ $appSettings->application_name }}" class="logo logo-sm" style="max-height: 30px; max-width: 30px; object-fit: contain; -webkit-text-fill-color: initial; background: transparent;">
                     @else
-                        <span class="logo logo-sm fw-bolder fs-4 text-dark">{{ substr($appSettings->application_name, 0, 1) }}</span>
+                        <span class="logo logo-sm fw-bolder fs-4 text-dark">{{ isset($appSettings->application_name) ? substr($appSettings->application_name, 0, 1) : 'D' }}</span>
                     @endif
                 </a>
             </div>
@@ -320,7 +320,7 @@
                 <script>
                     document.write(new Date().getFullYear());
                 </script>
-                <span>{{ $appSettings->application_name }}</span>
+                <span>{{ isset($appSettings->application_name) ? $appSettings->application_name : 'Dashboard' }}</span>
             </p>
             <div class="d-flex align-items-center gap-4">
                 <a href="javascript:void(0);" class="fs-11 fw-semibold text-uppercase">Help</a>
