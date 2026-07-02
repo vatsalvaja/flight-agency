@@ -547,6 +547,8 @@
 @endpush
 
 @push('scripts')
+<script src="{{ asset('assets/vendors/js/apexcharts.min.js') }}"></script>
+<script src="{{ asset('assets/vendors/js/circle-progress.min.js') }}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // 1. Stacked Spline Area Chart: Scoped Outbound Shipping Trend for last 15 days

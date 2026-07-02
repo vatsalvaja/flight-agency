@@ -1,4 +1,4 @@
-<div id="wings-global-loader" class="wings-loader-overlay active">
+<div id="wings-global-loader" class="wings-loader-overlay">
     <div class="wings-loader-card">
         <div class="wings-airplane-animation">
             <svg class="wings-loader-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">

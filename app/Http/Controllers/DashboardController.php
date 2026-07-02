@@ -62,16 +62,15 @@ class DashboardController extends Controller
         $totalDistance = round((clone $baseQuery)->sum('distance_km'), 2);
 
         // Average delivery speed/time logic
-        $deliveredOrders = (clone $baseQuery)->where('status', 'Delivered')
-            ->whereNotNull('delivered_at')
-            ->get();
-        $avgTimeHours = 0;
-        if ($deliveredOrders->count() > 0) {
-            $totalMinutes = 0;
-            foreach ($deliveredOrders as $order) {
-                $totalMinutes += $order->created_at->diffInMinutes($order->delivered_at);
-            }
-            $avgTimeHours = round(($totalMinutes / $deliveredOrders->count()) / 60, 1);
+        $avgQuery = (clone $baseQuery)->where('status', 'Delivered')
+            ->whereNotNull('delivered_at');
+
+        if (DB::getDriverName() === 'sqlite') {
+            $avgTimeHours = $avgQuery->selectRaw('ROUND(AVG(strftime("%s", delivered_at) - strftime("%s", created_at)) / 3600, 1) as avg_hours')
+                ->value('avg_hours') ?? 0;
+        } else {
+            $avgTimeHours = $avgQuery->selectRaw('ROUND(AVG(TIMESTAMPDIFF(SECOND, created_at, delivered_at)) / 3600, 1) as avg_hours')
+                ->value('avg_hours') ?? 0;
         }
 
         // Recent luggage assignments list

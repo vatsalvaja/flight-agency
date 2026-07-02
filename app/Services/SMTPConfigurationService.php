@@ -108,8 +108,8 @@ class SMTPConfigurationService
                 return;
             }
 
-            // Send Email
-            Mail::to($driver->email)->send(new OrderAssignedMail($assignment));
+            // Send Email (Queued asynchronously)
+            Mail::to($driver->email)->queue(new OrderAssignedMail($assignment));
 
             Log::info('SMTP Configuration: Mail sent successfully to driver.', [
                 'recipient' => $driver->email,

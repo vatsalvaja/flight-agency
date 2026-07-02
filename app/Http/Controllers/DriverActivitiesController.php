@@ -75,13 +75,12 @@ class DriverActivitiesController extends Controller
         if ($isManager) {
             $statsQuery->where('created_by', $userId);
         }
-        $allStats = $statsQuery->get();
 
         $kpis = [
-            'total' => $allStats->count(),
-            'transit' => $allStats->where('status', 'In Progress')->count(),
-            'pickup' => $allStats->where('status', 'Pickup')->count(),
-            'delivered' => $allStats->where('status', 'Delivered')->count(),
+            'total' => (clone $statsQuery)->count(),
+            'transit' => (clone $statsQuery)->where('status', 'In Progress')->count(),
+            'pickup' => (clone $statsQuery)->where('status', 'Pickup')->count(),
+            'delivered' => (clone $statsQuery)->where('status', 'Delivered')->count(),
         ];
 
         // Fetch paginated assignments list

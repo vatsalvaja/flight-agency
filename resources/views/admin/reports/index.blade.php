@@ -847,6 +847,7 @@
 @endsection
 
 @push('head')
+<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/daterangepicker.min.css') }}" />
 <!-- Include Select2 CSS inside Head stack -->
 <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/select2.min.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/select2-theme.min.css') }}">
@@ -1019,6 +1020,8 @@
 @endpush
 
 @push('scripts')
+<script src="{{ asset('assets/vendors/js/daterangepicker.min.js') }}"></script>
+<script src="{{ asset('assets/vendors/js/apexcharts.min.js') }}"></script>
 <!-- Include Select2 JS script -->
 <script src="{{ asset('assets/vendors/js/select2.min.js') }}"></script>
 

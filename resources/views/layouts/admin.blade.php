@@ -42,24 +42,6 @@
     <!--! END: Bootstrap CSS-->
     <!--! BEGIN: Vendors CSS-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/vendors.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/daterangepicker.min.css') }}" />
-	
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/jquery-jvectormap.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/select2.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/select2-theme.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/jquery.time-to.min.css') }}">	
-	
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/tagify.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/tagify-data.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/quill.min.css') }}">
-    <link type="text/css" rel="stylesheet" href="{{ asset('assets/vendors/css/tui-calendar.min.css') }}">
-    <link type="text/css" rel="stylesheet" href="{{ asset('assets/vendors/css/tui-theme.min.css') }}">
-    <link type="text/css" rel="stylesheet" href="{{ asset('assets/vendors/css/tui-time-picker.min.css') }}">
-    <link type="text/css" rel="stylesheet" href="{{ asset('assets/vendors/css/tui-date-picker.min.css') }}">
-	<link type="text/css" rel="stylesheet" href="{{ asset('assets/vendors/css/emojionearea.min.css') }}">	
-	<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/jquery.time-to.min.css') }}">
-	
-	<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/dataTables.bs5.min.css') }}">	
     <!--! END: Vendors CSS-->
     <!--! BEGIN: Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/theme.min.css') }}" />
@@ -351,10 +333,6 @@
     <!--! BEGIN: Vendors JS !-->
     <script src="{{ asset('assets/vendors/js/vendors.min.js') }}"></script>
     <!-- vendors.min.js {always must need to be top} -->
-    <script src="{{ asset('assets/vendors/js/daterangepicker.min.js') }}"></script>	
-    <script src="{{ asset('assets/vendors/js/apexcharts.min.js') }}"></script>	
-    <script src="{{ asset('assets/vendors/js/circle-progress.min.js') }}"></script>
-	<script src="{{ asset('assets/vendors/js/jquery.time-to.min.js') }}"></script>
     <!--! END: Vendors JS !-->
     <!--! BEGIN: Apps Init  !-->
     <script src="{{ asset('assets/js/common-init.min.js') }}"></script>

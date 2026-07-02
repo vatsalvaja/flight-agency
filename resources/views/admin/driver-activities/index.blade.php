@@ -578,6 +578,11 @@ html.app-skin-dark .table-stepper-label {
 </style>
 @endsection
 
+@push('head')
+<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/select2.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendors/css/select2-theme.min.css') }}">
+@endpush
+
 @push('scripts')
 <!-- Include Select2 JS script -->
 <script src="{{ asset('assets/vendors/js/select2.min.js') }}"></script>

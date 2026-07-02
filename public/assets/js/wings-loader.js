@@ -29,6 +29,7 @@
     let activeAjaxCount = 0;
     let ajaxTimeoutId = null;
     let failsafeTimeoutId = null;
+    let navClickTimeoutId = null;
 
     // Initialize DOM references
     function initLoaderDOM() {
@@ -134,8 +135,11 @@
         // Ignore external hosts
         if (link.host !== window.location.host) return;
 
-        // Activate loader!
-        showAppLoader(DEFAULT_NAV_TEXT);
+        // Debounce showing the loader (wait 250ms to prevent flashes on fast responses)
+        if (navClickTimeoutId) clearTimeout(navClickTimeoutId);
+        navClickTimeoutId = setTimeout(function() {
+            showAppLoader(DEFAULT_NAV_TEXT);
+        }, 250);
     });
 
     // ==========================================================================
@@ -157,6 +161,10 @@
     // 3. Browser Back/Forward Cache (bfcache) Restoration and Page Load Handlers
     // ==========================================================================
     window.addEventListener('pageshow', function(event) {
+        if (navClickTimeoutId) {
+            clearTimeout(navClickTimeoutId);
+            navClickTimeoutId = null;
+        }
         // If the page was loaded from history cache, make sure loader is hidden
         hideAppLoader();
     });
@@ -166,18 +174,35 @@
         stopFailsafe();
     });
 
-    // Automatically hide the pre-activated loader when the page has fully loaded
+    // Set a debounced initial page load timer (e.g. 200ms)
+    // If the page loads faster than 200ms, the loader is not shown
+    const initialLoadTimeoutId = setTimeout(function() {
+        if (document.readyState !== 'complete') {
+            showAppLoader(DEFAULT_NAV_TEXT);
+        }
+    }, 200);
+
+    // Automatically hide the loader when the page has fully loaded
     if (document.readyState === 'complete') {
+        clearTimeout(initialLoadTimeoutId);
         hideAppLoader();
     } else {
         window.addEventListener('load', function() {
+            clearTimeout(initialLoadTimeoutId);
+            if (navClickTimeoutId) {
+                clearTimeout(navClickTimeoutId);
+                navClickTimeoutId = null;
+            }
             hideAppLoader();
         });
     }
 
     // ==========================================================================
-    // 4. AJAX & Fetch Global Interception (with Debounce)
+    // 4. AJAX & Fetch Global Interception (with Debounce) - DISABLED
+    // (Disabled to prevent fullscreen loader flashes on background AJAX requests,
+    // which leads to poor UX and double/triple loader triggers)
     // ==========================================================================
+    /*
     function incrementAjax() {
         activeAjaxCount++;
         if (activeAjaxCount === 1) {
@@ -271,5 +296,6 @@
         
         return origSend.apply(this, arguments);
     };
+    */
 
 })();
