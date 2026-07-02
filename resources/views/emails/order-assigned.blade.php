@@ -172,14 +172,6 @@
                     <!-- Footer (Dark Slate) -->
                     <tr>
                         <td style="background-color: #0f172a; padding: 40px; color: #94a3b8; font-size: 13px; line-height: 1.6; text-align: center;">
-                            <p style="margin: 0; color: #ffffff; font-weight: 600; font-size: 14px;">Wings & Wheels Logistics</p>
-                            <p style="margin: 5px 0 20px 0; color: #64748b;">Premium Flight Aviation and Baggage Services</p>
-                            
-                            <p style="margin: 0 0 5px 0;">Support Email: <a href="mailto:{{ config('mail.from.address') }}" style="color: #38bdf8; text-decoration: none;">{{ config('mail.from.address') }}</a></p>
-                            <p style="margin: 0 0 25px 0;">Website: <a href="{{ url('/') }}" style="color: #38bdf8; text-decoration: none;">{{ url('/') }}</a></p>
-                            
-                            <hr style="border: 0; border-top: 1px solid #1e293b; margin: 20px 0;">
-                            
                             <p style="margin: 0;">&copy; {{ date('Y') }} {{ $appSettings->application_name ?? 'Wings & Wheels' }}. All rights reserved.</p>
                         </td>
                     </tr>
