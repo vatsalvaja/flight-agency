@@ -9,7 +9,9 @@ use App\Models\Role;
 use App\Models\User;
 use App\Http\Requests\StoreAssignLuggageRequest;
 use App\Http\Requests\UpdateAssignLuggageRequest;
+use App\Services\SMTPConfigurationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AssignLuggageController extends Controller
 {
@@ -85,7 +87,17 @@ class AssignLuggageController extends Controller
         $data['created_by'] = session('user_id');
         $data['status'] = 'In Progress'; // Automatically set to In Progress on creation
 
-        AssignLuggage::create($data);
+        $assignment = AssignLuggage::create($data);
+
+        // Database Assignment Successful -> WhatsApp Notification -> Email Notification
+        Log::info("WhatsApp Notification: Simulated successfully for assignment #{$assignment->id}");
+
+        try {
+            $assignment->load(['driver', 'creator', 'company', 'station']);
+            app(SMTPConfigurationService::class)->sendOrderAssignmentEmail($assignment);
+        } catch (\Exception $e) {
+            Log::error('SMTP Notification Error (store): ' . $e->getMessage());
+        }
 
         return redirect()->route('assign-luggage.index')->with('success', 'Luggage assignment created successfully.');
     }
@@ -157,6 +169,16 @@ class AssignLuggageController extends Controller
         $data['created_by'] = session('user_id');
 
         $assignment->update($data);
+
+        // Database Assignment Successful -> WhatsApp Notification -> Email Notification
+        Log::info("WhatsApp Notification: Simulated successfully for assignment #{$assignment->id}");
+
+        try {
+            $assignment->load(['driver', 'creator', 'company', 'station']);
+            app(SMTPConfigurationService::class)->sendOrderAssignmentEmail($assignment);
+        } catch (\Exception $e) {
+            Log::error('SMTP Notification Error (update): ' . $e->getMessage());
+        }
 
         return redirect()->route('assign-luggage.index')->with('success', 'Luggage assignment updated successfully.');
     }

@@ -189,11 +189,20 @@
                     @endif
 
                     @if($isAdmin)
-                    <li class="nxl-item {{ Request::routeIs('settings.*') ? 'active' : '' }}">
-                        <a href="{{ route('settings.edit') }}" class="nxl-link">
+                    <li class="nxl-item nxl-hasmenu {{ Request::routeIs('settings.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-settings"></i></span>
                             <span class="nxl-mtext">Settings</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item {{ Request::routeIs('settings.edit') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('settings.edit') }}">App Settings</a>
+                            </li>
+                            <li class="nxl-item {{ Request::routeIs('settings.smtp.edit') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('settings.smtp.edit') }}">SMTP Settings</a>
+                            </li>
+                        </ul>
                     </li>
                     @endif
                 </ul>

@@ -24,6 +24,8 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::get('settings/smtp', [SettingsController::class, 'smtpEdit'])->name('settings.smtp.edit');
+    Route::put('settings/smtp', [SettingsController::class, 'smtpUpdate'])->name('settings.smtp.update');
     Route::delete('settings/logo', [SettingsController::class, 'removeLogo'])->name('settings.logo.destroy');
     Route::delete('settings/favicon', [SettingsController::class, 'removeFavicon'])->name('settings.favicon.destroy');
     

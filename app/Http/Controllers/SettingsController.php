@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Models\SmtpSetting;
+use App\Services\SMTPConfigurationService;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
@@ -86,5 +88,38 @@ class SettingsController extends Controller
         }
 
         return redirect()->route('settings.edit')->with('success', 'Favicon removed successfully.');
+    }
+
+    /**
+     * Show the SMTP configuration settings form.
+     */
+    public function smtpEdit(SMTPConfigurationService $smtpService)
+    {
+        $settings = $smtpService->getDynamicSMTP();
+        return view('admin.settings.smtp', compact('settings'));
+    }
+
+    /**
+     * Update the SMTP settings in storage.
+     */
+    public function smtpUpdate(Request $request)
+    {
+        $validated = $request->validate([
+            'mail_host' => 'required|string|max:255',
+            'mail_port' => 'required|numeric',
+            'mail_username' => 'required|string|max:255',
+            'mail_password' => 'required|string|max:255',
+            'mail_encryption' => 'nullable|string|max:255',
+            'mail_charset' => 'nullable|string|max:255',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            SmtpSetting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $value]
+            );
+        }
+
+        return redirect()->route('settings.smtp.edit')->with('success', 'SMTP settings updated successfully.');
     }
 }
