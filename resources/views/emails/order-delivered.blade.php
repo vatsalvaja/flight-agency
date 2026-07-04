@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Order Assigned</title>
+    <title>Order Delivered</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         body {
@@ -61,8 +61,8 @@
                     <tr>
                         <td class="content-padding" style="padding: 40px 40px 0 40px;">
                             <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px 20px; border-radius: 8px;">
-                                <span style="color: #166534; font-size: 14px; font-weight: 600; display: block;">Notification Status: Assigned</span>
-                                <span style="color: #15803d; font-size: 13px; display: block; margin-top: 2px;">A new order assignment is ready for processing.</span>
+                                <span style="color: #166534; font-size: 14px; font-weight: 600; display: block;">Notification Status: Delivered</span>
+                                <span style="color: #15803d; font-size: 13px; display: block; margin-top: 2px;">The assigned driver has successfully completed and delivered the order.</span>
                             </div>
                         </td>
                     </tr>
@@ -70,26 +70,25 @@
                     <!-- Main Message -->
                     <tr>
                         <td class="content-padding" style="padding: 30px 40px 20px 40px;">
-                            <h2 style="margin: 0 0 10px 0; color: #0f172a; font-size: 20px; font-weight: 700; letter-spacing: -0.3px;">Hello, {{ $assignment->driver->name ?? 'Driver' }}!</h2>
-                            <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #475569;">You have been assigned a new delivery task. Please review the details below and proceed with the pickup schedule.</p>
+                            <h2 style="margin: 0 0 10px 0; color: #0f172a; font-size: 20px; font-weight: 700; letter-spacing: -0.3px;">Hello, {{ $assignment->creator->name ?? 'Manager' }}!</h2>
+                            <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #475569;">We are pleased to confirm that the assigned driver has successfully completed and delivered the assigned order.</p>
                         </td>
                     </tr>
 
-                    <!-- Delivery flow card (Modern look, no heavy grid borders) -->
+                    <!-- Delivery details card -->
                     <tr>
                         <td class="content-padding" style="padding: 10px 40px 20px 40px;">
                             <div style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 25px;">
-                                <h3 style="margin: 0 0 20px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">Assignment Overview</h3>
+                                <h3 style="margin: 0 0 20px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">Order Details</h3>
                                 
                                 <!-- Timeline flow (Pickup -> Drop) -->
                                 <div style="margin-bottom: 25px; border-left: 2px dashed #cbd5e1; padding-left: 20px; position: relative;">
                                     <div style="margin-bottom: 20px;">
                                         <span style="color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; display: block;">Pickup Location</span>
                                         <strong style="color: #0f172a; font-size: 15px; display: block; margin-top: 2px;">{{ $assignment->pickup_location }}</strong>
-                                        <span style="color: #94a3b8; font-size: 13px;">Date: {{ optional($assignment->expected_delivery_date)->format('M d, Y') ?? 'N/A' }}</span>
                                     </div>
                                     <div>
-                                        <span style="color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; display: block;">Drop Location</span>
+                                        <span style="color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; display: block;">Delivery Location (Destination)</span>
                                         <strong style="color: #0f172a; font-size: 15px; display: block; margin-top: 2px;">{{ $assignment->drop_location }}</strong>
                                     </div>
                                 </div>
@@ -101,21 +100,28 @@
                                     <tr>
                                         <td class="detail-row" width="50%" style="padding-bottom: 15px; vertical-align: top;">
                                             <span class="detail-label" style="font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; display: block;">Order ID</span>
-                                            <span style="font-size: 14px; color: #0f172a; font-weight: 600; display: block; margin-top: 2px;">#{{ $assignment->id }}</span>
+                                            <span style="font-size: 14px; color: #0f172a; font-weight: 600; display: block; margin-top: 2px;">#ORD-{{ str_pad($assignment->id, 5, '0', STR_PAD_LEFT) }}</span>
                                         </td>
                                         <td class="detail-row" width="50%" style="padding-bottom: 15px; vertical-align: top;">
-                                            <span class="detail-label" style="font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; display: block;">Flight Partner</span>
-                                            <span style="font-size: 14px; color: #0f172a; font-weight: 600; display: block; margin-top: 2px;">{{ $assignment->company->company_name ?? 'N/A' }}</span>
+                                            <span class="detail-label" style="font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; display: block;">Customer Name</span>
+                                            <span style="font-size: 14px; color: #0f172a; font-weight: 600; display: block; margin-top: 2px;">
+                                                {{ $assignment->company->company_name ?? 'N/A' }}
+                                                @if(isset($assignment->company->contact_person) && !empty($assignment->company->contact_person))
+                                                    ({{ $assignment->company->contact_person }})
+                                                @endif
+                                            </span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="detail-row" style="padding-bottom: 15px; vertical-align: top;">
-                                            <span class="detail-label" style="font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; display: block;">Assigned By</span>
-                                            <span style="font-size: 14px; color: #0f172a; font-weight: 500; display: block; margin-top: 2px;">{{ $assignment->creator->name ?? 'N/A' }}</span>
+                                            <span class="detail-label" style="font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; display: block;">Driver's Name</span>
+                                            <span style="font-size: 14px; color: #0f172a; font-weight: 500; display: block; margin-top: 2px;">{{ $assignment->driver->name ?? 'N/A' }}</span>
                                         </td>
                                         <td class="detail-row" style="padding-bottom: 15px; vertical-align: top;">
-                                            <span class="detail-label" style="font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; display: block;">Distance Estimate</span>
-                                            <span style="font-size: 14px; color: #0f172a; font-weight: 500; display: block; margin-top: 2px;">{{ $assignment->distance_km ? $assignment->distance_km . ' km' : 'N/A' }}</span>
+                                            <span class="detail-label" style="font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; display: block;">Delivery Date & Time</span>
+                                            <span style="font-size: 14px; color: #0f172a; font-weight: 500; display: block; margin-top: 2px;">
+                                                {{ $assignment->delivered_at ? $assignment->delivered_at->format('M d, Y h:i A') : \Carbon\Carbon::now()->format('M d, Y h:i A') }}
+                                            </span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -124,8 +130,8 @@
                                             <span style="font-size: 14px; color: #0f172a; font-weight: 500; display: block; margin-top: 2px;">{{ $assignment->driver->phone ?? 'N/A' }}</span>
                                         </td>
                                         <td class="detail-row" style="vertical-align: top;">
-                                            <span class="detail-label" style="font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; display: block;">Delivery Status</span>
-                                            <span style="font-size: 12px; background-color: #e0f2fe; color: #0369a1; font-weight: 600; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 2px;">{{ $assignment->status }}</span>
+                                            <span class="detail-label" style="font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; display: block;">Status Badge</span>
+                                            <span style="font-size: 12px; background-color: #d1fae5; color: #065f46; font-weight: 600; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 2px; text-transform: uppercase;">Delivered</span>
                                         </td>
                                     </tr>
                                 </table>
@@ -133,33 +139,21 @@
                         </td>
                     </tr>
 
-                    <!-- Special Notes Section -->
-                    @if($assignment->notes)
-                    <tr>
-                        <td class="content-padding" style="padding: 10px 40px 10px 40px;">
-                            <div style="background-color: #fefcf0; border: 1px solid #fef3c7; border-radius: 8px; padding: 15px 20px;">
-                                <span style="font-size: 12px; color: #b45309; font-weight: 600; text-transform: uppercase; display: block;">Special Instructions</span>
-                                <p style="margin: 5px 0 0 0; font-size: 14px; color: #78350f; font-style: italic; line-height: 1.5;">&ldquo;{{ $assignment->notes }}&rdquo;</p>
-                            </div>
-                        </td>
-                    </tr>
-                    @endif
-
-                    <!-- Luggage Images Section (New & User-requested) -->
-                    @if(!empty($assignment->images) && is_array($assignment->images))
+                    <!-- Delivery Proof Photos Grid (Inline Embedded) -->
+                    @if(!empty($assignment->delivery_proof_images) && is_array($assignment->delivery_proof_images))
                     <tr>
                         <td class="content-padding" style="padding: 20px 40px 10px 40px;">
-                            <h3 style="margin: 0 0 15px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">Uploaded Luggage Photos</h3>
+                            <h3 style="margin: 0 0 15px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">Delivery Proof Photos</h3>
                             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td>
                                         <table border="0" cellpadding="0" cellspacing="5" width="100%">
                                             <tr>
-                                                @foreach($assignment->images as $index => $image)
+                                                @foreach($assignment->delivery_proof_images as $index => $image)
                                                     @if(file_exists(public_path($image)))
                                                         <td class="image-col" width="33.3%" align="center" style="vertical-align: top;">
                                                             <div class="image-box" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #f8fafc;">
-                                                                <img src="{{ $message->embed(public_path($image)) }}" alt="Luggage Photo {{ $index + 1 }}" style="width: 100%; height: 120px; object-fit: cover; display: block;">
+                                                                <img src="{{ $message->embed(public_path($image)) }}" alt="Proof Photo {{ $index + 1 }}" style="width: 100%; height: 120px; object-fit: cover; display: block;">
                                                             </div>
                                                         </td>
                                                     @endif
@@ -169,6 +163,18 @@
                                     </td>
                                 </tr>
                             </table>
+                        </td>
+                    </tr>
+                    @endif
+
+                    <!-- Special Notes Section -->
+                    @if($assignment->notes)
+                    <tr>
+                        <td class="content-padding" style="padding: 10px 40px 10px 40px;">
+                            <div style="background-color: #fefcf0; border: 1px solid #fef3c7; border-radius: 8px; padding: 15px 20px;">
+                                <span style="font-size: 12px; color: #b45309; font-weight: 600; text-transform: uppercase; display: block;">Special Instructions</span>
+                                <p style="margin: 5px 0 0 0; font-size: 14px; color: #78350f; font-style: italic; line-height: 1.5;">&ldquo;{{ $assignment->notes }}&rdquo;</p>
+                            </div>
                         </td>
                     </tr>
                     @endif

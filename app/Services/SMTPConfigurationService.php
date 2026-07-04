@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\SmtpSetting;
 use App\Models\AssignLuggage;
 use App\Mail\OrderAssignedMail;
+use App\Mail\OrderPickedUpMail;
+use App\Mail\OrderDeliveredMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -120,6 +122,92 @@ class SMTPConfigurationService
         } catch (\Exception $e) {
             Log::error('SMTP Configuration: Mail sending failed.', [
                 'recipient' => $driver->email,
+                'assignment_id' => $assignment->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+    }
+
+    /**
+     * Send Order Picked Up Email to the manager who assigned the order.
+     */
+    public function sendOrderPickedUpEmail(AssignLuggage $assignment): void
+    {
+        $creator = $assignment->creator;
+        if (!$creator || empty($creator->email)) {
+            Log::warning('SMTP Configuration: Creator manager does not have a valid email. Skipping email sending.');
+            return;
+        }
+
+        try {
+            Log::info('SMTP Configuration: Starting email sending process (Picked Up).', [
+                'recipient' => $creator->email,
+                'assignment_id' => $assignment->id,
+            ]);
+
+            // Configure SMTP at runtime
+            $configured = $this->configureMail();
+            if (!$configured) {
+                Log::warning('SMTP Configuration: Dynamic mail configuration failed. Skipping email sending.');
+                return;
+            }
+
+            // Send Email (Synchronously)
+            Mail::to($creator->email)->send(new OrderPickedUpMail($assignment));
+
+            Log::info('SMTP Configuration: Mail sent successfully to manager (Picked Up).', [
+                'recipient' => $creator->email,
+                'subject' => 'Order Picked Up',
+                'assignment_id' => $assignment->id,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('SMTP Configuration: Mail sending failed (Picked Up).', [
+                'recipient' => $creator->email,
+                'assignment_id' => $assignment->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+    }
+
+    /**
+     * Send Order Delivered Email to the manager who assigned the order.
+     */
+    public function sendOrderDeliveredEmail(AssignLuggage $assignment): void
+    {
+        $creator = $assignment->creator;
+        if (!$creator || empty($creator->email)) {
+            Log::warning('SMTP Configuration: Creator manager does not have a valid email. Skipping email sending.');
+            return;
+        }
+
+        try {
+            Log::info('SMTP Configuration: Starting email sending process (Delivered).', [
+                'recipient' => $creator->email,
+                'assignment_id' => $assignment->id,
+            ]);
+
+            // Configure SMTP at runtime
+            $configured = $this->configureMail();
+            if (!$configured) {
+                Log::warning('SMTP Configuration: Dynamic mail configuration failed. Skipping email sending.');
+                return;
+            }
+
+            // Send Email (Synchronously)
+            Mail::to($creator->email)->send(new OrderDeliveredMail($assignment));
+
+            Log::info('SMTP Configuration: Mail sent successfully to manager (Delivered).', [
+                'recipient' => $creator->email,
+                'subject' => 'Order Delivered',
+                'assignment_id' => $assignment->id,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('SMTP Configuration: Mail sending failed (Delivered).', [
+                'recipient' => $creator->email,
                 'assignment_id' => $assignment->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

@@ -56,6 +56,13 @@ class AssignableOrdersController extends Controller
             'status' => 'Pickup'
         ]);
 
+        try {
+            $assignment->load(['driver', 'creator', 'company', 'station']);
+            app(\App\Services\SMTPConfigurationService::class)->sendOrderPickedUpEmail($assignment);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('SMTP Notification Error (pickup): ' . $e->getMessage());
+        }
+
         return redirect()->route('assignable-orders.show', $id)->with('success', 'Order status updated to Pickup.');
     }
 
@@ -96,6 +103,13 @@ class AssignableOrdersController extends Controller
             'delivered_at' => Carbon::now(),
             'delivery_proof_images' => $proofImages
         ]);
+
+        try {
+            $assignment->load(['driver', 'creator', 'company', 'station']);
+            app(\App\Services\SMTPConfigurationService::class)->sendOrderDeliveredEmail($assignment);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('SMTP Notification Error (deliver): ' . $e->getMessage());
+        }
 
         return redirect()->route('assignable-orders.show', $id)->with('success_delivered', 'Order successfully delivered!');
     }
