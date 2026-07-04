@@ -26,10 +26,12 @@ class AssignLuggageController extends Controller
         
         $query = AssignLuggage::with(['company', 'station', 'driver', 'creator']);
 
-        // Filter assignments: Managers can only see their own assigned list
+        // Filter assignments: Managers can only see their own assigned list, Drivers can only see their own assigned list
         if ($user && $user->role_id !== 0 && $user->role) {
             if (stripos($user->role->role_name, 'manager') !== false) {
                 $query->where('created_by', $userId);
+            } elseif (stripos($user->role->role_name, 'driver') !== false) {
+                $query->where('driver_id', $userId);
             }
         }
 
@@ -108,6 +110,16 @@ class AssignLuggageController extends Controller
     public function show($id)
     {
         $assignment = AssignLuggage::with(['company', 'station', 'driver', 'creator'])->findOrFail($id);
+        $userId = session('user_id');
+        $user = User::find($userId);
+        if ($user && $user->role_id !== 0 && $user->role) {
+            if (stripos($user->role->role_name, 'driver') !== false && $assignment->driver_id !== $userId) {
+                return redirect()->route('assign-luggage.index')->with('error', 'Unauthorized access to this luggage assignment.');
+            }
+            if (stripos($user->role->role_name, 'manager') !== false && $assignment->created_by !== $userId) {
+                return redirect()->route('assign-luggage.index')->with('error', 'Unauthorized access to this luggage assignment.');
+            }
+        }
         return view('admin.assign-luggage.show', compact('assignment'));
     }
 
@@ -117,6 +129,17 @@ class AssignLuggageController extends Controller
     public function edit($id)
     {
         $assignment = AssignLuggage::findOrFail($id);
+        $userId = session('user_id');
+        $user = User::find($userId);
+        if ($user && $user->role_id !== 0 && $user->role) {
+            if (stripos($user->role->role_name, 'driver') !== false && $assignment->driver_id !== $userId) {
+                return redirect()->route('assign-luggage.index')->with('error', 'Unauthorized access to this luggage assignment.');
+            }
+            if (stripos($user->role->role_name, 'manager') !== false && $assignment->created_by !== $userId) {
+                return redirect()->route('assign-luggage.index')->with('error', 'Unauthorized access to this luggage assignment.');
+            }
+        }
+
         $companies = Company::where('status', 'active')->orderBy('company_name', 'asc')->get();
         $stations = Station::where('status', 'active')->orderBy('station_name', 'asc')->get();
 
@@ -135,6 +158,17 @@ class AssignLuggageController extends Controller
     public function update(UpdateAssignLuggageRequest $request, $id)
     {
         $assignment = AssignLuggage::findOrFail($id);
+        $userId = session('user_id');
+        $user = User::find($userId);
+        if ($user && $user->role_id !== 0 && $user->role) {
+            if (stripos($user->role->role_name, 'driver') !== false && $assignment->driver_id !== $userId) {
+                return redirect()->route('assign-luggage.index')->with('error', 'Unauthorized access to this luggage assignment.');
+            }
+            if (stripos($user->role->role_name, 'manager') !== false && $assignment->created_by !== $userId) {
+                return redirect()->route('assign-luggage.index')->with('error', 'Unauthorized access to this luggage assignment.');
+            }
+        }
+
         $data = $request->validated();
         
         // Status is managed by the driver workflow; do not let manager edit it.
@@ -189,6 +223,17 @@ class AssignLuggageController extends Controller
     public function destroy($id)
     {
         $assignment = AssignLuggage::findOrFail($id);
+        $userId = session('user_id');
+        $user = User::find($userId);
+        if ($user && $user->role_id !== 0 && $user->role) {
+            if (stripos($user->role->role_name, 'driver') !== false && $assignment->driver_id !== $userId) {
+                return redirect()->route('assign-luggage.index')->with('error', 'Unauthorized access to this luggage assignment.');
+            }
+            if (stripos($user->role->role_name, 'manager') !== false && $assignment->created_by !== $userId) {
+                return redirect()->route('assign-luggage.index')->with('error', 'Unauthorized access to this luggage assignment.');
+            }
+        }
+
         $images = $assignment->images ?? [];
         
         foreach ($images as $img) {

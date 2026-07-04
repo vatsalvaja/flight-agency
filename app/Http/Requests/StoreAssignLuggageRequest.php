@@ -15,6 +15,20 @@ class StoreAssignLuggageRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        $userId = session('user_id');
+        $user = \App\Models\User::find($userId);
+        if ($user && $user->role_id > 0 && $user->role && stripos($user->role->role_name, 'driver') !== false) {
+            $this->merge([
+                'driver_id' => $userId,
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      */
     public function rules(): array

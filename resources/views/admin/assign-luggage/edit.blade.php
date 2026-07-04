@@ -80,13 +80,26 @@
 
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-semibold" for="driver_id">Driver <span class="text-danger">*</span></label>
-                                    <select name="driver_id" id="driver_id" class="form-control @error('driver_id') is-invalid @enderror" required>
-                                        @foreach($drivers as $driver)
-                                            <option value="{{ $driver->id }}" {{ old('driver_id', $assignment->driver_id) == $driver->id ? 'selected' : '' }}>
-                                                {{ $driver->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    @php
+                                        $isDriver = false;
+                                        if (isset($loggedUser) && $loggedUser->role_id > 0 && $loggedUser->role) {
+                                            $isDriver = (stripos($loggedUser->role->role_name, 'driver') !== false);
+                                        }
+                                    @endphp
+                                    @if($isDriver)
+                                        <select id="driver_id_display" class="form-control" disabled>
+                                            <option value="{{ $loggedUser->id }}" selected>{{ $loggedUser->name }}</option>
+                                        </select>
+                                        <input type="hidden" name="driver_id" id="driver_id" value="{{ $loggedUser->id }}">
+                                    @else
+                                        <select name="driver_id" id="driver_id" class="form-control @error('driver_id') is-invalid @enderror" required>
+                                            @foreach($drivers as $driver)
+                                                <option value="{{ $driver->id }}" {{ old('driver_id', $assignment->driver_id) == $driver->id ? 'selected' : '' }}>
+                                                    {{ $driver->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    @endif
                                     @error('driver_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

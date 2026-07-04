@@ -78,6 +78,8 @@ class AdminAuth
             if (in_array($path, $allowedCommonPaths) || 
                 $path === 'admin/assignable-orders' || 
                 str_starts_with($path, 'admin/assignable-orders/') ||
+                $path === 'admin/assign-luggage' || 
+                str_starts_with($path, 'admin/assign-luggage/') ||
                 $path === 'admin/reports') {
                 return $next($request);
             }
