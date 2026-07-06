@@ -166,7 +166,12 @@
                         </div>
                         
                         <!-- Map container -->
-                        <div id="manager-tracking-map" class="manager-tracking-map"></div>
+                        <div id="tracking-map-shell" class="tracking-map-shell">
+                            <button type="button" id="tracking-map-fullscreen" class="map-fullscreen-toggle" aria-label="Open map fullscreen" title="Fullscreen map">
+                                <i class="feather-maximize-2"></i>
+                            </button>
+                            <div id="manager-tracking-map" class="manager-tracking-map"></div>
+                        </div>
                     </div>
                 </div>
                 @endif
@@ -267,6 +272,68 @@
     height: clamp(320px, 42vw, 420px);
     min-height: 320px;
     background: #eaeaea;
+}
+
+.tracking-map-shell {
+    position: relative;
+    background: #eaeaea;
+}
+
+.map-fullscreen-toggle {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 6;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.96);
+    color: #0f172a;
+    box-shadow: 0 3px 14px rgba(15, 23, 42, 0.16);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.map-fullscreen-toggle i {
+    font-size: 18px;
+}
+
+.map-fullscreen-toggle:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+html.app-skin-dark .map-fullscreen-toggle {
+    background: rgba(15, 23, 42, 0.96);
+    color: #f8fafc;
+}
+
+.tracking-map-shell:fullscreen,
+.tracking-map-shell:-webkit-full-screen,
+.tracking-map-shell.is-map-fullscreen {
+    width: 100vw;
+    height: 100dvh;
+    background: #eaeaea;
+}
+
+.tracking-map-shell:fullscreen .manager-tracking-map,
+.tracking-map-shell:-webkit-full-screen .manager-tracking-map,
+.tracking-map-shell.is-map-fullscreen .manager-tracking-map {
+    height: 100dvh;
+    min-height: 100dvh;
+}
+
+.tracking-map-shell.is-map-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 1085;
+}
+
+body.tracking-map-expanded {
+    overflow: hidden;
 }
 
 /* Real-Time Map HUD Overlay */
@@ -434,6 +501,14 @@ html.app-skin-dark .hud-divider {
         min-height: 360px;
     }
 
+    .map-fullscreen-toggle {
+        display: inline-flex;
+        width: 46px;
+        height: 46px;
+        top: 10px;
+        right: 10px;
+    }
+
     .map-hud-overlay {
         position: static;
         max-width: none;
@@ -525,6 +600,112 @@ document.addEventListener('DOMContentLoaded', function() {
     let trackingRouteHistory = [];
     
     const orderId = "{{ $assignment->id }}";
+    const mapShell = document.getElementById('tracking-map-shell');
+    const fullscreenButton = document.getElementById('tracking-map-fullscreen');
+
+    function getFullscreenElement() {
+        return document.fullscreenElement || document.webkitFullscreenElement || null;
+    }
+
+    function isMapFullscreen() {
+        return getFullscreenElement() === mapShell || (mapShell && mapShell.classList.contains('is-map-fullscreen'));
+    }
+
+    function refreshMapAfterResize() {
+        if (!map || typeof google === 'undefined') return;
+
+        const center = map.getCenter();
+        window.setTimeout(function() {
+            google.maps.event.trigger(map, 'resize');
+            if (center) {
+                map.setCenter(center);
+            }
+        }, 150);
+    }
+
+    function updateFullscreenButtonState() {
+        if (!fullscreenButton) return;
+
+        const expanded = isMapFullscreen();
+        fullscreenButton.setAttribute('aria-label', expanded ? 'Exit map fullscreen' : 'Open map fullscreen');
+        fullscreenButton.setAttribute('title', expanded ? 'Exit fullscreen' : 'Fullscreen map');
+        fullscreenButton.innerHTML = expanded ? '<i class="feather-minimize-2"></i>' : '<i class="feather-maximize-2"></i>';
+    }
+
+    function closeMapFullscreen() {
+        if (!mapShell) return;
+
+        if (getFullscreenElement() && document.exitFullscreen) {
+            document.exitFullscreen();
+            return;
+        }
+
+        if (getFullscreenElement() && document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+            return;
+        }
+
+        mapShell.classList.remove('is-map-fullscreen');
+        document.body.classList.remove('tracking-map-expanded');
+        updateFullscreenButtonState();
+        refreshMapAfterResize();
+    }
+
+    function openMapFullscreen() {
+        if (!mapShell) return;
+
+        const requestFullscreen = mapShell.requestFullscreen || mapShell.webkitRequestFullscreen;
+
+        if (requestFullscreen) {
+            const fullscreenRequest = requestFullscreen.call(mapShell);
+
+            if (fullscreenRequest && typeof fullscreenRequest.catch === 'function') {
+                fullscreenRequest.catch(function() {
+                    mapShell.classList.add('is-map-fullscreen');
+                    document.body.classList.add('tracking-map-expanded');
+                    updateFullscreenButtonState();
+                    refreshMapAfterResize();
+                });
+            } else {
+                updateFullscreenButtonState();
+                refreshMapAfterResize();
+            }
+            return;
+        }
+
+        mapShell.classList.add('is-map-fullscreen');
+        document.body.classList.add('tracking-map-expanded');
+        updateFullscreenButtonState();
+        refreshMapAfterResize();
+    }
+
+    function handleFullscreenChange() {
+        if (!getFullscreenElement()) {
+            mapShell.classList.remove('is-map-fullscreen');
+            document.body.classList.remove('tracking-map-expanded');
+        }
+        updateFullscreenButtonState();
+        refreshMapAfterResize();
+    }
+
+    if (fullscreenButton && mapShell) {
+        fullscreenButton.addEventListener('click', function() {
+            if (isMapFullscreen()) {
+                closeMapFullscreen();
+            } else {
+                openMapFullscreen();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && mapShell.classList.contains('is-map-fullscreen')) {
+                closeMapFullscreen();
+            }
+        });
+    }
 
     // Haversine distance helper
     function getDistance(p1, p2) {
@@ -601,7 +782,7 @@ document.addEventListener('DOMContentLoaded', function() {
             zoom: 13,
             mapTypeControl: false,
             streetViewControl: false,
-            fullscreenControl: true,
+            fullscreenControl: window.innerWidth >= 768,
             styles: [
                 {
                     "featureType": "poi",
