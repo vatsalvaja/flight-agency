@@ -47,4 +47,8 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('assignable-orders/{id}', [\App\Http\Controllers\AssignableOrdersController::class, 'show'])->name('assignable-orders.show');
     Route::post('assignable-orders/{id}/pickup', [\App\Http\Controllers\AssignableOrdersController::class, 'pickup'])->name('assignable-orders.pickup');
     Route::post('assignable-orders/{id}/deliver', [\App\Http\Controllers\AssignableOrdersController::class, 'deliver'])->name('assignable-orders.deliver');
+
+    // Real-Time Location Tracking
+    Route::post('assignable-orders/{id}/location', [\App\Http\Controllers\DriverLocationController::class, 'updateLocation'])->name('assignable-orders.location');
+    Route::get('assign-luggage/{id}/tracking-data', [\App\Http\Controllers\DriverLocationController::class, 'getTrackingData'])->name('assign-luggage.tracking-data');
 });

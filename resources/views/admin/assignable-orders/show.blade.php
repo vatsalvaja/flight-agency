@@ -648,26 +648,209 @@ function setNavStats(distance, duration) {
 /**
  * Start watching the driver's GPS location and update the map in real time.
  */
+/**
+ * Start watching the driver's GPS location and update the map/server in real time.
+ */
+let lastSentLat = null;
+let lastSentLng = null;
+let lastSentTime = 0;
+const MIN_DISTANCE_METERS = 5;
+const MIN_TIME_INTERVAL = 10000;
+const STATIONARY_HEARTBEAT = 60000;
+let wakeLock = null;
+
+// Haversine formula to compute distance in meters
+function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth's radius in meters
+    const phi1 = lat1 * Math.PI / 180;
+    const phi2 = lat2 * Math.PI / 180;
+    const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+    const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+              Math.cos(phi1) * Math.cos(phi2) *
+              Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
+}
+
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Screen Wake Lock active.');
+        }
+    } catch (err) {
+        console.warn('Wake lock request failed:', err.message);
+    }
+}
+
+// Re-request wake lock when page is focused again
+document.addEventListener('visibilitychange', async () => {
+    if (wakeLock !== null && document.visibilityState === 'visible') {
+        await requestWakeLock();
+    }
+});
+
+function sendLocationToServer(lat, lng, speed, heading) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    // Attempt battery API if available
+    if (navigator.getBattery) {
+        navigator.getBattery().then(function(battery) {
+            const batteryLevel = Math.round(battery.level * 100);
+            postUpdate(lat, lng, speed, heading, batteryLevel);
+        }).catch(() => {
+            postUpdate(lat, lng, speed, heading, null);
+        });
+    } else {
+        postUpdate(lat, lng, speed, heading, null);
+    }
+    
+    function postUpdate(lat, lng, speed, heading, batteryLevel) {
+        const orderId = "{{ $assignment->id }}";
+        fetch(`/admin/assignable-orders/${orderId}/location`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                latitude: lat,
+                longitude: lng,
+                speed: speed,
+                heading: heading,
+                battery_level: batteryLevel
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Location update posted.');
+                lastSentLat = lat;
+                lastSentLng = lng;
+                lastSentTime = Date.now();
+            } else {
+                console.warn('Server rejected location update:', data.message);
+            }
+        })
+        .catch(err => {
+            console.error('Failed to post location update:', err);
+            queueOfflineLocation(lat, lng, speed, heading);
+        });
+    }
+}
+
+function queueOfflineLocation(lat, lng, speed, heading) {
+    try {
+        let offlineQueue = JSON.parse(localStorage.getItem('offline_locations') || '[]');
+        offlineQueue.push({
+            latitude: lat,
+            longitude: lng,
+            speed: speed,
+            heading: heading,
+            timestamp: new Date().toISOString()
+        });
+        if (offlineQueue.length > 100) offlineQueue.shift();
+        localStorage.setItem('offline_locations', JSON.stringify(offlineQueue));
+    } catch (e) {
+        console.warn('Failed to queue location offline:', e);
+    }
+}
+
+function syncOfflineLocations() {
+    try {
+        const offlineQueue = JSON.parse(localStorage.getItem('offline_locations') || '[]');
+        if (offlineQueue.length === 0) return;
+        if (!navigator.onLine) return;
+        
+        console.log('Syncing ' + offlineQueue.length + ' offline location coordinates...');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const orderId = "{{ $assignment->id }}";
+        const latestOffline = offlineQueue[offlineQueue.length - 1];
+        
+        fetch(`/admin/assignable-orders/${orderId}/location`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                latitude: latestOffline.latitude,
+                longitude: latestOffline.longitude,
+                speed: latestOffline.speed,
+                heading: latestOffline.heading
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                localStorage.removeItem('offline_locations');
+                console.log('Offline queue synced successfully.');
+            }
+        })
+        .catch(err => {
+            console.warn('Sync failed, will retry later:', err);
+        });
+    } catch (e) {
+        console.warn('Offline sync error:', e);
+    }
+}
+
+window.addEventListener('online', syncOfflineLocations);
+setInterval(syncOfflineLocations, 30000);
+
 function startGeoWatch() {
     if (!navigator.geolocation) {
         updateGpsStatus('Not supported', false);
         return;
     }
 
+    if (geoWatchId !== null) {
+        return; // Already active
+    }
+
     updateGpsStatus('Acquiring...', null);
+    requestWakeLock();
 
     geoWatchId = navigator.geolocation.watchPosition(
         function(pos) {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
             const accuracy = Math.round(pos.coords.accuracy);
+            const speed = pos.coords.speed; // m/s
+            const speedKmh = speed !== null ? (speed * 3.6) : null;
+            const heading = pos.coords.heading;
 
             updateGpsStatus(`Active (±${accuracy}m)`, true);
-            updateDriverMarker(lat, lng);
+            
+            if (mapInitialised && navMap) {
+                updateDriverMarker(lat, lng);
+                if (DROP_LAT && DROP_LNG) {
+                    fetchOSRMRoute(lat, lng, DROP_LAT, DROP_LNG);
+                }
+            }
 
-            // Recalculate route from driver's live position to destination
-            if (DROP_LAT && DROP_LNG && navMap) {
-                fetchOSRMRoute(lat, lng, DROP_LAT, DROP_LNG);
+            const now = Date.now();
+            const timeDiff = now - lastSentTime;
+            let shouldSend = false;
+
+            if (lastSentLat === null || lastSentLng === null) {
+                shouldSend = true;
+            } else {
+                const distanceMoved = calculateDistanceMeters(lastSentLat, lastSentLng, lat, lng);
+                if (timeDiff >= MIN_TIME_INTERVAL && (distanceMoved >= MIN_DISTANCE_METERS || (speedKmh && speedKmh > 2))) {
+                    shouldSend = true;
+                } else if (timeDiff >= STATIONARY_HEARTBEAT) {
+                    shouldSend = true;
+                }
+            }
+
+            if (shouldSend) {
+                sendLocationToServer(lat, lng, speedKmh, heading);
             }
         },
         function(err) {
@@ -678,15 +861,18 @@ function startGeoWatch() {
     );
 }
 
-/**
- * Stop the geolocation watcher.
- */
 function stopGeoWatch() {
+    // Keep tracking active in background when the user closes the Leaflet map panel
+    console.log('Background tracking active.');
+}
+
+// Clean up geo watch on window unload
+window.addEventListener('beforeunload', function() {
     if (geoWatchId !== null) {
         navigator.geolocation.clearWatch(geoWatchId);
         geoWatchId = null;
     }
-}
+});
 
 /**
  * Place or update the animated driver marker on the map.
@@ -722,9 +908,6 @@ function updateGpsStatus(text, active) {
             : (active === false ? 'feather-wifi-off text-danger' : 'feather-loader text-muted');
     }
 }
-
-// Stop geo watcher when user navigates away
-window.addEventListener('beforeunload', stopGeoWatch);
 
 function triggerCamera() {
     document.getElementById('camera-input').click();
@@ -882,6 +1065,12 @@ function renderPreviews() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Automatically start tracking if order is Picked Up (in status 'Pickup')
+    const ORDER_STATUS = "{{ $assignment->status }}";
+    if (ORDER_STATUS === 'Pickup') {
+        startGeoWatch();
+    }
+
     const cameraInput = document.getElementById('camera-input');
     const galleryInput = document.getElementById('gallery-input');
     const form = document.getElementById('delivery-submit-form');

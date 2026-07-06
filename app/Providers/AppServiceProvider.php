@@ -22,6 +22,19 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
+        // Bind Request User Resolver to read from custom user sessions (enables native Laravel Echo / Broadcast Auth to work)
+        $this->app->rebinding('request', function ($app, $request) {
+            $request->setUserResolver(function () {
+                $userId = session('user_id');
+                return $userId ? \App\Models\User::find($userId) : null;
+            });
+        });
+
+        request()->setUserResolver(function () {
+            $userId = session('user_id');
+            return $userId ? \App\Models\User::find($userId) : null;
+        });
+
         try {
             if (Schema::hasTable('settings')) {
                 $appSettings = \App\Models\Setting::first() ?? new \App\Models\Setting([
