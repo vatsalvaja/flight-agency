@@ -33,7 +33,7 @@
     <div class="main-content">
         <div class="row">
             <!-- Details Card -->
-            <div class="col-lg-8 mb-4">
+            <div class="col-lg-8 mb-4 assignment-detail-main">
                 <div class="card stretch stretch-full">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Luggage Assignment Info</h5>
@@ -123,21 +123,21 @@
 
                 @if($assignment->status === 'Pickup' || $assignment->status === 'Delivered')
                 <!-- Real-Time Map Card -->
-                <div class="card mt-4" style="border-radius: 16px; overflow: hidden;">
-                    <div class="card-header bg-transparent d-flex align-items-center justify-content-between py-3 px-4 flex-wrap gap-2">
-                        <div class="d-flex align-items-center gap-2">
+                <div class="card mt-4 live-tracking-card">
+                    <div class="card-header bg-transparent live-tracking-header">
+                        <div class="live-tracking-title">
                             <div class="avatar-text avatar-sm bg-soft-warning text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
                                 <i class="feather-map-pin"></i>
                             </div>
-                            <div>
+                            <div class="min-w-0">
                                 <h5 class="card-title mb-0 fw-extrabold text-dark">Live Delivery Tracking</h5>
                                 <span class="text-muted fs-11" id="tracking-subtitle">
                                     {{ $assignment->status === 'Pickup' ? 'Real-time driver location updates' : 'Completed delivery route' }}
                                 </span>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="fs-12 fw-bold text-muted d-none d-sm-inline" id="last-ping-hud">Loading telemetry...</span>
+                        <div class="live-tracking-status">
+                            <span class="fs-12 fw-bold text-muted" id="last-ping-hud">Loading telemetry...</span>
                             <span class="badge bg-soft-secondary text-secondary px-2.5 py-1.5 fs-11" id="driver-status-badge">Offline</span>
                         </div>
                     </div>
@@ -166,15 +166,15 @@
                         </div>
                         
                         <!-- Map container -->
-                        <div id="manager-tracking-map" style="width: 100%; height: 420px; background: #eaeaea;"></div>
+                        <div id="manager-tracking-map" class="manager-tracking-map"></div>
                     </div>
                 </div>
                 @endif
             </div>
 
             <!-- Side Card: Notes & Images -->
-            <div class="col-lg-4 mb-4">
-                <div class="row g-4 h-100">
+            <div class="col-lg-4 mb-4 assignment-detail-sidebar">
+                <div class="row g-4 h-100 assignment-sidebar-grid">
                     <!-- Notes card -->
                     <div class="col-12">
                         <div class="card stretch stretch-full" style="min-height: 180px;">
@@ -225,6 +225,50 @@
     transform: scale(1.05);
 }
 
+.live-tracking-card {
+    border-radius: 16px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.live-tracking-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 1rem 1.5rem;
+}
+
+.live-tracking-title,
+.live-tracking-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.live-tracking-title .min-w-0 {
+    min-width: 0;
+}
+
+.live-tracking-title .card-title,
+#tracking-subtitle,
+#last-ping-hud {
+    overflow-wrap: anywhere;
+}
+
+.live-tracking-status {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.manager-tracking-map {
+    width: 100%;
+    height: clamp(320px, 42vw, 420px);
+    min-height: 320px;
+    background: #eaeaea;
+}
+
 /* Real-Time Map HUD Overlay */
 .map-hud-overlay {
     position: absolute;
@@ -272,6 +316,177 @@ html.app-skin-dark .hud-val {
 }
 html.app-skin-dark .hud-divider {
     background: #334155;
+}
+
+@media (max-width: 1199.98px) {
+    .live-tracking-header {
+        align-items: flex-start;
+    }
+
+    .live-tracking-status {
+        max-width: 46%;
+    }
+
+    .map-hud-overlay {
+        max-width: calc(100% - 30px);
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .nxl-container .assign-luggage-show .main-content {
+        padding: 12px 8px 5px !important;
+        overflow-x: clip !important;
+    }
+
+    .assign-luggage-show > .page-header {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    .assign-luggage-show .main-content > .row {
+        --bs-gutter-x: 0;
+        --bs-gutter-y: 0;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .assignment-detail-main,
+    .assignment-detail-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    .assignment-detail-main {
+        order: 1;
+    }
+
+    .assignment-detail-sidebar {
+        order: 2;
+    }
+
+    .assignment-sidebar-grid {
+        height: auto !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        --bs-gutter-x: 0;
+        --bs-gutter-y: 12px;
+    }
+
+    .assignment-sidebar-grid > [class*="col-"] {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .assign-luggage-show .stretch,
+    .assign-luggage-show .stretch.stretch-full,
+    .assign-luggage-show .card.h-100 {
+        height: auto !important;
+        min-height: 0 !important;
+    }
+
+    .assign-luggage-show .main-content .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 12px !important;
+    }
+
+    .assignment-sidebar-grid .card-body .row.g-2 > .col-4 {
+        flex: 0 0 50%;
+        width: 50%;
+    }
+
+    .assignment-sidebar-grid .hover-image {
+        height: 118px !important;
+    }
+
+    .live-tracking-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.875rem 1rem !important;
+    }
+
+    .live-tracking-title {
+        align-items: flex-start;
+    }
+
+    .live-tracking-status {
+        max-width: none;
+        justify-content: space-between;
+        gap: 8px;
+        width: 100%;
+    }
+
+    #last-ping-hud {
+        display: inline !important;
+        flex: 1 1 160px;
+        font-size: 11px !important;
+        line-height: 1.35;
+    }
+
+    .manager-tracking-map {
+        height: 360px;
+        min-height: 360px;
+    }
+
+    .map-hud-overlay {
+        position: static;
+        max-width: none;
+        justify-content: space-between;
+        padding: 10px;
+        gap: 8px;
+        border-top: 0;
+        border-left: 0;
+        border-right: 0;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        pointer-events: auto;
+    }
+
+    .hud-stat-item {
+        flex: 1 1 calc(50% - 12px);
+        min-width: 105px;
+    }
+
+    .hud-divider {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .live-tracking-title .avatar-text {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        min-height: 28px !important;
+    }
+
+    .manager-tracking-map {
+        height: 340px;
+        min-height: 340px;
+    }
+
+    .map-hud-overlay {
+        padding: 8px;
+    }
+
+    .hud-stat-item {
+        min-width: 0;
+    }
+
+    .hud-label {
+        font-size: 8px;
+    }
+
+    .hud-val {
+        font-size: 11px;
+    }
 }
 </style>
 
