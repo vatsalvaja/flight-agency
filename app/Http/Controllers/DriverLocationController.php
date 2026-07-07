@@ -18,6 +18,15 @@ class DriverLocationController extends Controller
     {
         $userId = session('user_id');
 
+        Log::debug('Driver location API request received.', [
+            'order_id' => $orderId,
+            'driver_id' => $userId,
+            'latitude' => $request->input('latitude'),
+            'longitude' => $request->input('longitude'),
+            'speed' => $request->input('speed'),
+            'heading' => $request->input('heading'),
+        ]);
+
         // 1. Authorize: Is this assignment assigned to the authenticated user?
         $assignment = AssignLuggage::where('driver_id', $userId)
             ->where('id', $orderId)
@@ -45,6 +54,7 @@ class DriverLocationController extends Controller
             'speed' => 'nullable|numeric|min:0',
             'heading' => 'nullable|numeric|between:0,360',
             'battery_level' => 'nullable|integer|between:0,100',
+            'accuracy' => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -72,23 +82,54 @@ class DriverLocationController extends Controller
                 'heading' => $validated['heading'] ?? null,
             ]);
 
-            // 6. Broadcast the live event to subscribers
-            broadcast(new DriverLocationUpdated(
-                $assignment->id,
-                $validated['latitude'],
-                $validated['longitude'],
-                $validated['speed'] ?? null,
-                $validated['heading'] ?? null,
-                $validated['battery_level'] ?? null
-            ));
+            $broadcasted = true;
+            $broadcastError = null;
+
+            try {
+                // 6. Broadcast the live event to subscribers. Saving must still succeed if Reverb is offline.
+                broadcast(new DriverLocationUpdated(
+                    $assignment->id,
+                    $validated['latitude'],
+                    $validated['longitude'],
+                    $validated['speed'] ?? null,
+                    $validated['heading'] ?? null,
+                    $validated['battery_level'] ?? null
+                ));
+
+                Log::debug('DriverLocationUpdated broadcast event fired.', [
+                    'order_id' => $assignment->id,
+                    'driver_id' => $userId,
+                    'latitude' => $validated['latitude'],
+                    'longitude' => $validated['longitude'],
+                    'speed' => $validated['speed'] ?? null,
+                    'heading' => $validated['heading'] ?? null,
+                ]);
+            } catch (\Throwable $broadcastException) {
+                $broadcasted = false;
+                $broadcastError = $broadcastException->getMessage();
+
+                Log::warning('Driver location saved but broadcast failed.', [
+                    'order_id' => $assignment->id,
+                    'driver_id' => $userId,
+                    'error' => $broadcastError,
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Location updated and broadcasted successfully.'
+                'message' => $broadcasted
+                    ? 'Location updated and broadcasted successfully.'
+                    : 'Location updated. Live broadcast is unavailable, manager polling will refresh latest location.',
+                'broadcasted' => $broadcasted,
+                'broadcast_error' => $broadcastError,
+                'updated_at' => now()->toDateTimeString(),
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Driver Location Update Error: ' . $e->getMessage());
+            Log::error('Driver Location Update Error: ' . $e->getMessage(), [
+                'order_id' => $orderId,
+                'driver_id' => $userId,
+            ]);
 
             return response()->json([
                 'success' => false,

@@ -916,7 +916,13 @@ html.app-skin-dark .table-stepper-label {
         let boundsGroup = null;
         let activeOrderId = trackingOrders.length ? String(trackingOrders[0].id) : null;
         let pollingTimer = null;
+        let lastLivePingAt = null;
+        let lastDashboardDriverLatLng = null;
         let subscribedChannel = null;
+
+        function dashboardTrackingDebug(message, context = {}) {
+            console.log('[DriverActivitiesTracking]', message, context);
+        }
 
         function initEcho() {
             if (window.LaravelEcho || typeof Echo === 'undefined') {
@@ -933,9 +939,11 @@ html.app-skin-dark .table-stepper-label {
                     forceTLS: {{ env("REVERB_SCHEME") === 'https' ? 'true' : 'false' }},
                     enabledTransports: ['ws', 'wss'],
                 });
+                dashboardTrackingDebug('Echo initialized for driver activities tracking.');
                 return window.LaravelEcho;
             } catch (error) {
                 console.warn('Live tracking broadcast setup skipped:', error);
+                dashboardTrackingDebug('Echo initialization failed.', { message: error.message });
                 return null;
             }
         }
@@ -1001,6 +1009,18 @@ html.app-skin-dark .table-stepper-label {
             return `Ping ${Math.round(minutes / 60)}h ago`;
         }
 
+        setInterval(() => {
+            if (!lastLivePingAt) return;
+
+            const seconds = Math.round((Date.now() - lastLivePingAt) / 1000);
+            if (seconds > 60) {
+                setText('#live-map-updated', 'Tracking paused / Driver offline');
+                dashboardTrackingDebug('Dashboard tracking marked stale.', { seconds });
+            } else if (seconds > 10) {
+                setText('#live-map-updated', `Last updated ${seconds}s ago`);
+            }
+        }, 5000);
+
         function updateSummary(order, data) {
             setText('.live-selected-title', `${order.order_number} · ${order.driver.name}`);
             setText('.live-selected-subtitle', `${order.pickup.address} to ${order.destination.address}`);
@@ -1026,6 +1046,13 @@ html.app-skin-dark .table-stepper-label {
             if (!location || location.lat === null || location.lng === null || !map) return;
 
             const latLng = [location.lat, location.lng];
+            const previous = lastDashboardDriverLatLng;
+            const movedMeters = previous ? map.distance(previous, L.latLng(latLng)) : null;
+            const isStationary = movedMeters !== null && movedMeters < 3 && (location.speed === null || Number(location.speed) < 2);
+            lastDashboardDriverLatLng = L.latLng(latLng);
+            const updateTimestamp = location.updated_at ? new Date(String(location.updated_at).replace(' ', 'T')).getTime() : Date.now();
+            lastLivePingAt = updateTimestamp || Date.now();
+            const updateAgeSeconds = Math.round((Date.now() - lastLivePingAt) / 1000);
 
             if (!driverMarker) {
                 driverMarker = L.marker(latLng, {
@@ -1036,8 +1063,23 @@ html.app-skin-dark .table-stepper-label {
                 driverMarker.setLatLng(latLng);
             }
 
+            dashboardTrackingDebug('Marker updated on dashboard map.', {
+                orderId: order.id,
+                lat: location.lat,
+                lng: location.lng,
+                speed: location.speed,
+                movedMeters,
+                isStationary
+            });
+
             if (boundsGroup) {
                 boundsGroup.addLayer(driverMarker);
+            }
+
+            if (updateAgeSeconds > 60) {
+                setText('#live-map-updated', 'Tracking paused / Driver offline');
+            } else {
+                setText('#live-map-updated', isStationary ? 'Driver is stationary' : 'Last updated just now');
             }
         }
 
@@ -1064,6 +1106,7 @@ html.app-skin-dark .table-stepper-label {
         function renderTrackingData(order, data) {
             initMap();
             clearMapLayers();
+            lastDashboardDriverLatLng = null;
             updateSummary(order, data);
 
             pickupMarker = addPointMarker('pickup', data.pickup || order.pickup, 'package', 'Pickup Point');
@@ -1094,9 +1137,11 @@ html.app-skin-dark .table-stepper-label {
                 }
 
                 subscribedChannel = String(orderId);
+                dashboardTrackingDebug('Subscribing to dashboard tracking channel.', { channel: `order.tracking.${orderId}` });
                 echo.private(`order.tracking.${orderId}`)
                     .listen('.DriverLocationUpdated', event => {
                         if (String(activeOrderId) !== String(orderId)) return;
+                        dashboardTrackingDebug('Manager received DriverLocationUpdated event on dashboard.', event);
 
                         const liveLocation = {
                             lat: Number(event.latitude),
@@ -1110,10 +1155,10 @@ html.app-skin-dark .table-stepper-label {
                         updateDriverLocation(liveLocation, order);
                         setText('#live-map-speed', liveLocation.speed !== null ? Number(liveLocation.speed).toFixed(1) : '0.0');
                         setText('#live-map-battery', liveLocation.battery_level !== null ? liveLocation.battery_level : '--');
-                        setText('#live-map-updated', 'Ping 0s ago');
                     });
             } catch (error) {
                 console.warn('Live tracking subscription failed:', error);
+                dashboardTrackingDebug('Dashboard tracking subscription failed.', { message: error.message });
             }
         }
 
@@ -1131,6 +1176,7 @@ html.app-skin-dark .table-stepper-label {
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
+                            dashboardTrackingDebug('Polling tracking data refreshed.', { orderId });
                             renderTrackingData(order, data);
                         }
                     })

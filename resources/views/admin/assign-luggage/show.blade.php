@@ -596,7 +596,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let directionsRenderer = null;
     let directionsService = null;
     let lastPingTime = 0;
+    let lastDriverPosition = null;
+    let driverStationary = false;
     let offlineTimer = null;
+    let trackingPollTimer = null;
     let trackingRouteHistory = [];
     
     const orderId = "{{ $assignment->id }}";
@@ -719,6 +722,24 @@ document.addEventListener('DOMContentLoaded', function() {
         return R * c;
     }
 
+    function managerTrackingDebug(message, context = {}) {
+        console.log('[ManagerTracking]', message, context);
+    }
+
+    function setTrackingBadge(text, state) {
+        const badge = document.getElementById('driver-status-badge');
+        if (!badge) return;
+
+        const classes = {
+            online: 'badge bg-soft-success text-success px-2.5 py-1.5 fs-11',
+            warning: 'badge bg-soft-warning text-warning px-2.5 py-1.5 fs-11',
+            offline: 'badge bg-soft-secondary text-secondary px-2.5 py-1.5 fs-11'
+        };
+
+        badge.className = classes[state] || classes.offline;
+        badge.textContent = text;
+    }
+
     // Google Maps marker animation helper
     function interpolateMarker(marker, startPos, endPos, duration) {
         const startTime = performance.now();
@@ -744,6 +765,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Main map initializer
     function initTracking() {
+        managerTrackingDebug('Initial tracking data request sent.', { orderId });
         fetch(`/admin/assign-luggage/${orderId}/tracking-data`)
             .then(res => res.json())
             .then(data => {
@@ -751,9 +773,39 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.warn(data.message);
                     return;
                 }
+                managerTrackingDebug('Initial tracking data loaded.', data);
                 renderMap(data);
             })
             .catch(err => console.error('Failed to load tracking data:', err));
+    }
+
+    function refreshTrackingFromServer() {
+        managerTrackingDebug('Polling tracking data fallback request sent.', { orderId });
+        fetch(`/admin/assign-luggage/${orderId}/tracking-data`, {
+            headers: { 'Accept': 'application/json' }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success || !data.last_location) return;
+
+                managerTrackingDebug('Polling fallback received latest location.', data.last_location);
+                updateDriverMarkerState(
+                    data.last_location.lat,
+                    data.last_location.lng,
+                    data.last_location.heading,
+                    data.last_location.speed,
+                    data.last_location.battery_level,
+                    data.last_location.updated_at
+                );
+            })
+            .catch(err => managerTrackingDebug('Polling tracking fallback failed.', { message: err.message }));
+    }
+
+    function startTrackingPollingFallback() {
+        if (trackingPollTimer) return;
+
+        trackingPollTimer = setInterval(refreshTrackingFromServer, 10000);
+        managerTrackingDebug('Polling fallback started for tracking page.', { intervalSeconds: 10 });
     }
 
     function renderMap(data) {
@@ -844,7 +896,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Mark online since we have a valid last location within 60s
             const lastUpdate = new Date(data.last_location.updated_at).getTime();
             if (Date.now() - lastUpdate < 60000) {
-                setOnlineBadge(true);
+                setTrackingBadge('Active', 'online');
+            } else {
+                setTrackingBadge('Tracking paused / Driver offline', 'offline');
             }
         }
 
@@ -931,7 +985,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!map) return;
 
         const newPos = new google.maps.LatLng(lat, lng);
-        lastPingTime = Date.now();
+        const previousPos = lastDriverPosition;
+        const movedMeters = previousPos ? getDistance(previousPos, newPos) : null;
+        driverStationary = movedMeters !== null && movedMeters < 3 && (speed === null || Number(speed) < 2);
+        lastDriverPosition = newPos;
+        const updateTimestamp = updatedAt ? new Date(String(updatedAt).replace(' ', 'T')).getTime() : Date.now();
+        lastPingTime = updateTimestamp || Date.now();
+        const updateAgeSeconds = Math.round((Date.now() - lastPingTime) / 1000);
+        managerTrackingDebug('Marker update requested.', { lat, lng, heading, speed, battery, updatedAt, movedMeters, driverStationary });
 
         // Arrowhead symbol pointing direction
         const arrowSymbol = {
@@ -952,12 +1013,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: arrowSymbol,
                 zIndex: 1000
             });
+            managerTrackingDebug('Driver marker created on map.', { lat, lng });
         } else {
             const startPos = driverMarker.getPosition();
             interpolateMarker(driverMarker, startPos, newPos, 1500);
             
             // Update icon with rotation
             driverMarker.setIcon(arrowSymbol);
+            managerTrackingDebug('Driver marker updated on map.', { lat, lng });
         }
 
         // Add to history line path
@@ -975,7 +1038,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Update last updated timer
-        document.getElementById('last-ping-hud').textContent = 'Ping: 1s ago';
+        if (updateAgeSeconds > 60) {
+            document.getElementById('last-ping-hud').textContent = 'Tracking paused / Driver offline';
+            setTrackingBadge('Tracking paused / Driver offline', 'offline');
+        } else {
+            document.getElementById('last-ping-hud').textContent = driverStationary ? 'Driver is stationary' : 'Last updated just now';
+            setTrackingBadge(driverStationary ? 'Stationary' : 'Active', driverStationary ? 'warning' : 'online');
+        }
 
         // Recalculate remaining path directions from new coordinate
         if (directionsService && destinationMarker) {
@@ -995,15 +1064,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function setOnlineBadge(online) {
-        const badge = document.getElementById('driver-status-badge');
-        if (!badge) return;
-
         if (online) {
-            badge.className = 'badge bg-soft-success text-success px-2.5 py-1.5 fs-11';
-            badge.textContent = 'Active';
+            setTrackingBadge('Active', 'online');
         } else {
-            badge.className = 'badge bg-soft-secondary text-secondary px-2.5 py-1.5 fs-11';
-            badge.textContent = 'Offline';
+            setTrackingBadge('Tracking paused / Driver offline', 'offline');
         }
     }
 
@@ -1013,26 +1077,32 @@ document.addEventListener('DOMContentLoaded', function() {
         const diffSecs = Math.round((Date.now() - lastPingTime) / 1000);
         const hud = document.getElementById('last-ping-hud');
         
-        if (diffSecs < 60) {
-            hud.textContent = 'Ping: ' + diffSecs + 's ago';
+        if (driverStationary && diffSecs < 45) {
+            hud.textContent = 'Driver is stationary';
+        } else if (diffSecs < 60) {
+            hud.textContent = 'Last updated ' + diffSecs + 's ago';
         } else {
-            hud.textContent = 'Ping: ' + Math.floor(diffSecs / 60) + 'm ago';
+            hud.textContent = 'Last updated ' + Math.floor(diffSecs / 60) + 'm ago';
         }
 
         // Mark offline if > 45 seconds have passed without location updates
-        if (diffSecs > 45) {
+        if (diffSecs > 60) {
             setOnlineBadge(false);
+            hud.textContent = 'Tracking paused / Driver offline';
+            managerTrackingDebug('Tracking marked stale on manager page.', { diffSecs });
         }
     }, 5000);
 
     // Initialize Map and Load Telemetry
     initTracking();
+    startTrackingPollingFallback();
 
     // 2. Listen to real-time broadcasts
     if (window.LaravelEcho) {
+        managerTrackingDebug('Subscribing to private tracking channel.', { channel: `order.tracking.${orderId}` });
         window.LaravelEcho.private(`order.tracking.${orderId}`)
             .listen('.DriverLocationUpdated', (e) => {
-                console.log('Real-time location received:', e);
+                managerTrackingDebug('Manager received DriverLocationUpdated event.', e);
                 setOnlineBadge(true);
                 updateDriverMarkerState(
                     e.latitude,
@@ -1043,6 +1113,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     e.updatedAt
                 );
             });
+    } else {
+        managerTrackingDebug('Laravel Echo is unavailable; live events will not be received.');
     }
 });
 </script>

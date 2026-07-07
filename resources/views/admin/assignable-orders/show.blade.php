@@ -263,6 +263,23 @@
             </div> <!-- closes row (line 79) -->
 
             @if($assignment->status === 'Pickup')
+            <div class="alert alert-light border d-flex align-items-start gap-3 mb-3" id="driver-live-tracking-panel">
+                <div class="rounded-circle d-flex align-items-center justify-content-center bg-soft-primary text-primary" style="width: 36px; height: 36px; flex: 0 0 36px;">
+                    <i class="feather-radio" id="driver-tracking-icon"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <span class="fw-bold text-dark fs-13">Live tracking</span>
+                        <span class="badge bg-soft-warning text-warning fs-11" id="driver-tracking-status">Starting GPS...</span>
+                    </div>
+                    <div class="text-muted fs-11 mt-1" id="driver-tracking-detail">Keep this page open after pickup. Mobile browsers may pause GPS when the phone is locked or battery optimization is active.</div>
+                    <div class="d-flex flex-wrap gap-3 mt-2 fs-11 text-muted">
+                        <span>GPS: <strong id="driver-gps-permission">Checking</strong></span>
+                        <span>Last update: <strong id="driver-last-location-update">No ping yet</strong></span>
+                        <span id="driver-stationary-state">Waiting for movement</span>
+                    </div>
+                </div>
+            </div>
             {{-- ===== EMBEDDED NAVIGATION MAP PANEL ===== --}}
             <div id="navigation-map-panel" class="nav-map-panel" style="display: none;">
                 <!-- Map Panel Header with Route Summary -->
@@ -485,8 +502,11 @@ function openGoogleMapsDirections() {
         url += '&origin=' + encodeURIComponent(PICKUP_ADDR);
     }
     
-    // window.open(url, '_blank');
-    window.location.href = url;
+    const mapsWindow = window.open(url, '_blank', 'noopener');
+    if (!mapsWindow) {
+        updateDriverTrackingPanel('Tracking still active', 'Allow popups to open Google Maps separately. Staying on this page keeps live tracking running.', null);
+        trackingDebug('Google Maps popup was blocked; stayed on tracking page to avoid stopping GPS.');
+    }
     
 }
 
@@ -654,10 +674,87 @@ function setNavStats(distance, duration) {
 let lastSentLat = null;
 let lastSentLng = null;
 let lastSentTime = 0;
-const MIN_DISTANCE_METERS = 5;
-const MIN_TIME_INTERVAL = 10000;
-const STATIONARY_HEARTBEAT = 60000;
+let lastGpsLat = null;
+let lastGpsLng = null;
+let lastGpsTime = 0;
+let lastGpsAccuracy = null;
+let trackingHealthTimer = null;
+const MIN_DISTANCE_METERS = 3;
+const MIN_TIME_INTERVAL = 5000;
+const STATIONARY_HEARTBEAT = 30000;
+const GPS_STALE_WARNING = 45000;
 let wakeLock = null;
+
+function trackingDebug(message, context = {}) {
+    console.log('[DriverTracking]', message, context);
+}
+
+function formatElapsed(timestamp) {
+    if (!timestamp) return 'No ping yet';
+    const seconds = Math.max(0, Math.round((Date.now() - timestamp) / 1000));
+    if (seconds < 60) return `${seconds}s ago`;
+    return `${Math.round(seconds / 60)}m ago`;
+}
+
+function updateDriverTrackingPanel(status, detail, active = null) {
+    const statusEl = document.getElementById('driver-tracking-status');
+    const detailEl = document.getElementById('driver-tracking-detail');
+    const iconEl = document.getElementById('driver-tracking-icon');
+
+    if (statusEl) {
+        statusEl.textContent = status;
+        statusEl.className = active === true
+            ? 'badge bg-soft-success text-success fs-11'
+            : (active === false ? 'badge bg-soft-danger text-danger fs-11' : 'badge bg-soft-warning text-warning fs-11');
+    }
+
+    if (detailEl && detail) detailEl.textContent = detail;
+    if (iconEl) {
+        iconEl.className = active === true
+            ? 'feather-radio text-success'
+            : (active === false ? 'feather-wifi-off text-danger' : 'feather-loader text-warning');
+    }
+}
+
+function updateLastLocationText(timestamp) {
+    const el = document.getElementById('driver-last-location-update');
+    if (el) el.textContent = formatElapsed(timestamp);
+}
+
+function updateStationaryState(isStationary, distanceMoved = null) {
+    const el = document.getElementById('driver-stationary-state');
+    if (!el) return;
+
+    if (isStationary) {
+        el.textContent = 'Driver is stationary';
+        el.className = 'text-warning';
+    } else {
+        el.textContent = distanceMoved !== null ? `Moving (${distanceMoved.toFixed(1)}m)` : 'Moving';
+        el.className = 'text-success';
+    }
+}
+
+function updateGpsPermissionStatus(value) {
+    const el = document.getElementById('driver-gps-permission');
+    if (el) el.textContent = value;
+}
+
+function startTrackingHealthTimer() {
+    if (trackingHealthTimer) return;
+
+    trackingHealthTimer = setInterval(() => {
+        updateLastLocationText(lastSentTime || lastGpsTime);
+
+        if (lastGpsTime && Date.now() - lastGpsTime > GPS_STALE_WARNING) {
+            updateDriverTrackingPanel(
+                'GPS not updating',
+                'Tracking may be paused because the screen is locked, the tab is inactive, or battery optimization stopped location updates.',
+                false
+            );
+            trackingDebug('GPS stale warning shown.', { secondsSinceGps: Math.round((Date.now() - lastGpsTime) / 1000) });
+        }
+    }, 5000);
+}
 
 // Haversine formula to compute distance in meters
 function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
@@ -679,17 +776,26 @@ async function requestWakeLock() {
     try {
         if ('wakeLock' in navigator) {
             wakeLock = await navigator.wakeLock.request('screen');
-            console.log('Screen Wake Lock active.');
+            trackingDebug('Screen Wake Lock active.');
         }
     } catch (err) {
-        console.warn('Wake lock request failed:', err.message);
+        trackingDebug('Wake lock request failed.', { message: err.message });
     }
 }
 
 // Re-request wake lock when page is focused again
 document.addEventListener('visibilitychange', async () => {
+    trackingDebug('Page visibility changed.', { visibilityState: document.visibilityState });
     if (wakeLock !== null && document.visibilityState === 'visible') {
         await requestWakeLock();
+    }
+
+    if (document.visibilityState !== 'visible') {
+        updateDriverTrackingPanel(
+            'Tracking may pause',
+            'Keep the browser visible when possible. Some phones pause GPS while locked or in the background.',
+            null
+        );
     }
 });
 
@@ -710,6 +816,7 @@ function sendLocationToServer(lat, lng, speed, heading) {
     
     function postUpdate(lat, lng, speed, heading, batteryLevel) {
         const orderId = "{{ $assignment->id }}";
+        trackingDebug('Location API request sent.', { orderId, lat, lng, speed, heading, batteryLevel });
         fetch(`/admin/assignable-orders/${orderId}/location`, {
             method: 'POST',
             headers: {
@@ -722,22 +829,31 @@ function sendLocationToServer(lat, lng, speed, heading) {
                 longitude: lng,
                 speed: speed,
                 heading: heading,
-                battery_level: batteryLevel
+                battery_level: batteryLevel,
+                accuracy: lastGpsAccuracy
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log('Location update posted.');
+                trackingDebug('Location API success.', data);
                 lastSentLat = lat;
                 lastSentLng = lng;
                 lastSentTime = Date.now();
+                if (data.broadcasted === false) {
+                    updateDriverTrackingPanel('Saved, broadcast offline', 'Location was saved. Start Laravel Reverb for instant manager updates; manager polling can still refresh it.', null);
+                } else {
+                    updateDriverTrackingPanel('Live', 'Location is being sent to the manager.', true);
+                }
+                updateLastLocationText(lastSentTime);
             } else {
-                console.warn('Server rejected location update:', data.message);
+                trackingDebug('Location API rejected.', data);
+                updateDriverTrackingPanel('API rejected', data.message || 'Server rejected the location update.', false);
             }
         })
         .catch(err => {
-            console.error('Failed to post location update:', err);
+            trackingDebug('Location API failed.', { message: err.message });
+            updateDriverTrackingPanel('Offline queueing', 'Network failed. Latest location will retry when the browser is online.', false);
             queueOfflineLocation(lat, lng, speed, heading);
         });
     }
@@ -806,15 +922,37 @@ setInterval(syncOfflineLocations, 30000);
 function startGeoWatch() {
     if (!navigator.geolocation) {
         updateGpsStatus('Not supported', false);
+        updateGpsPermissionStatus('Not supported');
+        updateDriverTrackingPanel('GPS unavailable', 'This browser does not support geolocation.', false);
+        trackingDebug('Geolocation is not supported.');
         return;
     }
 
     if (geoWatchId !== null) {
+        trackingDebug('Tracking start skipped because watchPosition is already running.', { geoWatchId });
         return; // Already active
     }
 
     updateGpsStatus('Acquiring...', null);
+    updateGpsPermissionStatus('Requesting');
+    updateDriverTrackingPanel('Starting GPS', 'Waiting for the first location coordinate.', null);
     requestWakeLock();
+    startTrackingHealthTimer();
+
+    if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: 'geolocation' })
+            .then(permission => {
+                updateGpsPermissionStatus(permission.state);
+                trackingDebug('GPS permission status.', { state: permission.state });
+                permission.onchange = () => {
+                    updateGpsPermissionStatus(permission.state);
+                    trackingDebug('GPS permission changed.', { state: permission.state });
+                };
+            })
+            .catch(error => trackingDebug('GPS permission query failed.', { message: error.message }));
+    }
+
+    trackingDebug('Tracking started.');
 
     geoWatchId = navigator.geolocation.watchPosition(
         function(pos) {
@@ -824,9 +962,32 @@ function startGeoWatch() {
             const speed = pos.coords.speed; // m/s
             const speedKmh = speed !== null ? (speed * 3.6) : null;
             const heading = pos.coords.heading;
+            const previousGpsLat = lastGpsLat;
+            const previousGpsLng = lastGpsLng;
+            const movedSinceLastGps = previousGpsLat !== null && previousGpsLng !== null
+                ? calculateDistanceMeters(previousGpsLat, previousGpsLng, lat, lng)
+                : null;
+
+            lastGpsLat = lat;
+            lastGpsLng = lng;
+            lastGpsTime = Date.now();
+            lastGpsAccuracy = accuracy;
 
             updateGpsStatus(`Active (±${accuracy}m)`, true);
             
+            updateGpsPermissionStatus('granted');
+            updateDriverTrackingPanel('GPS active', `Coordinate received with about ${accuracy}m accuracy.`, true);
+            updateLastLocationText(lastGpsTime);
+            updateStationaryState(movedSinceLastGps !== null && movedSinceLastGps < MIN_DISTANCE_METERS, movedSinceLastGps);
+            trackingDebug('GPS coordinate received.', {
+                lat,
+                lng,
+                accuracy,
+                speedKmh,
+                heading,
+                movedSinceLastGps
+            });
+
             if (mapInitialised && navMap) {
                 updateDriverMarker(lat, lng);
                 if (DROP_LAT && DROP_LNG) {
@@ -851,19 +1012,28 @@ function startGeoWatch() {
 
             if (shouldSend) {
                 sendLocationToServer(lat, lng, speedKmh, heading);
+            } else {
+                trackingDebug('Location API request skipped by movement throttle.', {
+                    secondsSinceLastSent: Math.round(timeDiff / 1000),
+                    minIntervalSeconds: MIN_TIME_INTERVAL / 1000
+                });
             }
         },
         function(err) {
-            console.warn('Geolocation error:', err.message);
+            trackingDebug('Geolocation error.', { code: err.code, message: err.message });
             updateGpsStatus('Unavailable', false);
+            updateGpsPermissionStatus(err.code === err.PERMISSION_DENIED ? 'denied' : 'unavailable');
+            updateDriverTrackingPanel('GPS unavailable', err.message || 'Location permission or GPS signal is unavailable.', false);
         },
         { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
     );
+
+    trackingDebug('watchPosition registered.', { geoWatchId });
 }
 
 function stopGeoWatch() {
     // Keep tracking active in background when the user closes the Leaflet map panel
-    console.log('Background tracking active.');
+    trackingDebug('Background tracking remains active after closing the map panel.');
 }
 
 // Clean up geo watch on window unload
@@ -893,6 +1063,8 @@ function updateDriverMarker(lat, lng) {
     } else {
         driverMarker.setLatLng([lat, lng]);
     }
+
+    trackingDebug('Driver marker updated on driver map.', { lat, lng });
 }
 
 /**
