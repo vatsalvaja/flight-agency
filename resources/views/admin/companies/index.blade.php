@@ -4,6 +4,13 @@
 
 @section('content')
 <div class="nxl-content">
+    <div id="flightCompaniesConfig"
+        data-list-url="{{ route('companies.list') }}"
+        data-save-url="{{ route('companies.save') }}"
+        data-create-url="{{ route('companies.create') }}"
+        data-empty-message='No companies found. Click "Add Company" to register a new one.'>
+    </div>
+
     <!-- [ page-header ] start -->
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
@@ -27,6 +34,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="flightCompanyAlert"></div>
+
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="feather-check-circle me-2"></i>
@@ -54,56 +63,13 @@
                                         <th class="text-end pe-4">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @forelse($companies as $company)
-                                        <tr>
-                                            <td class="ps-4">
-                                                @if($company->logo)
-                                                    <img src="{{ asset($company->logo) }}" alt="logo" class="rounded" style="height: 36px; width: 36px; object-fit: cover;">
-                                                @else
-                                                    <div class="avatar-text avatar-sm bg-soft-secondary text-secondary rounded d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                                                        {{ substr($company->company_name, 0, 1) }}
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td class="fw-semibold text-dark">{{ $company->company_name }}</td>
-                                            <td><code>{{ $company->company_code ?? 'N/A' }}</code></td>
-                                            <td>{{ $company->contact_person ?? 'N/A' }}</td>
-                                            <td>{{ $company->email ?? 'N/A' }}</td>
-                                            <td>{{ $company->phone ?? 'N/A' }}</td>
-                                            <td>
-                                                @if($company->status === 'active')
-                                                    <span class="badge bg-soft-success text-success px-2 py-1">Active</span>
-                                                @else
-                                                    <span class="badge bg-soft-danger text-danger px-2 py-1">Inactive</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-end pe-4">
-                                                <div class="d-inline-flex gap-2">
-                                                    <a href="{{ route('companies.show', $company->id) }}" class="btn btn-sm btn-light-brand" title="View Details">
-                                                        <i class="feather-eye"></i>
-                                                    </a>
-                                                    <a href="{{ route('companies.edit', $company->id) }}" class="btn btn-sm btn-light-brand" title="Edit Company">
-                                                        <i class="feather-edit"></i>
-                                                    </a>
-                                                    <form action="{{ route('companies.destroy', $company->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this company?');" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-light-danger" title="Delete Company">
-                                                            <i class="feather-trash-2"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="text-center py-5 text-muted">
-                                                <i class="feather-alert-circle fs-3 d-block mb-2"></i>
-                                                No companies found. Click "Add Company" to register a new one.
-                                            </td>
-                                        </tr>
-                                    @endforelse
+                                <tbody id="flightCompaniesTableBody">
+                                    <tr>
+                                        <td colspan="8" class="text-center py-5 text-muted">
+                                            <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                                            Loading companies...
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -115,3 +81,32 @@
     <!-- [ Main Content ] end -->
 </div>
 @endsection
+
+@section('modals')
+<div class="modal fade" id="flightCompanyDetailsModal" tabindex="-1" aria-labelledby="flightCompanyDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="flightCompanyDetailsModalLabel">Company Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="flightCompanyDetailsBody">
+                <div class="text-center py-5 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                    Loading company details...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <a href="#" id="flightCompanyDetailsEdit" class="btn btn-primary">
+                    <i class="feather-edit me-2"></i>Edit Company
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/flight-companies.js') }}"></script>
+@endpush

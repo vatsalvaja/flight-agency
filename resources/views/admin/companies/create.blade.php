@@ -28,6 +28,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="flightCompanyAlert"></div>
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="feather-alert-octagon me-2"></i>
@@ -41,8 +43,9 @@
                         <h5 class="card-title mb-0">Company Profile Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('companies.store') }}" method="POST" enctype="multipart/form-data">
+                        <form id="flightCompanyForm" action="{{ route('companies.save') }}" method="POST" enctype="multipart/form-data" data-index-url="{{ route('companies.index') }}">
                             @csrf
+                            <input type="hidden" name="id" id="company_id" value="">
 
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
@@ -129,3 +132,7 @@
     <!-- [ Main Content ] end -->
 </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/flight-companies.js') }}"></script>
+@endpush

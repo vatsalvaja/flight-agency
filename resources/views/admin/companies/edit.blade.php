@@ -3,6 +3,9 @@
 @section('title', 'Edit Company || ' . ($appSettings->application_name ?? 'Wings'))
 
 @section('content')
+@php
+    $companyData = isset($company) ? $company : null;
+@endphp
 <div class="nxl-content">
     <!-- [ page-header ] start -->
     <div class="page-header">
@@ -28,6 +31,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="flightCompanyAlert"></div>
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="feather-alert-octagon me-2"></i>
@@ -41,21 +46,21 @@
                         <h5 class="card-title mb-0">Modify Company Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('companies.update', $company->id) }}" method="POST" enctype="multipart/form-data">
+                        <form id="flightCompanyForm" action="{{ route('companies.save') }}" method="POST" enctype="multipart/form-data" data-company-id="{{ $companyData->id ?? '' }}" data-data-url="{{ isset($companyData->id) ? route('companies.data', $companyData->id) : '' }}" data-index-url="{{ route('companies.index') }}">
                             @csrf
-                            @method('PUT')
+                            <input type="hidden" name="id" id="company_id" value="{{ $companyData->id ?? '' }}">
 
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="company_name">Company Name <span class="text-danger">*</span></label>
-                                    <input type="text" name="company_name" id="company_name" class="form-control @error('company_name') is-invalid @enderror" value="{{ old('company_name', $company->company_name) }}" required>
+                                    <input type="text" name="company_name" id="company_name" class="form-control @error('company_name') is-invalid @enderror" value="{{ old('company_name', $companyData->company_name ?? '') }}" required>
                                     @error('company_name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="company_code">Company Code</label>
-                                    <input type="text" name="company_code" id="company_code" class="form-control @error('company_code') is-invalid @enderror" value="{{ old('company_code', $company->company_code) }}">
+                                    <input type="text" name="company_code" id="company_code" class="form-control @error('company_code') is-invalid @enderror" value="{{ old('company_code', $companyData->company_code ?? '') }}">
                                     @error('company_code')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -65,14 +70,14 @@
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="contact_person">Contact Person</label>
-                                    <input type="text" name="contact_person" id="contact_person" class="form-control @error('contact_person') is-invalid @enderror" value="{{ old('contact_person', $company->contact_person) }}">
+                                    <input type="text" name="contact_person" id="contact_person" class="form-control @error('contact_person') is-invalid @enderror" value="{{ old('contact_person', $companyData->contact_person ?? '') }}">
                                     @error('contact_person')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="email">Email</label>
-                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $company->email) }}">
+                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $companyData->email ?? '') }}">
                                     @error('email')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -82,7 +87,7 @@
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="phone">Phone Number</label>
-                                    <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $company->phone) }}">
+                                    <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $companyData->phone ?? '') }}">
                                     @error('phone')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -90,8 +95,8 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="status">Status <span class="text-danger">*</span></label>
                                     <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
-                                        <option value="active" {{ old('status', $company->status) == 'active' ? 'selected' : '' }}>Active</option>
-                                        <option value="inactive" {{ old('status', $company->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                        <option value="active" {{ old('status', $companyData->status ?? 'active') == 'active' ? 'selected' : '' }}>Active</option>
+                                        <option value="inactive" {{ old('status', $companyData->status ?? '') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                                     </select>
                                     @error('status')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -102,7 +107,7 @@
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="address">Address</label>
-                                    <textarea name="address" id="address" class="form-control @error('address') is-invalid @enderror" rows="3">{{ old('address', $company->address) }}</textarea>
+                                    <textarea name="address" id="address" class="form-control @error('address') is-invalid @enderror" rows="3">{{ old('address', $companyData->address ?? '') }}</textarea>
                                     @error('address')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -115,10 +120,15 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
 
-                                    @if($company->logo)
-                                        <div class="mt-3 p-2 border rounded bg-light d-inline-block" style="max-width: 150px;">
+                                    @if(isset($companyData->logo) && $companyData->logo)
+                                        <div id="currentLogoPreview" class="mt-3 p-2 border rounded bg-light d-inline-block" style="max-width: 150px;">
                                             <div class="fs-11 text-muted mb-1">Current Logo:</div>
-                                            <img src="{{ asset($company->logo) }}" alt="Logo" class="img-fluid rounded" style="max-height: 48px;">
+                                            <img src="{{ asset($companyData->logo) }}" alt="Logo" class="img-fluid rounded" style="max-height: 48px;">
+                                        </div>
+                                    @else
+                                        <div id="currentLogoPreview" class="mt-3 p-2 border rounded bg-light d-none" style="max-width: 150px;">
+                                            <div class="fs-11 text-muted mb-1">Current Logo:</div>
+                                            <img src="" alt="Logo" class="img-fluid rounded" style="max-height: 48px;">
                                         </div>
                                     @endif
                                 </div>
@@ -137,3 +147,7 @@
     <!-- [ Main Content ] end -->
 </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/flight-companies.js') }}"></script>
+@endpush

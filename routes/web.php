@@ -18,6 +18,9 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
     
+    Route::get('companies/list', [CompanyController::class, 'list'])->name('companies.list');
+    Route::get('companies/{company}/data', [CompanyController::class, 'getDataById'])->name('companies.data');
+    Route::post('companies/save', [CompanyController::class, 'save'])->name('companies.save');
     Route::resource('companies', CompanyController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
