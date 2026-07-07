@@ -4,6 +4,14 @@
 
 @section('content')
 <div class="nxl-content">
+    <div id="assignLuggageConfig"
+        data-list-url="{{ route('assign-luggage.list') }}"
+        data-save-url="{{ route('assign-luggage.save') }}"
+        data-create-url="{{ route('assign-luggage.create') }}"
+        data-is-admin="{{ (isset($loggedUser) && $loggedUser->role_id === 0) ? '1' : '0' }}"
+        data-empty-message='No luggage assignments found. Click "Assign Luggage" to create a new one.'>
+    </div>
+
     <!-- [ page-header ] start -->
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
@@ -27,6 +35,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="assignLuggageAlert"></div>
+
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="feather-check-circle me-2"></i>
@@ -38,15 +48,13 @@
                 <div class="card stretch stretch-full">
                     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <h5 class="card-title mb-0">Luggage Assignment Directory</h5>
-                        <form action="{{ route('assign-luggage.index') }}" method="GET" class="d-flex align-items-center gap-2">
+                        <form id="assignLuggageSearchForm" action="{{ route('assign-luggage.index') }}" method="GET" class="d-flex align-items-center gap-2">
                             <div class="input-group input-group-sm" style="max-width: 250px;">
                                 <span class="input-group-text bg-light border-end-0"><i class="feather-search text-muted"></i></span>
-                                <input type="text" name="search" class="form-control border-start-0" placeholder="Search locations, status..." value="{{ $search ?? '' }}">
+                                <input type="text" name="search" id="assignLuggageSearchInput" class="form-control border-start-0" placeholder="Search locations, status..." value="{{ $search ?? '' }}">
                             </div>
                             <button type="submit" class="btn btn-sm btn-primary">Search</button>
-                            @if($search)
-                                <a href="{{ route('assign-luggage.index') }}" class="btn btn-sm btn-secondary">Clear</a>
-                            @endif
+                            <button type="button" id="assignLuggageSearchClear" class="btn btn-sm btn-secondary {{ empty($search) ? 'd-none' : '' }}">Clear</button>
                         </form>
                     </div>
                     <div class="card-body p-0">
@@ -69,88 +77,17 @@
                                         <th class="text-end pe-4">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @forelse($assignments as $assignment)
-                                        <tr>
-                                            <td class="ps-4">
-                                                <div class="d-flex align-items-center">
-                                                    @if($assignment->company->logo)
-                                                        <img src="{{ asset($assignment->company->logo) }}" alt="logo" class="rounded me-2" style="height: 28px; width: 28px; object-fit: cover;">
-                                                    @else
-                                                        <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded me-2 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-weight: 700; font-size: 11px;">
-                                                            {{ substr($assignment->company->company_name, 0, 1) }}
-                                                        </div>
-                                                    @endif
-                                                    <span class="fw-semibold text-dark">{{ $assignment->company->company_name }}</span>
-                                                </div>
-                                            </td>
-                                            <td>{{ $assignment->station->station_name }}</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    @if($assignment->driver->profile_photo)
-                                                        <img src="{{ asset($assignment->driver->profile_photo) }}" alt="avatar" class="rounded-circle me-2" style="height: 28px; width: 28px; object-fit: cover;">
-                                                    @else
-                                                        <div class="avatar-text avatar-sm bg-soft-info text-info rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-weight: 700; font-size: 11px;">
-                                                            {{ $assignment->driver->getInitials() }}
-                                                        </div>
-                                                    @endif
-                                                    <span>{{ $assignment->driver->name }}</span>
-                                                </div>
-                                            </td>
-                                            <td title="{{ $assignment->pickup_location }}">{{ \Illuminate\Support\Str::limit($assignment->pickup_location, 25) }}</td>
-                                            <td title="{{ $assignment->drop_location }}">{{ \Illuminate\Support\Str::limit($assignment->drop_location, 25) }}</td>
-                                            <td><code>{{ $assignment->distance_km ?? '0.00' }} km</code></td>
-                                            <td>{{ $assignment->expected_delivery_date->format('M d, Y') }}</td>
-                                            <td>
-                                                @if($assignment->status === 'Pickup')
-                                                    <span class="badge bg-soft-warning text-warning px-2 py-1">Pickup</span>
-                                                @elseif($assignment->status === 'In Progress')
-                                                    <span class="badge bg-soft-info text-info px-2 py-1">In Progress</span>
-                                                @else
-                                                    <span class="badge bg-soft-success text-success px-2 py-1">Delivered</span>
-                                                @endif
-                                            </td>
-                                            <td>{{ $assignment->created_at->format('M d, Y') }}</td>
-                                            @if(isset($loggedUser) && $loggedUser->role_id === 0)
-                                                <td>
-                                                    <span class="badge bg-soft-info text-info px-2 py-1 fw-semibold">{{ $assignment->creator->name ?? 'System' }}</span>
-                                                </td>
-                                            @endif
-                                            <td class="text-end pe-4">
-                                                <div class="d-inline-flex gap-2">
-                                                    <a href="{{ route('assign-luggage.show', $assignment->id) }}" class="btn btn-sm btn-light-brand" title="View Details">
-                                                        <i class="feather-eye"></i>
-                                                    </a>
-                                                    <a href="{{ route('assign-luggage.edit', $assignment->id) }}" class="btn btn-sm btn-light-brand" title="Edit Assignment">
-                                                        <i class="feather-edit"></i>
-                                                    </a>
-                                                    <form action="{{ route('assign-luggage.destroy', $assignment->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this luggage assignment?');" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-light-danger" title="Delete Assignment">
-                                                            <i class="feather-trash-2"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="{{ (isset($loggedUser) && $loggedUser->role_id === 0) ? 11 : 10 }}" class="text-center py-5 text-muted">
-                                                <i class="feather-alert-circle fs-3 d-block mb-2"></i>
-                                                No luggage assignments found. Click "Assign Luggage" to create a new one.
-                                            </td>
-                                        </tr>
-                                    @endforelse
+                                <tbody id="assignLuggageTableBody">
+                                    <tr>
+                                        <td colspan="{{ (isset($loggedUser) && $loggedUser->role_id === 0) ? 11 : 10 }}" class="text-center py-5 text-muted">
+                                            <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                                            Loading luggage assignments...
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    @if($assignments->hasPages())
-                        <div class="card-footer d-flex justify-content-end py-3">
-                            {{ $assignments->links('pagination::bootstrap-5') }}
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -158,3 +95,35 @@
     <!-- [ Main Content ] end -->
 </div>
 @endsection
+
+@section('modals')
+<div class="modal fade" id="assignLuggageDetailsModal" tabindex="-1" aria-labelledby="assignLuggageDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignLuggageDetailsModalLabel">Luggage Assignment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="assignLuggageDetailsBody">
+                <div class="text-center py-5 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                    Loading assignment details...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <a href="#" id="assignLuggageDetailsFull" class="btn btn-light-brand">
+                    <i class="feather-external-link me-2"></i>Full Details
+                </a>
+                <a href="#" id="assignLuggageDetailsEdit" class="btn btn-primary">
+                    <i class="feather-edit me-2"></i>Edit Assignment
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/assign-luggage.js') }}"></script>
+@endpush

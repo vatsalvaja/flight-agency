@@ -28,6 +28,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="assignLuggageAlert"></div>
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="feather-alert-octagon me-2"></i>
@@ -41,8 +43,9 @@
                         <h5 class="card-title mb-0">Luggage Assignment Details</h5>
                     </div>
                     <div class="card-body">
-                        <form id="luggage-assign-form" action="{{ route('assign-luggage.store') }}" method="POST" enctype="multipart/form-data">
+                        <form id="luggage-assign-form" action="{{ route('assign-luggage.save') }}" method="POST" enctype="multipart/form-data" data-index-url="{{ route('assign-luggage.index') }}">
                             @csrf
+                            <input type="hidden" name="id" id="assignment_id" value="">
 
                             @php
                                 $isDriver = false;
@@ -382,4 +385,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<script src="{{ asset('assets/js/assign-luggage.js') }}"></script>
 @endpush

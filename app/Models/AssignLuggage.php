@@ -56,7 +56,11 @@ class AssignLuggage extends Model
      */
     public function company()
     {
-        return $this->belongsTo(Company::class, 'company_id');
+        return $this->belongsTo(Company::class, 'company_id')->withDefault([
+            'company_name' => 'N/A',
+            'company_code' => 'N/A',
+            'logo' => null,
+        ]);
     }
 
     /**
@@ -64,7 +68,10 @@ class AssignLuggage extends Model
      */
     public function station()
     {
-        return $this->belongsTo(Station::class, 'station_id');
+        return $this->belongsTo(Station::class, 'station_id')->withDefault([
+            'station_name' => 'N/A',
+            'station_code' => 'N/A',
+        ]);
     }
 
     /**
@@ -72,7 +79,10 @@ class AssignLuggage extends Model
      */
     public function driver()
     {
-        return $this->belongsTo(User::class, 'driver_id');
+        return $this->belongsTo(User::class, 'driver_id')->withDefault([
+            'name' => 'N/A',
+            'profile_photo' => null,
+        ]);
     }
 
     /**
@@ -80,6 +90,8 @@ class AssignLuggage extends Model
      */
     public function creator()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by')->withDefault([
+            'name' => 'System',
+        ]);
     }
 }

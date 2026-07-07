@@ -3,6 +3,9 @@
 @section('title', 'Edit Luggage Assignment || ' . ($appSettings->application_name ?? 'Wings'))
 
 @section('content')
+@php
+    $assignmentData = isset($assignment) ? $assignment : null;
+@endphp
 <div class="nxl-content">
     <!-- [ page-header ] start -->
     <div class="page-header">
@@ -28,6 +31,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="assignLuggageAlert"></div>
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="feather-alert-octagon me-2"></i>
@@ -41,9 +46,9 @@
                         <h5 class="card-title mb-0">Modify Luggage Assignment</h5>
                     </div>
                     <div class="card-body">
-                        <form id="luggage-assign-form" action="{{ route('assign-luggage.update', $assignment->id) }}" method="POST" enctype="multipart/form-data">
+                        <form id="luggage-assign-form" action="{{ route('assign-luggage.save') }}" method="POST" enctype="multipart/form-data" data-assignment-id="{{ $assignmentData->id ?? '' }}" data-data-url="{{ isset($assignmentData->id) ? route('assign-luggage.data', $assignmentData->id) : '' }}" data-index-url="{{ route('assign-luggage.index') }}">
                             @csrf
-                            @method('PUT')
+                            <input type="hidden" name="id" id="assignment_id" value="{{ $assignmentData->id ?? '' }}">
 
                             <!-- Retained Images Hidden Field -->
                             <input type="hidden" name="retained_images" id="retained_images" value="">
@@ -251,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --------------------------------------------------
     // Existing Images Removal State Management
     // --------------------------------------------------
-    let retainedImages = @json($assignment->images ?? []);
+                                let retainedImages = @json($assignmentData->images ?? []);
     const retainedInput = document.getElementById('retained_images');
     
     // Initialize hidden input
@@ -428,4 +433,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<script src="{{ asset('assets/js/assign-luggage.js') }}"></script>
 @endpush
