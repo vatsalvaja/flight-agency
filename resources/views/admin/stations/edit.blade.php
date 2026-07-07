@@ -3,6 +3,9 @@
 @section('title', 'Edit Station || ' . ($appSettings->application_name ?? 'Wings'))
 
 @section('content')
+@php
+    $stationData = isset($station) ? $station : null;
+@endphp
 <div class="nxl-content">
     <!-- [ page-header ] start -->
     <div class="page-header">
@@ -28,6 +31,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="stationAlert"></div>
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="feather-alert-octagon me-2"></i>
@@ -41,21 +46,21 @@
                         <h5 class="card-title mb-0">Station Profile Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('stations.update', $station->id) }}" method="POST">
+                        <form id="stationForm" action="{{ route('stations.save') }}" method="POST" data-station-id="{{ $stationData->id ?? '' }}" data-data-url="{{ isset($stationData->id) ? route('stations.data', $stationData->id) : '' }}" data-index-url="{{ route('stations.index') }}">
                             @csrf
-                            @method('PUT')
+                            <input type="hidden" name="id" id="station_id" value="{{ $stationData->id ?? '' }}">
 
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="station_name">Station Name <span class="text-danger">*</span></label>
-                                    <input type="text" name="station_name" id="station_name" class="form-control @error('station_name') is-invalid @enderror" value="{{ old('station_name', $station->station_name) }}" required placeholder="e.g. Indira Gandhi International Airport">
+                                    <input type="text" name="station_name" id="station_name" class="form-control @error('station_name') is-invalid @enderror" value="{{ old('station_name', $stationData->station_name ?? '') }}" required placeholder="e.g. Indira Gandhi International Airport">
                                     @error('station_name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="station_code">Station Code <span class="text-danger">*</span></label>
-                                    <input type="text" name="station_code" id="station_code" class="form-control @error('station_code') is-invalid @enderror" value="{{ old('station_code', $station->station_code) }}" required placeholder="e.g. DEL">
+                                    <input type="text" name="station_code" id="station_code" class="form-control @error('station_code') is-invalid @enderror" value="{{ old('station_code', $stationData->station_code ?? '') }}" required placeholder="e.g. DEL">
                                     @error('station_code')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -65,14 +70,14 @@
                             <div class="row mb-4">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-semibold" for="contact_number">Contact Number</label>
-                                    <input type="text" name="contact_number" id="contact_number" class="form-control @error('contact_number') is-invalid @enderror" value="{{ old('contact_number', $station->contact_number) }}" placeholder="e.g. +91 11 47197001">
+                                    <input type="text" name="contact_number" id="contact_number" class="form-control @error('contact_number') is-invalid @enderror" value="{{ old('contact_number', $stationData->contact_number ?? '') }}" placeholder="e.g. +91 11 47197001">
                                     @error('contact_number')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-semibold" for="email">Email Address</label>
-                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $station->email) }}" placeholder="e.g. support@delhiairport.com">
+                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $stationData->email ?? '') }}" placeholder="e.g. support@delhiairport.com">
                                     @error('email')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -80,8 +85,8 @@
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-semibold" for="status">Status <span class="text-danger">*</span></label>
                                     <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
-                                        <option value="active" {{ old('status', $station->status) == 'active' ? 'selected' : '' }}>Active</option>
-                                        <option value="inactive" {{ old('status', $station->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                        <option value="active" {{ old('status', $stationData->status ?? 'active') == 'active' ? 'selected' : '' }}>Active</option>
+                                        <option value="inactive" {{ old('status', $stationData->status ?? '') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                                     </select>
                                     @error('status')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -92,21 +97,21 @@
                             <div class="row mb-4">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-semibold" for="city">City <span class="text-danger">*</span></label>
-                                    <input type="text" name="city" id="city" class="form-control @error('city') is-invalid @enderror" value="{{ old('city', $station->city) }}" required placeholder="e.g. New Delhi">
+                                    <input type="text" name="city" id="city" class="form-control @error('city') is-invalid @enderror" value="{{ old('city', $stationData->city ?? '') }}" required placeholder="e.g. New Delhi">
                                     @error('city')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-semibold" for="state">State / Region <span class="text-danger">*</span></label>
-                                    <input type="text" name="state" id="state" class="form-control @error('state') is-invalid @enderror" value="{{ old('state', $station->state) }}" required placeholder="e.g. Delhi">
+                                    <input type="text" name="state" id="state" class="form-control @error('state') is-invalid @enderror" value="{{ old('state', $stationData->state ?? '') }}" required placeholder="e.g. Delhi">
                                     @error('state')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-semibold" for="country">Country <span class="text-danger">*</span></label>
-                                    <input type="text" name="country" id="country" class="form-control @error('country') is-invalid @enderror" value="{{ old('country', $station->country) }}" required placeholder="e.g. India">
+                                    <input type="text" name="country" id="country" class="form-control @error('country') is-invalid @enderror" value="{{ old('country', $stationData->country ?? '') }}" required placeholder="e.g. India">
                                     @error('country')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -116,7 +121,7 @@
                             <div class="row mb-4">
                                 <div class="col-12 mb-3">
                                     <label class="form-label fw-semibold" for="address">Address</label>
-                                    <textarea name="address" id="address" class="form-control @error('address') is-invalid @enderror" rows="3" placeholder="e.g. New Udaan Bhawan, Terminal 3">{{ old('address', $station->address) }}</textarea>
+                                    <textarea name="address" id="address" class="form-control @error('address') is-invalid @enderror" rows="3" placeholder="e.g. New Udaan Bhawan, Terminal 3">{{ old('address', $stationData->address ?? '') }}</textarea>
                                     @error('address')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -136,3 +141,7 @@
     <!-- [ Main Content ] end -->
 </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/stations.js') }}"></script>
+@endpush

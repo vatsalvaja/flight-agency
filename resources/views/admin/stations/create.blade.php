@@ -28,6 +28,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="stationAlert"></div>
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="feather-alert-octagon me-2"></i>
@@ -41,8 +43,9 @@
                         <h5 class="card-title mb-0">Station Profile Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('stations.store') }}" method="POST">
+                        <form id="stationForm" action="{{ route('stations.save') }}" method="POST" data-index-url="{{ route('stations.index') }}">
                             @csrf
+                            <input type="hidden" name="id" id="station_id" value="">
 
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
@@ -135,3 +138,7 @@
     <!-- [ Main Content ] end -->
 </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/stations.js') }}"></script>
+@endpush

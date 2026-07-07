@@ -37,6 +37,9 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('account-settings', [\App\Http\Controllers\ProfileController::class, 'accountSettings'])->name('account-settings.edit');
     Route::put('change-password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('change-password.update');
     
+    Route::get('stations/list', [\App\Http\Controllers\StationController::class, 'list'])->name('stations.list');
+    Route::get('stations/{station}/data', [\App\Http\Controllers\StationController::class, 'getDataById'])->name('stations.data');
+    Route::post('stations/save', [\App\Http\Controllers\StationController::class, 'save'])->name('stations.save');
     Route::resource('stations', \App\Http\Controllers\StationController::class);
 
     
