@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="nxl-content d-print-none reports-page">
+    <div id="reportsConfig" data-list-url="{{ route('reports.list') }}"></div>
     <!-- Page Header (Screen) -->
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
@@ -121,7 +122,7 @@
                             <button type="submit" class="btn btn-primary flex-fill py-2 d-flex align-items-center justify-content-center gap-1 font-weight-bold">
                                 <i class="feather-check"></i> Filter
                             </button>
-                            <a href="{{ route('reports.index') }}" class="btn btn-light py-2 px-3 d-flex align-items-center justify-content-center" title="Reset Filters"><i class="feather-rotate-ccw"></i></a>
+                            <button type="button" id="reportsResetFilter" class="btn btn-light py-2 px-3 d-flex align-items-center justify-content-center" title="Reset Filters"><i class="feather-rotate-ccw"></i></button>
                         </div>
                     </div>
                 </form>
@@ -167,7 +168,7 @@
                                 <i class="feather-package fs-4"></i>
                             </div>
                             <div>
-                                <h4 class="fw-bold mb-1 text-dark">{{ $totalAssignments }}</h4>
+                                <h4 id="reportsKpiTotal" class="fw-bold mb-1 text-dark">{{ $totalAssignments }}</h4>
                                 <span class="text-muted fs-12 text-uppercase fw-semibold">Total Assignments</span>
                             </div>
                         </div>
@@ -180,7 +181,7 @@
                                 <i class="feather-check-circle fs-4"></i>
                             </div>
                             <div>
-                                <h4 class="fw-bold mb-1 text-dark">{{ $deliveredCount }}</h4>
+                                <h4 id="reportsKpiDelivered" class="fw-bold mb-1 text-dark">{{ $deliveredCount }}</h4>
                                 <span class="text-muted fs-12 text-uppercase fw-semibold">Delivered Volume</span>
                             </div>
                         </div>
@@ -193,7 +194,7 @@
                                 <i class="feather-truck fs-4"></i>
                             </div>
                             <div>
-                                <h4 class="fw-bold mb-1 text-dark">{{ $inProgressCount + $pickupCount }}</h4>
+                                <h4 id="reportsKpiActive" class="fw-bold mb-1 text-dark">{{ $inProgressCount + $pickupCount }}</h4>
                                 <span class="text-muted fs-12 text-uppercase fw-semibold">Active In-Transit</span>
                             </div>
                         </div>
@@ -206,7 +207,7 @@
                                 <i class="feather-clock fs-4"></i>
                             </div>
                             <div>
-                                <h4 class="fw-bold mb-1 text-dark">{{ $avgTimeHours }} hrs</h4>
+                                <h4 id="reportsKpiAvgTime" class="fw-bold mb-1 text-dark">{{ $avgTimeHours }} hrs</h4>
                                 <span class="text-muted fs-12 text-uppercase fw-semibold">Avg Delivery Speed</span>
                             </div>
                         </div>
@@ -253,7 +254,7 @@
                         <div class="card">
                             <div class="card-header border-bottom d-flex align-items-center justify-content-between">
                                 <h6 class="card-title text-dark fw-bold mb-0"><i class="feather-shield text-primary me-2"></i>Manager-wise Order Creation</h6>
-                                <span class="badge bg-soft-primary text-primary">{{ $managerWise->count() }} Managers</span>
+                                <span id="reportsManagerCount" class="badge bg-soft-primary text-primary">{{ $managerWise->count() }} Managers</span>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
@@ -265,7 +266,7 @@
                                                 <th class="text-end">Total Assigned Distance</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="reportsManagerTableBody">
                                             @forelse($managerWise as $mw)
                                                 <tr>
                                                     <td class="fw-semibold text-dark">{{ $mw['name'] }}</td>
@@ -289,7 +290,7 @@
                         <div class="card">
                             <div class="card-header border-bottom d-flex align-items-center justify-content-between">
                                 <h6 class="card-title text-dark fw-bold mb-0"><i class="feather-truck text-primary me-2"></i>Driver Logistics Performance</h6>
-                                <span class="badge bg-soft-success text-success">{{ $driverWise->count() }} Drivers</span>
+                                <span id="reportsDriverCount" class="badge bg-soft-success text-success">{{ $driverWise->count() }} Drivers</span>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
@@ -303,7 +304,7 @@
                                                 <th class="text-end">Distance Travelled</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="reportsDriverTableBody">
                                             @forelse($driverWise as $dw)
                                                 <tr>
                                                     <td class="fw-semibold text-dark">{{ $dw['name'] }}</td>
@@ -329,7 +330,7 @@
                         <div class="card">
                             <div class="card-header border-bottom d-flex align-items-center justify-content-between">
                                 <h6 class="card-title text-dark fw-bold mb-0"><i class="feather-truck text-primary me-2"></i>Driver Logistics Performance</h6>
-                                <span class="badge bg-soft-success text-success">{{ $driverWise->count() }} Drivers</span>
+                                <span id="reportsDriverCountManager" class="badge bg-soft-success text-success">{{ $driverWise->count() }} Drivers</span>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
@@ -343,7 +344,7 @@
                                                 <th class="text-end">Distance Travelled</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="reportsDriverTableBodyManager">
                                             @forelse($driverWise as $dw)
                                                 <tr>
                                                     <td class="fw-semibold text-dark">{{ $dw['name'] }}</td>
@@ -391,16 +392,16 @@
                                 <div class="avatar bg-soft-info text-info rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
                                     <i class="feather-navigation fs-1"></i>
                                 </div>
-                                <h4 class="fw-bold text-dark mb-1">{{ $totalDistance }} km</h4>
+                                <h4 id="reportsTotalDistance" class="fw-bold text-dark mb-1">{{ $totalDistance }} km</h4>
                                 <p class="text-muted fs-12 text-uppercase fw-semibold mb-3">Operational Fleet Distance</p>
                                 <div class="border-top pt-3 w-100 text-start">
                                     <div class="d-flex justify-content-between mb-1">
                                         <span class="text-muted fs-12">Delivered Orders Distance</span>
-                                        <span class="fw-bold text-dark fs-12">{{ round($assignments->where('status', 'Delivered')->sum('distance_km'), 2) }} km</span>
+                                        <span id="reportsDeliveredDistance" class="fw-bold text-dark fs-12">{{ round($assignments->where('status', 'Delivered')->sum('distance_km'), 2) }} km</span>
                                     </div>
                                     <div class="d-flex justify-content-between">
                                         <span class="text-muted fs-12">Average Distance/Order</span>
-                                        <span class="fw-bold text-dark fs-12">{{ $totalAssignments > 0 ? round($totalDistance / $totalAssignments, 1) : 0 }} km</span>
+                                        <span id="reportsAverageDistance" class="fw-bold text-dark fs-12">{{ $totalAssignments > 0 ? round($totalDistance / $totalAssignments, 1) : 0 }} km</span>
                                     </div>
                                 </div>
                             </div>
@@ -425,7 +426,7 @@
                                                 <th class="text-end">Cumulated Distance</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="reportsCompanyTableBody">
                                             @forelse($companyWise as $cw)
                                                 <tr>
                                                     <td class="fw-semibold text-dark">{{ $cw['name'] }}</td>
@@ -460,7 +461,7 @@
                                                 <th class="text-end">Logged Outbound Distance</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="reportsStationTableBody">
                                             @forelse($stationWise as $sw)
                                                 <tr>
                                                     <td class="fw-semibold text-dark">{{ $sw['name'] }}</td>
@@ -487,7 +488,7 @@
                 <div class="card stretch stretch-full">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h6 class="card-title text-dark fw-bold mb-0">Detailed Assignments Log</h6>
-                        <span class="fs-12 text-muted">Showing {{ $assignments->firstItem() ?? 0 }}-{{ $assignments->lastItem() ?? 0 }} of {{ $assignments->total() }} records</span>
+                        <span id="reportsLogCount" class="fs-12 text-muted">Showing {{ $assignments->firstItem() ?? 0 }}-{{ $assignments->lastItem() ?? 0 }} of {{ $assignments->total() }} records</span>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -505,7 +506,7 @@
                                         <th>Proof</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="reportsLogTableBody">
                                     @forelse($assignments as $row)
                                         <tr>
                                             <td class="fw-semibold text-dark">#{{ $row->id }}</td>
@@ -557,9 +558,11 @@
                     </div>
                     <!-- Pagination Footer -->
                     @if($assignments->hasPages())
-                        <div class="card-footer d-flex justify-content-end py-3">
+                        <div id="reportsPagination" class="card-footer d-flex justify-content-end py-3">
                             {{ $assignments->links('pagination::bootstrap-5') }}
                         </div>
+                    @else
+                        <div id="reportsPagination" class="card-footer d-none justify-content-end py-3"></div>
                     @endif
                 </div>
             </div>
@@ -1110,6 +1113,7 @@
 
         var opsChart = new ApexCharts(document.querySelector("#operational-activity-chart"), opsOptions);
         opsChart.render();
+        window.reportsOpsChart = opsChart;
 
         // Redesigned Chart 2: Corporate Luggage volume comparison (Horizontal bar chart)
         @if(!$isDriver)
@@ -1155,6 +1159,7 @@
 
         var companyChart = new ApexCharts(document.querySelector("#company-volume-chart"), companyOptions);
         companyChart.render();
+        window.reportsCompanyChart = companyChart;
         @endif
 
         // Redesigned Chart 3: Proportional Status Donut
@@ -1203,6 +1208,7 @@
 
         var donutChart = new ApexCharts(document.querySelector("#status-donut-chart"), donutOptions);
         donutChart.render();
+        window.reportsDonutChart = donutChart;
     });
 
     // Excel CSV Export Trigger
@@ -1212,4 +1218,5 @@
         window.location.href = exportUrl;
     }
 </script>
+<script src="{{ asset('assets/js/reports.js') }}"></script>
 @endpush

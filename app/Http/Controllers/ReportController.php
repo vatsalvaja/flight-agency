@@ -387,4 +387,320 @@ class ReportController extends Controller
             'isDriver'
         ));
     }
+
+    /**
+     * Return filtered report data for AJAX refresh.
+     */
+    public function list(Request $request)
+    {
+        [$loggedUser, $isAdmin, $isManager, $isDriver] = $this->reportContext();
+        [$datePreset, $startDate, $endDate, $dateRange] = $this->reportDateRange($request);
+
+        $query = $this->reportQuery($request, $loggedUser, $isManager, $isDriver, $startDate, $endDate);
+        $metrics = $this->reportMetrics($query, $startDate, $endDate);
+        $assignments = (clone $query)->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reports loaded successfully.',
+            'data' => [
+                'date_preset' => $datePreset,
+                'date_range' => $dateRange,
+                'kpis' => [
+                    'total_assignments' => $metrics['totalAssignments'],
+                    'delivered_count' => $metrics['deliveredCount'],
+                    'pickup_count' => $metrics['pickupCount'],
+                    'in_progress_count' => $metrics['inProgressCount'],
+                    'active_count' => $metrics['inProgressCount'] + $metrics['pickupCount'],
+                    'total_distance' => $metrics['totalDistance'],
+                    'delivered_distance' => $metrics['deliveredDistance'],
+                    'average_distance' => $metrics['totalAssignments'] > 0 ? round($metrics['totalDistance'] / $metrics['totalAssignments'], 1) : 0,
+                    'avg_time_hours' => $metrics['avgTimeHours'],
+                ],
+                'charts' => [
+                    'daily_trend' => $metrics['dailyTrend'],
+                    'status_distribution' => $metrics['statusDistribution'],
+                    'company_names' => $metrics['companyWise']->pluck('name')->values(),
+                    'company_counts' => $metrics['companyWise']->pluck('count')->values(),
+                ],
+                'breakdowns' => [
+                    'manager_wise' => $metrics['managerWise']->values(),
+                    'driver_wise' => $metrics['driverWise']->values(),
+                    'company_wise' => $metrics['companyWise']->values(),
+                    'station_wise' => $metrics['stationWise']->values(),
+                ],
+                'assignments' => $assignments->getCollection()->map(function (AssignLuggage $assignment) {
+                    return $this->formatAssignmentRow($assignment);
+                })->values(),
+                'meta' => [
+                    'current_page' => $assignments->currentPage(),
+                    'last_page' => $assignments->lastPage(),
+                    'per_page' => $assignments->perPage(),
+                    'total' => $assignments->total(),
+                    'from' => $assignments->firstItem(),
+                    'to' => $assignments->lastItem(),
+                ],
+                'permissions' => [
+                    'is_admin' => $isAdmin,
+                    'is_manager' => $isManager,
+                    'is_driver' => $isDriver,
+                ],
+            ],
+        ]);
+    }
+
+    private function reportContext(): array
+    {
+        $loggedUser = auth()->user();
+        if (!$loggedUser) {
+            $loggedUser = User::find(session('user_id'));
+        }
+
+        $isAdmin = $loggedUser && $loggedUser->role_id === 0;
+        $isManager = false;
+        $isDriver = false;
+
+        if ($loggedUser && $loggedUser->role_id > 0 && $loggedUser->role) {
+            $isManager = stripos($loggedUser->role->role_name, 'manager') !== false;
+            $isDriver = stripos($loggedUser->role->role_name, 'driver') !== false;
+        }
+
+        if (!$isAdmin && !$isManager && !$isDriver) {
+            abort(403, 'Unauthorized action. The Reports module is restricted to Administrators, Managers, and Drivers.');
+        }
+
+        return [$loggedUser, $isAdmin, $isManager, $isDriver];
+    }
+
+    private function reportDateRange(Request $request): array
+    {
+        $datePreset = $request->input('date_preset', 'monthly');
+        $startDate = null;
+        $endDate = null;
+
+        switch ($datePreset) {
+            case 'today':
+                $startDate = Carbon::today()->startOfDay();
+                $endDate = Carbon::today()->endOfDay();
+                break;
+            case 'weekly':
+                $startDate = Carbon::now()->subDays(6)->startOfDay();
+                $endDate = Carbon::now()->endOfDay();
+                break;
+            case 'yearly':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfDay();
+                break;
+            case 'custom':
+                if ($request->filled('date_range')) {
+                    $dates = explode(' - ', $request->date_range);
+                    if (count($dates) === 2) {
+                        try {
+                            $startDate = Carbon::createFromFormat('m/d/Y', trim($dates[0]))->startOfDay();
+                            $endDate = Carbon::createFromFormat('m/d/Y', trim($dates[1]))->endOfDay();
+                        } catch (\Exception $e) {
+                            try {
+                                $startDate = Carbon::parse(trim($dates[0]))->startOfDay();
+                                $endDate = Carbon::parse(trim($dates[1]))->endOfDay();
+                            } catch (\Exception $ignored) {
+                                $startDate = null;
+                                $endDate = null;
+                            }
+                        }
+                    }
+                }
+                break;
+            case 'monthly':
+            default:
+                $datePreset = 'monthly';
+                $startDate = Carbon::now()->subDays(29)->startOfDay();
+                $endDate = Carbon::now()->endOfDay();
+                break;
+        }
+
+        if (!$startDate || !$endDate) {
+            $datePreset = 'monthly';
+            $startDate = Carbon::now()->subDays(29)->startOfDay();
+            $endDate = Carbon::now()->endOfDay();
+        }
+
+        return [$datePreset, $startDate, $endDate, $startDate->format('m/d/Y') . ' - ' . $endDate->format('m/d/Y')];
+    }
+
+    private function reportQuery(Request $request, ?User $loggedUser, bool $isManager, bool $isDriver, Carbon $startDate, Carbon $endDate)
+    {
+        $query = AssignLuggage::with(['company', 'station', 'driver', 'creator'])
+            ->whereBetween('created_at', [$startDate, $endDate]);
+
+        if ($isManager && $loggedUser) {
+            $query->where('created_by', $loggedUser->id);
+        } elseif ($isDriver && $loggedUser) {
+            $query->where('driver_id', $loggedUser->id);
+        }
+
+        if ($request->filled('company_id')) {
+            $query->where('company_id', $request->company_id);
+        }
+
+        if ($request->filled('station_id')) {
+            $query->where('station_id', $request->station_id);
+        }
+
+        if (!$isDriver && $request->filled('driver_id')) {
+            $query->where('driver_id', $request->driver_id);
+        }
+
+        if (!$isManager && !$isDriver && $request->filled('manager_id')) {
+            $query->where('created_by', $request->manager_id);
+        }
+
+        if ($request->filled('status') && in_array($request->status, ['In Progress', 'Pickup', 'Delivered'], true)) {
+            $query->where('status', $request->status);
+        }
+
+        return $query;
+    }
+
+    private function reportMetrics($query, Carbon $startDate, Carbon $endDate): array
+    {
+        $kpiQuery = clone $query;
+        $totalAssignments = (clone $kpiQuery)->count();
+        $deliveredCount = (clone $kpiQuery)->where('status', 'Delivered')->count();
+        $pickupCount = (clone $kpiQuery)->where('status', 'Pickup')->count();
+        $inProgressCount = (clone $kpiQuery)->where('status', 'In Progress')->count();
+        $totalDistance = round((float) (clone $kpiQuery)->sum('distance_km'), 2);
+        $deliveredDistance = round((float) (clone $kpiQuery)->where('status', 'Delivered')->sum('distance_km'), 2);
+
+        $avgQuery = (clone $kpiQuery)->where('status', 'Delivered')->whereNotNull('delivered_at');
+        if (DB::getDriverName() === 'sqlite') {
+            $avgTimeHours = $avgQuery->selectRaw('ROUND(AVG(strftime("%s", delivered_at) - strftime("%s", created_at)) / 3600, 1) as avg_hours')->value('avg_hours') ?? 0;
+        } else {
+            $avgTimeHours = $avgQuery->selectRaw('ROUND(AVG(TIMESTAMPDIFF(SECOND, created_at, delivered_at)) / 3600, 1) as avg_hours')->value('avg_hours') ?? 0;
+        }
+
+        $dailyTrendRaw = (clone $kpiQuery)
+            ->select(DB::raw('DATE(created_at) as date_label'), 'status', DB::raw('count(*) as count'))
+            ->groupBy('date_label', 'status')
+            ->orderBy('date_label', 'asc')
+            ->get();
+
+        $trendLookup = [];
+        foreach ($dailyTrendRaw as $row) {
+            $trendLookup[$row->date_label][$row->status] = $row->count;
+        }
+
+        $dailyTrend = [];
+        $currentDate = clone $startDate;
+        while ($currentDate->lte($endDate)) {
+            $formattedDate = $currentDate->format('Y-m-d');
+            $dailyTrend[] = [
+                'date' => $currentDate->format('M d'),
+                'in_progress' => $trendLookup[$formattedDate]['In Progress'] ?? 0,
+                'pickup' => $trendLookup[$formattedDate]['Pickup'] ?? 0,
+                'delivered' => $trendLookup[$formattedDate]['Delivered'] ?? 0,
+            ];
+            $currentDate->addDay();
+        }
+
+        $managerWise = (clone $kpiQuery)
+            ->select('created_by', DB::raw('count(*) as count'), DB::raw('sum(distance_km) as total_distance'))
+            ->groupBy('created_by')
+            ->orderBy('count', 'desc')
+            ->with('creator')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->creator->name ?? 'System/Admin',
+                    'count' => (int) ($item->count ?? 0),
+                    'distance' => round((float) ($item->total_distance ?? 0), 2),
+                ];
+            });
+
+        $driverWise = (clone $kpiQuery)
+            ->select('driver_id', DB::raw('count(*) as count'), DB::raw('sum(distance_km) as total_distance'), DB::raw('sum(case when status="Delivered" then 1 else 0 end) as completed_count'))
+            ->groupBy('driver_id')
+            ->orderBy('completed_count', 'desc')
+            ->with('driver')
+            ->get()
+            ->map(function ($item) {
+                $count = (int) ($item->count ?? 0);
+                $completed = (int) ($item->completed_count ?? 0);
+
+                return [
+                    'name' => $item->driver->name ?? 'Unassigned',
+                    'total' => $count,
+                    'completed' => $completed,
+                    'rate' => $count > 0 ? round(($completed / $count) * 100, 1) : 0,
+                    'distance' => round((float) ($item->total_distance ?? 0), 2),
+                ];
+            });
+
+        $companyWise = (clone $kpiQuery)
+            ->select('company_id', DB::raw('count(*) as count'), DB::raw('sum(distance_km) as total_distance'))
+            ->groupBy('company_id')
+            ->orderBy('count', 'desc')
+            ->with('company')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->company->company_name ?? 'Unknown Company',
+                    'count' => (int) ($item->count ?? 0),
+                    'distance' => round((float) ($item->total_distance ?? 0), 2),
+                ];
+            });
+
+        $stationWise = (clone $kpiQuery)
+            ->select('station_id', DB::raw('count(*) as count'), DB::raw('sum(distance_km) as total_distance'))
+            ->groupBy('station_id')
+            ->orderBy('count', 'desc')
+            ->with('station')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->station->station_name ?? 'Unknown Station',
+                    'count' => (int) ($item->count ?? 0),
+                    'distance' => round((float) ($item->total_distance ?? 0), 2),
+                ];
+            });
+
+        return [
+            'totalAssignments' => $totalAssignments,
+            'deliveredCount' => $deliveredCount,
+            'pickupCount' => $pickupCount,
+            'inProgressCount' => $inProgressCount,
+            'totalDistance' => $totalDistance,
+            'deliveredDistance' => $deliveredDistance,
+            'avgTimeHours' => $avgTimeHours,
+            'dailyTrend' => $dailyTrend,
+            'statusDistribution' => [
+                'In Progress' => $inProgressCount,
+                'Pickup' => $pickupCount,
+                'Delivered' => $deliveredCount,
+            ],
+            'managerWise' => $managerWise,
+            'driverWise' => $driverWise,
+            'companyWise' => $companyWise,
+            'stationWise' => $stationWise,
+        ];
+    }
+
+    private function formatAssignmentRow(AssignLuggage $assignment): array
+    {
+        $assignment->loadMissing(['company', 'station', 'driver', 'creator']);
+        $proofImages = is_array($assignment->delivery_proof_images) ? $assignment->delivery_proof_images : [];
+
+        return [
+            'id' => $assignment->id,
+            'ref_id' => '#' . $assignment->id,
+            'created_at' => $assignment->created_at ? $assignment->created_at->format('Y-m-d H:i') : 'N/A',
+            'company_name' => $assignment->company->company_name ?? 'N/A',
+            'station_name' => $assignment->station->station_name ?? 'N/A',
+            'drop_location' => $assignment->drop_location ?? 'N/A',
+            'manager_name' => $assignment->creator->name ?? 'System/Admin',
+            'driver_name' => $assignment->driver->name ?? 'Unassigned',
+            'distance_km' => round((float) ($assignment->distance_km ?? 0), 2),
+            'status' => $assignment->status ?? 'In Progress',
+            'has_proof' => count($proofImages) > 0,
+        ];
+    }
 }
