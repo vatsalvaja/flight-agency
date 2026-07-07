@@ -25,6 +25,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="userAlert"></div>
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="feather-alert-octagon me-2"></i>
@@ -38,8 +40,9 @@
                         <h5 class="card-title mb-0">User Account Details</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('users.store') }}" method="POST">
+                        <form id="userForm" action="{{ route('users.save') }}" method="POST" data-index-url="{{ route('users.index') }}">
                             @csrf
+                            <input type="hidden" name="id" id="user_id" value="">
 
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
@@ -70,7 +73,7 @@
                                     <label class="form-label fw-semibold" for="role_id">Role Dropdown <span class="text-danger">*</span></label>
                                     <select name="role_id" id="role_id" class="form-control @error('role_id') is-invalid @enderror" required>
                                         <option value="0" {{ old('role_id') == '0' ? 'selected' : '' }}>Admin (System)</option>
-                                        @foreach($roles as $role)
+                                        @foreach(($roles ?? []) as $role)
                                             <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>{{ $role->role_name }}</option>
                                         @endforeach
                                     </select>
@@ -105,3 +108,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/users.js') }}"></script>
+@endpush

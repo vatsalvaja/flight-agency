@@ -3,6 +3,9 @@
 @section('title', 'Edit Role || ' . ($appSettings->application_name ?? 'Wings'))
 
 @section('content')
+@php
+    $roleData = isset($role) ? $role : null;
+@endphp
 <div class="nxl-content">
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
@@ -25,6 +28,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="roleAlert"></div>
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="feather-alert-octagon me-2"></i>
@@ -38,14 +43,14 @@
                         <h5 class="card-title mb-0">Modify Role Details</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('roles.update', $role->id) }}" method="POST">
+                        <form id="roleForm" action="{{ route('roles.save') }}" method="POST" data-role-id="{{ $roleData->id ?? '' }}" data-data-url="{{ isset($roleData->id) ? route('roles.data', $roleData->id) : '' }}" data-index-url="{{ route('roles.index') }}">
                             @csrf
-                            @method('PUT')
+                            <input type="hidden" name="id" id="role_id" value="{{ $roleData->id ?? '' }}">
 
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="role_name">Role Name <span class="text-danger">*</span></label>
-                                    <input type="text" name="role_name" id="role_name" class="form-control @error('role_name') is-invalid @enderror" value="{{ old('role_name', $role->role_name) }}" required>
+                                    <input type="text" name="role_name" id="role_name" class="form-control @error('role_name') is-invalid @enderror" value="{{ old('role_name', $roleData->role_name ?? '') }}" required>
                                     @error('role_name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -53,8 +58,8 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="status">Status <span class="text-danger">*</span></label>
                                     <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
-                                        <option value="0" {{ old('status', $role->status) == '0' ? 'selected' : '' }}>Active</option>
-                                        <option value="1" {{ old('status', $role->status) == '1' ? 'selected' : '' }}>Inactive</option>
+                                        <option value="0" {{ old('status', $roleData->status ?? '0') == '0' ? 'selected' : '' }}>Active</option>
+                                        <option value="1" {{ old('status', $roleData->status ?? '') == '1' ? 'selected' : '' }}>Inactive</option>
                                     </select>
                                     @error('status')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -74,3 +79,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/roles.js') }}"></script>
+@endpush

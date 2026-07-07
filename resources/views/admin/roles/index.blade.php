@@ -4,6 +4,13 @@
 
 @section('content')
 <div class="nxl-content">
+    <div id="rolesConfig"
+        data-list-url="{{ route('roles.list') }}"
+        data-save-url="{{ route('roles.save') }}"
+        data-create-url="{{ route('roles.create') }}"
+        data-empty-message="No custom roles configured yet.">
+    </div>
+
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
             <div class="page-header-title">
@@ -24,6 +31,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="roleAlert"></div>
+
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="feather-check-circle me-2"></i>
@@ -56,42 +65,13 @@
                                         <th class="text-end pe-4" style="width: 150px;">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @forelse($roles as $role)
-                                        <tr>
-                                            <td class="ps-4"><code>#{{ $role->id }}</code></td>
-                                            <td class="fw-semibold text-dark">{{ $role->role_name }}</td>
-                                            <td>
-                                                @if($role->status == 0)
-                                                    <span class="badge bg-soft-success text-success px-2 py-1">Active</span>
-                                                @else
-                                                    <span class="badge bg-soft-danger text-danger px-2 py-1">Inactive</span>
-                                                @endif
-                                            </td>
-                                            <td>{{ $role->created_at ? $role->created_at->format('M d, Y') : 'N/A' }}</td>
-                                            <td class="text-end pe-4">
-                                                <div class="d-inline-flex gap-2">
-                                                    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-sm btn-light-brand" title="Edit Role">
-                                                        <i class="feather-edit"></i>
-                                                    </a>
-                                                    <form action="{{ route('roles.destroy', $role->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this role?');" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-light-danger" title="Delete Role">
-                                                            <i class="feather-trash-2"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="5" class="text-center py-5 text-muted">
-                                                <i class="feather-alert-circle fs-3 d-block mb-2"></i>
-                                                No custom roles configured yet.
-                                            </td>
-                                        </tr>
-                                    @endforelse
+                                <tbody id="rolesTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">
+                                            <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                                            Loading roles...
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -102,3 +82,32 @@
     </div>
 </div>
 @endsection
+
+@section('modals')
+<div class="modal fade" id="roleDetailsModal" tabindex="-1" aria-labelledby="roleDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="roleDetailsModalLabel">Role Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="roleDetailsBody">
+                <div class="text-center py-5 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                    Loading role details...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <a href="#" id="roleDetailsEdit" class="btn btn-primary">
+                    <i class="feather-edit me-2"></i>Edit Role
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/roles.js') }}"></script>
+@endpush

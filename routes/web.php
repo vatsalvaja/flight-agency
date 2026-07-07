@@ -22,7 +22,14 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('companies/{company}/data', [CompanyController::class, 'getDataById'])->name('companies.data');
     Route::post('companies/save', [CompanyController::class, 'save'])->name('companies.save');
     Route::resource('companies', CompanyController::class);
+    Route::get('roles/list', [RoleController::class, 'list'])->name('roles.list');
+    Route::get('roles/{role}/data', [RoleController::class, 'getDataById'])->name('roles.data');
+    Route::post('roles/save', [RoleController::class, 'save'])->name('roles.save');
     Route::resource('roles', RoleController::class);
+
+    Route::get('users/list', [UserController::class, 'list'])->name('users.list');
+    Route::get('users/{user}/data', [UserController::class, 'getDataById'])->name('users.data');
+    Route::post('users/save', [UserController::class, 'save'])->name('users.save');
     Route::resource('users', UserController::class);
     
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');

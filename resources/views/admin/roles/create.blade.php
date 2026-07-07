@@ -25,6 +25,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="roleAlert"></div>
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="feather-alert-octagon me-2"></i>
@@ -38,8 +40,9 @@
                         <h5 class="card-title mb-0">Role Details</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('roles.store') }}" method="POST">
+                        <form id="roleForm" action="{{ route('roles.save') }}" method="POST" data-index-url="{{ route('roles.index') }}">
                             @csrf
+                            <input type="hidden" name="id" id="role_id" value="">
 
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
@@ -73,3 +76,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/roles.js') }}"></script>
+@endpush

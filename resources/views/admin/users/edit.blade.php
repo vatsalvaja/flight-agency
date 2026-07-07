@@ -3,6 +3,9 @@
 @section('title', 'Edit User || ' . ($appSettings->application_name ?? 'Wings'))
 
 @section('content')
+@php
+    $userData = isset($user) ? $user : null;
+@endphp
 <div class="nxl-content">
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
@@ -25,6 +28,8 @@
     <div class="main-content">
         <div class="row">
             <div class="col-12">
+                <div id="userAlert"></div>
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="feather-alert-octagon me-2"></i>
@@ -38,21 +43,21 @@
                         <h5 class="card-title mb-0">Modify User Account Details</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('users.update', $user->id) }}" method="POST">
+                        <form id="userForm" action="{{ route('users.save') }}" method="POST" data-user-id="{{ $userData->id ?? '' }}" data-data-url="{{ isset($userData->id) ? route('users.data', $userData->id) : '' }}" data-index-url="{{ route('users.index') }}">
                             @csrf
-                            @method('PUT')
+                            <input type="hidden" name="id" id="user_id" value="{{ $userData->id ?? '' }}">
 
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="name">Full Name <span class="text-danger">*</span></label>
-                                    <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" required>
+                                    <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $userData->name ?? '') }}" required>
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="email">Email Address <span class="text-danger">*</span></label>
-                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required>
+                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $userData->email ?? '') }}" required>
                                     @error('email')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -70,9 +75,9 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="role_id">Role Dropdown <span class="text-danger">*</span></label>
                                     <select name="role_id" id="role_id" class="form-control @error('role_id') is-invalid @enderror" required>
-                                        <option value="0" {{ old('role_id', $user->role_id) == '0' ? 'selected' : '' }}>Admin (System)</option>
-                                        @foreach($roles as $role)
-                                            <option value="{{ $role->id }}" {{ old('role_id', $user->role_id) == $role->id ? 'selected' : '' }}>{{ $role->role_name }}</option>
+                                        <option value="0" {{ old('role_id', $userData->role_id ?? '') == '0' ? 'selected' : '' }}>Admin (System)</option>
+                                        @foreach(($roles ?? []) as $role)
+                                            <option value="{{ $role->id }}" {{ old('role_id', $userData->role_id ?? '') == $role->id ? 'selected' : '' }}>{{ $role->role_name }}</option>
                                         @endforeach
                                     </select>
                                     @error('role_id')
@@ -85,8 +90,8 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="status">Status <span class="text-danger">*</span></label>
                                     <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
-                                        <option value="0" {{ old('status', $user->status) == '0' ? 'selected' : '' }}>Active</option>
-                                        <option value="1" {{ old('status', $user->status) == '1' ? 'selected' : '' }}>Inactive</option>
+                                        <option value="0" {{ old('status', $userData->status ?? '0') == '0' ? 'selected' : '' }}>Active</option>
+                                        <option value="1" {{ old('status', $userData->status ?? '') == '1' ? 'selected' : '' }}>Inactive</option>
                                     </select>
                                     @error('status')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -106,3 +111,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/users.js') }}"></script>
+@endpush
