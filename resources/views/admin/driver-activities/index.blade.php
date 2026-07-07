@@ -11,6 +11,7 @@
 <div class="nxl-content">
     <div class="main-content py-4">
         <div class="container-fluid px-4">
+            <div id="driverActivitiesConfig" data-list-url="{{ route('driver-activities.list') }}"></div>
             
             <!-- Breadcrumbs and Header -->
             <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
@@ -34,7 +35,7 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="fs-10 text-muted d-block text-uppercase fw-bold mb-0.5">Total Assigned</span>
-                                <span class="fs-20 fw-extrabold text-dark">{{ $kpis['total'] }}</span>
+                                <span id="driverActivitiesKpiTotal" class="fs-20 fw-extrabold text-dark">{{ $kpis['total'] }}</span>
                             </div>
                             <div class="bg-soft-secondary text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
                                 <i class="feather-grid fs-14"></i>
@@ -48,7 +49,7 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="fs-10 text-muted d-block text-uppercase fw-bold mb-0.5">In Transit</span>
-                                <span class="fs-20 fw-extrabold text-primary">{{ $kpis['transit'] }}</span>
+                                <span id="driverActivitiesKpiTransit" class="fs-20 fw-extrabold text-primary">{{ $kpis['transit'] }}</span>
                             </div>
                             <div class="bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
                                 <i class="feather-navigation fs-14"></i>
@@ -62,7 +63,7 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="fs-10 text-muted d-block text-uppercase fw-bold mb-0.5">At Pickup</span>
-                                <span class="fs-20 fw-extrabold text-warning">{{ $kpis['pickup'] }}</span>
+                                <span id="driverActivitiesKpiPickup" class="fs-20 fw-extrabold text-warning">{{ $kpis['pickup'] }}</span>
                             </div>
                             <div class="bg-soft-warning text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
                                 <i class="feather-package fs-14"></i>
@@ -76,7 +77,7 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="fs-10 text-muted d-block text-uppercase fw-bold mb-0.5">Delivered</span>
-                                <span class="fs-20 fw-extrabold text-success">{{ $kpis['delivered'] }}</span>
+                                <span id="driverActivitiesKpiDelivered" class="fs-20 fw-extrabold text-success">{{ $kpis['delivered'] }}</span>
                             </div>
                             <div class="bg-soft-success text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
                                 <i class="feather-check fs-14"></i>
@@ -89,18 +90,18 @@
             <!-- Search & Filters Container -->
             <div class="card border border-gray-3 shadow-sm mb-4 filter-card" style="border-radius: 12px;">
                 <div class="card-body p-3.5">
-                    <form action="{{ route('driver-activities.index') }}" method="GET" class="row g-3 align-items-center">
+                    <form id="driverActivitiesFilterForm" action="{{ route('driver-activities.index') }}" method="GET" class="row g-3 align-items-center">
                         <!-- Search term input -->
                         <div class="col-12 col-md-3 col-lg-4">
                             <div class="input-group">
                                 <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="feather-search fs-13"></i></span>
-                                <input type="text" name="search" value="{{ $search }}" class="form-control border-start-0 fs-12.5" placeholder="Search locations, driver or airline...">
+                                <input type="text" id="driverActivitiesSearchInput" name="search" value="{{ $search }}" class="form-control border-start-0 fs-12.5" placeholder="Search locations, driver or airline...">
                             </div>
                         </div>
                         
                         <!-- Driver dropdown selector -->
                         <div class="col-12 col-sm-6 col-md-3 col-lg-3">
-                            <select name="driver_id" class="form-select select2-select fs-12.5">
+                            <select id="driverActivitiesDriverFilter" name="driver_id" class="form-select select2-select fs-12.5">
                                 <option value="">All Drivers</option>
                                 @foreach($drivers as $d)
                                     <option value="{{ $d->id }}" {{ $driverId == $d->id ? 'selected' : '' }}>{{ $d->name }}</option>
@@ -110,7 +111,7 @@
 
                         <!-- Status filter selector -->
                         <div class="col-12 col-sm-6 col-md-3 col-lg-2">
-                            <select name="status" class="form-select select2-select fs-12.5">
+                            <select id="driverActivitiesStatusFilter" name="status" class="form-select select2-select fs-12.5">
                                 <option value="">All Statuses</option>
                                 <option value="In Progress" {{ $status === 'In Progress' ? 'selected' : '' }}>In Transit</option>
                                 <option value="Pickup" {{ $status === 'Pickup' ? 'selected' : '' }}>Pickup</option>
@@ -121,7 +122,7 @@
                         <!-- Filter action buttons -->
                         <div class="col-12 col-md-3 col-lg-3 d-flex gap-2">
                             <button type="submit" class="btn btn-primary flex-fill fs-12 fw-bold text-white text-nowrap"><i class="feather-filter me-1"></i> Filter</button>
-                            <a href="{{ route('driver-activities.index') }}" class="btn btn-light border flex-fill fs-12 fw-bold text-nowrap"><i class="feather-rotate-ccw me-1"></i> Reset</a>
+                            <button type="button" id="driverActivitiesResetFilter" class="btn btn-light border flex-fill fs-12 fw-bold text-nowrap"><i class="feather-rotate-ccw me-1"></i> Reset</button>
                         </div>
                     </form>
                 </div>
@@ -253,7 +254,7 @@
             <div class="card border border-gray-3 shadow-sm overflow-hidden" style="border-radius: 16px;">
                 <div class="card-header bg-transparent border-bottom border-gray-2 py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h5 class="card-title mb-0 fw-extrabold text-dark">Activity Log List</h5>
-                    <span class="badge bg-soft-primary text-primary px-3 py-1.5 fs-11 rounded-pill fw-bold">Showing {{ $assignments->count() }} records</span>
+                    <span id="driverActivitiesRecordCount" class="badge bg-soft-primary text-primary px-3 py-1.5 fs-11 rounded-pill fw-bold">Showing {{ $assignments->count() }} records</span>
                 </div>
                 
                 <div class="table-responsive">
@@ -267,7 +268,7 @@
                                 <th class="pe-4 py-3" style="width: 250px;">Delivery Proof</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="driverActivitiesTableBody">
                             @forelse($assignments as $assignment)
                                 <tr>
                                     <!-- Driver Info Column -->
@@ -420,9 +421,11 @@
 
                 <!-- Pagination Footer -->
                 @if($assignments->hasPages())
-                    <div class="card-footer bg-transparent border-top border-gray-2 p-3 px-4 d-flex justify-content-center">
+                    <div id="driverActivitiesPagination" class="card-footer bg-transparent border-top border-gray-2 p-3 px-4 d-flex justify-content-center">
                         {{ $assignments->links() }}
                     </div>
+                @else
+                    <div id="driverActivitiesPagination" class="card-footer bg-transparent border-top border-gray-2 p-3 px-4 d-none justify-content-center"></div>
                 @endif
             </div>
 
@@ -1312,4 +1315,5 @@ html.app-skin-dark .table-stepper-label {
         }
     });
 </script>
+<script src="{{ asset('assets/js/driver-activities.js') }}"></script>
 @endpush

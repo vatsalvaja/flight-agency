@@ -57,6 +57,7 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::post('assign-luggage/save', [\App\Http\Controllers\AssignLuggageController::class, 'save'])->name('assign-luggage.save');
     Route::resource('assign-luggage', \App\Http\Controllers\AssignLuggageController::class);
 
+    Route::get('driver-activities/list', [\App\Http\Controllers\DriverActivitiesController::class, 'list'])->name('driver-activities.list');
     Route::get('driver-activities', [\App\Http\Controllers\DriverActivitiesController::class, 'index'])->name('driver-activities.index');
 
     Route::get('assignable-orders', [\App\Http\Controllers\AssignableOrdersController::class, 'index'])->name('assignable-orders.index');
