@@ -1,6 +1,11 @@
+
 @extends('layouts.admin')
 
 @section('title', 'Driver Activities || ' . ($appSettings->application_name ?? 'Wings'))
+
+@push('head')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+@endpush
 
 @section('content')
 <div class="nxl-content">
@@ -120,6 +125,127 @@
                         </div>
                     </form>
                 </div>
+            </div>
+
+            @php
+                $trackingPayload = $liveTrackingAssignments->map(function ($assignment) use ($currentLocations) {
+                    $location = $currentLocations->get($assignment->driver_id);
+
+                    return [
+                        'id' => $assignment->id,
+                        'order_number' => '#ORD-' . str_pad($assignment->id, 5, '0', STR_PAD_LEFT),
+                        'driver' => [
+                            'name' => optional($assignment->driver)->name ?? 'Unassigned',
+                            'email' => optional($assignment->driver)->email ?? 'N/A',
+                            'initials' => $assignment->driver ? $assignment->driver->getInitials() : 'UN',
+                            'photo' => ($assignment->driver && $assignment->driver->profile_photo) ? asset($assignment->driver->profile_photo) : null,
+                        ],
+                        'company' => optional($assignment->company)->company_name ?? 'N/A',
+                        'pickup' => [
+                            'address' => $assignment->pickup_location,
+                            'lat' => $assignment->pickup_latitude !== null ? (float) $assignment->pickup_latitude : null,
+                            'lng' => $assignment->pickup_longitude !== null ? (float) $assignment->pickup_longitude : null,
+                        ],
+                        'destination' => [
+                            'address' => $assignment->drop_location,
+                            'lat' => $assignment->drop_latitude !== null ? (float) $assignment->drop_latitude : null,
+                            'lng' => $assignment->drop_longitude !== null ? (float) $assignment->drop_longitude : null,
+                        ],
+                        'last_location' => $location ? [
+                            'lat' => (float) $location->latitude,
+                            'lng' => (float) $location->longitude,
+                            'speed' => $location->speed !== null ? (float) $location->speed : null,
+                            'heading' => $location->heading !== null ? (float) $location->heading : null,
+                            'battery_level' => $location->battery_level !== null ? (int) $location->battery_level : null,
+                            'updated_at' => optional($location->updated_at)->toDateTimeString(),
+                        ] : null,
+                        'tracking_url' => route('assign-luggage.tracking-data', $assignment->id),
+                    ];
+                })->values();
+            @endphp
+
+            <!-- Live Delivery Tracking Section -->
+            <div class="card border border-gray-3 shadow-sm overflow-hidden mb-4 live-delivery-card" style="border-radius: 16px;">
+                <div class="card-header bg-transparent border-bottom border-gray-2 py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h5 class="card-title mb-0 fw-extrabold text-dark">Live Delivery Tracking</h5>
+                        <span class="text-muted fs-12">Track all drivers after pickup order confirmation</span>
+                    </div>
+                    <span class="badge bg-soft-warning text-warning px-3 py-1.5 fs-11 rounded-pill fw-bold">{{ $liveTrackingAssignments->count() }} live routes</span>
+                </div>
+
+                @if($liveTrackingAssignments->count() > 0)
+                    <div class="row g-0 live-delivery-grid">
+                        <div class="col-12 col-xl-4 border-end border-gray-2 live-delivery-list">
+                            <div class="p-3 d-flex flex-column gap-2">
+                                @foreach($liveTrackingAssignments as $idx => $trackingAssignment)
+                                    @php
+                                        $trackingLocation = $currentLocations->get($trackingAssignment->driver_id);
+                                        $isFresh = $trackingLocation && $trackingLocation->updated_at && $trackingLocation->updated_at->gt(now()->subMinutes(2));
+                                    @endphp
+                                    <button type="button"
+                                            class="live-route-item {{ $idx === 0 ? 'active' : '' }}"
+                                            data-order-id="{{ $trackingAssignment->id }}">
+                                        <div class="d-flex align-items-start gap-2.5 min-w-0">
+                                            @if($trackingAssignment->driver && $trackingAssignment->driver->profile_photo)
+                                                <img src="{{ asset($trackingAssignment->driver->profile_photo) }}" alt="driver avatar" class="rounded-circle live-route-avatar">
+                                            @elseif($trackingAssignment->driver)
+                                                <span class="avatar-text bg-soft-primary text-primary rounded-circle live-route-avatar d-flex align-items-center justify-content-center fw-bold">{{ $trackingAssignment->driver->getInitials() }}</span>
+                                            @else
+                                                <span class="avatar-text bg-soft-secondary text-muted rounded-circle live-route-avatar d-flex align-items-center justify-content-center fw-bold">UN</span>
+                                            @endif
+                                            <span class="min-w-0 flex-grow-1">
+                                                <span class="d-flex align-items-center justify-content-between gap-2 mb-1">
+                                                    <span class="fw-extrabold text-dark fs-12.5 text-truncate">{{ $trackingAssignment->driver->name ?? 'Unassigned' }}</span>
+                                                    <span class="badge {{ $isFresh ? 'bg-soft-success text-success' : 'bg-soft-secondary text-secondary' }} fs-10 rounded-pill live-route-status">
+                                                        {{ $isFresh ? 'Live' : 'Waiting' }}
+                                                    </span>
+                                                </span>
+                                                <span class="d-block text-primary fw-bold fs-11 mb-1">#ORD-{{ str_pad($trackingAssignment->id, 5, '0', STR_PAD_LEFT) }} · {{ $trackingAssignment->company->company_name ?? 'N/A' }}</span>
+                                                <span class="d-block text-muted fs-11 line-clamp-1" title="{{ $trackingAssignment->drop_location }}">
+                                                    <i class="feather-map-pin me-1"></i>{{ $trackingAssignment->drop_location }}
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="col-12 col-xl-8">
+                            <div class="live-map-toolbar px-4 py-3 border-bottom border-gray-2 d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                                <div class="min-w-0">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="avatar-text avatar-sm bg-soft-warning text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                            <i class="feather-navigation"></i>
+                                        </span>
+                                        <div class="min-w-0">
+                                            <h6 class="fw-extrabold text-dark mb-0 live-selected-title">Select a live route</h6>
+                                            <span class="text-muted fs-11 live-selected-subtitle">Pickup and delivery route will appear here</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="live-map-stats">
+                                    <span><strong id="live-map-speed">0.0</strong> km/h</span>
+                                    <span><strong id="live-map-battery">--</strong>% battery</span>
+                                    <span id="live-map-updated">No ping yet</span>
+                                </div>
+                            </div>
+                            <div id="driver-activities-live-map" class="driver-activities-live-map"></div>
+                            <div class="live-map-legend">
+                                <span><i class="legend-dot pickup-dot"></i> Pickup</span>
+                                <span><i class="legend-dot drop-dot"></i> Destination</span>
+                                <span><i class="legend-dot driver-dot"></i> Driver</span>
+                                <span><i class="legend-line"></i> Route history</span>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="p-5 text-center">
+                        <i class="feather-map-pin fs-1 text-muted mb-3 d-block"></i>
+                        <h6 class="fw-bold text-dark mb-1">No Live Deliveries</h6>
+                        <p class="text-muted fs-12.5 mb-0">Live routes appear here after a driver picks up an order.</p>
+                    </div>
+                @endif
             </div>
 
             <!-- Main Listing Table Card -->
@@ -259,6 +385,15 @@
                                                     <span class="text-muted fs-10 fw-semibold d-block">{{ $assignment->delivered_at ? $assignment->delivered_at->format('d M, H:i') : '' }}</span>
                                                 </div>
                                             </div>
+                                        @elseif($assignment->status === 'Pickup')
+                                            <div class="d-flex align-items-center gap-2">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-light-warning text-warning border-0 fw-bold fs-11 js-track-order"
+                                                        data-order-id="{{ $assignment->id }}">
+                                                    <i class="feather-map-pin me-1"></i> Track Route
+                                                </button>
+                                                <span class="fs-11 text-muted">Live after pickup</span>
+                                            </div>
                                         @else
                                             <div class="d-flex align-items-center gap-2 text-muted">
                                                 <i class="feather-clock fs-14"></i>
@@ -340,6 +475,147 @@ function showProofImage(imageSrc, label) {
 }
 .kpi-delivered {
     border-left: 3.5px solid #10b981 !important;
+}
+
+.live-delivery-grid {
+    min-height: 440px;
+}
+.live-delivery-list {
+    max-height: 520px;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+html.app-skin-dark .live-delivery-list {
+    background: rgba(15, 23, 42, 0.32);
+}
+.live-route-item {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: left;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.live-route-item:hover,
+.live-route-item.active {
+    border-color: #f59e0b;
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.14);
+    transform: translateY(-1px);
+}
+html.app-skin-dark .live-route-item {
+    background: #1e293b;
+    border-color: #334155;
+}
+.live-route-avatar {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    flex: 0 0 36px;
+    font-size: 12px;
+}
+.live-route-status {
+    flex: 0 0 auto;
+}
+.driver-activities-live-map {
+    width: 100%;
+    height: 390px;
+    background: #e2e8f0;
+}
+.live-map-toolbar {
+    min-height: 74px;
+}
+.live-map-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+}
+.live-map-stats span {
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 5px 10px;
+    background: #ffffff;
+}
+html.app-skin-dark .live-map-stats span {
+    background: #0f172a;
+    border-color: #334155;
+}
+.live-map-legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    border-top: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: 10.5px;
+    font-weight: 700;
+}
+.legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+.legend-line {
+    display: inline-block;
+    width: 18px;
+    height: 3px;
+    border-radius: 3px;
+    background: #f59e0b;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+.pickup-dot {
+    background: #3b82f6;
+}
+.drop-dot {
+    background: #10b981;
+}
+.driver-dot {
+    background: #f59e0b;
+}
+.live-map-marker {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    box-shadow: 0 5px 14px rgba(15, 23, 42, 0.24);
+}
+.live-map-marker.pickup {
+    background: #3b82f6;
+}
+.live-map-marker.drop {
+    background: #10b981;
+}
+.live-map-marker.driver {
+    background: #f59e0b;
+    position: relative;
+}
+.live-map-marker.driver::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    background: rgba(245, 158, 11, 0.28);
+    animation: liveDriverPulse 1.8s ease-out infinite;
+}
+.live-map-marker.driver i {
+    position: relative;
+    z-index: 1;
+}
+@keyframes liveDriverPulse {
+    0% { transform: scale(0.7); opacity: 0.9; }
+    100% { transform: scale(1.8); opacity: 0; }
 }
 
 /* Hover-zoom effects for table proof thumbnails */
@@ -544,6 +820,28 @@ html.app-skin-dark .table-stepper-label {
         padding: 10px 12px !important;
     }
 
+    .live-delivery-grid {
+        min-height: auto;
+    }
+
+    .live-delivery-list {
+        max-height: 290px;
+        border-right: 0 !important;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .driver-activities-live-map {
+        height: 320px;
+    }
+
+    .live-map-toolbar {
+        align-items: flex-start !important;
+    }
+
+    .live-map-stats {
+        width: 100%;
+    }
+
     /* ── Table: horizontal scroll within tight container ─────────── */
     .table-responsive {
         border-radius: 0 !important;
@@ -586,6 +884,9 @@ html.app-skin-dark .table-stepper-label {
 @push('scripts')
 <!-- Include Select2 JS script -->
 <script src="{{ asset('assets/vendors/js/select2.min.js') }}"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
 <script>
     $(document).ready(function() {
         // Initialize Select2 selectors (Professional bootstrap-5 themed dropdowns)
@@ -594,6 +895,308 @@ html.app-skin-dark .table-stepper-label {
             width: '100%',
             dropdownParent: $('.filter-card')
         });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const trackingOrders = @json($trackingPayload);
+        const trackingById = new Map(trackingOrders.map(order => [String(order.id), order]));
+        const mapElement = document.getElementById('driver-activities-live-map');
+        const listButtons = document.querySelectorAll('.live-route-item');
+        const trackButtons = document.querySelectorAll('.js-track-order');
+
+        if (!mapElement || typeof L === 'undefined') {
+            return;
+        }
+
+        let map = null;
+        let pickupMarker = null;
+        let dropMarker = null;
+        let driverMarker = null;
+        let routePolyline = null;
+        let boundsGroup = null;
+        let activeOrderId = trackingOrders.length ? String(trackingOrders[0].id) : null;
+        let pollingTimer = null;
+        let subscribedChannel = null;
+
+        function initEcho() {
+            if (window.LaravelEcho || typeof Echo === 'undefined') {
+                return window.LaravelEcho || null;
+            }
+
+            try {
+                window.LaravelEcho = new Echo({
+                    broadcaster: 'reverb',
+                    key: '{{ env("REVERB_APP_KEY") }}',
+                    wsHost: '{{ env("REVERB_HOST") ?: "127.0.0.1" }}',
+                    wsPort: {{ env("REVERB_PORT") ?: 8080 }},
+                    wssPort: {{ env("REVERB_PORT") ?: 8080 }},
+                    forceTLS: {{ env("REVERB_SCHEME") === 'https' ? 'true' : 'false' }},
+                    enabledTransports: ['ws', 'wss'],
+                });
+                return window.LaravelEcho;
+            } catch (error) {
+                console.warn('Live tracking broadcast setup skipped:', error);
+                return null;
+            }
+        }
+
+        function initMap() {
+            if (map) return;
+
+            map = L.map(mapElement, {
+                center: [20, 0],
+                zoom: 2,
+                zoomControl: true,
+                attributionControl: true
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+
+        function makeIcon(type, iconName) {
+            return L.divIcon({
+                className: '',
+                html: `<div class="live-map-marker ${type}"><i class="feather-${iconName}"></i></div>`,
+                iconSize: [34, 34],
+                iconAnchor: [17, 17],
+                popupAnchor: [0, -18]
+            });
+        }
+
+        function clearMapLayers() {
+            [pickupMarker, dropMarker, driverMarker, routePolyline].forEach(layer => {
+                if (layer && map) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            pickupMarker = null;
+            dropMarker = null;
+            driverMarker = null;
+            routePolyline = null;
+            if (boundsGroup && map) {
+                map.removeLayer(boundsGroup);
+            }
+            boundsGroup = L.featureGroup().addTo(map);
+        }
+
+        function setText(selector, value) {
+            const element = document.querySelector(selector);
+            if (element) element.textContent = value;
+        }
+
+        function formatPing(updatedAt) {
+            if (!updatedAt) return 'No ping yet';
+
+            const timestamp = new Date(updatedAt.replace(' ', 'T')).getTime();
+            if (!timestamp) return 'Last ping recorded';
+
+            const seconds = Math.max(0, Math.round((Date.now() - timestamp) / 1000));
+            if (seconds < 60) return `Ping ${seconds}s ago`;
+            const minutes = Math.round(seconds / 60);
+            if (minutes < 60) return `Ping ${minutes}m ago`;
+            return `Ping ${Math.round(minutes / 60)}h ago`;
+        }
+
+        function updateSummary(order, data) {
+            setText('.live-selected-title', `${order.order_number} · ${order.driver.name}`);
+            setText('.live-selected-subtitle', `${order.pickup.address} to ${order.destination.address}`);
+
+            const lastLocation = data.last_location || order.last_location;
+            setText('#live-map-speed', lastLocation && lastLocation.speed !== null ? Number(lastLocation.speed).toFixed(1) : '0.0');
+            setText('#live-map-battery', lastLocation && lastLocation.battery_level !== null ? lastLocation.battery_level : '--');
+            setText('#live-map-updated', formatPing(lastLocation ? lastLocation.updated_at : null));
+        }
+
+        function addPointMarker(kind, point, iconName, popupTitle) {
+            if (!point || point.lat === null || point.lng === null) return null;
+
+            const marker = L.marker([point.lat, point.lng], {
+                icon: makeIcon(kind, iconName)
+            }).addTo(map).bindPopup(`<strong>${popupTitle}</strong><br><small>${point.address || ''}</small>`);
+
+            boundsGroup.addLayer(marker);
+            return marker;
+        }
+
+        function updateDriverLocation(location, order) {
+            if (!location || location.lat === null || location.lng === null || !map) return;
+
+            const latLng = [location.lat, location.lng];
+
+            if (!driverMarker) {
+                driverMarker = L.marker(latLng, {
+                    icon: makeIcon('driver', 'navigation'),
+                    zIndexOffset: 1000
+                }).addTo(map).bindPopup(`<strong>${order.driver.name}</strong><br><small>Live driver location</small>`);
+            } else {
+                driverMarker.setLatLng(latLng);
+            }
+
+            if (boundsGroup) {
+                boundsGroup.addLayer(driverMarker);
+            }
+        }
+
+        function drawRouteHistory(history) {
+            if (!history || history.length === 0) return;
+
+            const path = history
+                .filter(point => point.lat !== null && point.lng !== null)
+                .map(point => [point.lat, point.lng]);
+
+            if (path.length === 0) return;
+
+            routePolyline = L.polyline(path, {
+                color: '#f59e0b',
+                weight: 5,
+                opacity: 0.85,
+                lineCap: 'round',
+                lineJoin: 'round'
+            }).addTo(map);
+
+            boundsGroup.addLayer(routePolyline);
+        }
+
+        function renderTrackingData(order, data) {
+            initMap();
+            clearMapLayers();
+            updateSummary(order, data);
+
+            pickupMarker = addPointMarker('pickup', data.pickup || order.pickup, 'package', 'Pickup Point');
+            dropMarker = addPointMarker('drop', data.destination || order.destination, 'map-pin', 'Delivery Destination');
+            drawRouteHistory(data.route_history || []);
+            updateDriverLocation(data.last_location || order.last_location, order);
+
+            if (boundsGroup && boundsGroup.getLayers().length > 0) {
+                map.fitBounds(boundsGroup.getBounds(), { padding: [42, 42], maxZoom: 15 });
+            }
+
+            setTimeout(() => map.invalidateSize(), 100);
+        }
+
+        function setActiveButton(orderId) {
+            listButtons.forEach(button => {
+                button.classList.toggle('active', button.dataset.orderId === String(orderId));
+            });
+        }
+
+        function subscribeToOrder(orderId, order) {
+            const echo = initEcho();
+            if (!echo) return;
+
+            try {
+                if (subscribedChannel && window.LaravelEcho.leave) {
+                    window.LaravelEcho.leave(`order.tracking.${subscribedChannel}`);
+                }
+
+                subscribedChannel = String(orderId);
+                echo.private(`order.tracking.${orderId}`)
+                    .listen('.DriverLocationUpdated', event => {
+                        if (String(activeOrderId) !== String(orderId)) return;
+
+                        const liveLocation = {
+                            lat: Number(event.latitude),
+                            lng: Number(event.longitude),
+                            speed: event.speed,
+                            heading: event.heading,
+                            battery_level: event.batteryLevel,
+                            updated_at: event.updatedAt
+                        };
+
+                        updateDriverLocation(liveLocation, order);
+                        setText('#live-map-speed', liveLocation.speed !== null ? Number(liveLocation.speed).toFixed(1) : '0.0');
+                        setText('#live-map-battery', liveLocation.battery_level !== null ? liveLocation.battery_level : '--');
+                        setText('#live-map-updated', 'Ping 0s ago');
+                    });
+            } catch (error) {
+                console.warn('Live tracking subscription failed:', error);
+            }
+        }
+
+        function startPolling(orderId, order) {
+            if (pollingTimer) {
+                clearInterval(pollingTimer);
+            }
+
+            pollingTimer = setInterval(() => {
+                if (String(activeOrderId) !== String(orderId)) return;
+
+                fetch(order.tracking_url || `/admin/assign-luggage/${orderId}/tracking-data`, {
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            renderTrackingData(order, data);
+                        }
+                    })
+                    .catch(error => console.warn('Tracking refresh failed:', error));
+            }, 15000);
+        }
+
+        function loadOrder(orderId) {
+            const id = String(orderId);
+            let order = trackingById.get(id);
+
+            if (!order) {
+                order = {
+                    id: id,
+                    order_number: `#ORD-${id.padStart(5, '0')}`,
+                    driver: { name: 'Driver', email: 'N/A', initials: 'DR', photo: null },
+                    pickup: { address: '', lat: null, lng: null },
+                    destination: { address: '', lat: null, lng: null },
+                    last_location: null,
+                    tracking_url: `/admin/assign-luggage/${id}/tracking-data`
+                };
+            }
+
+            activeOrderId = id;
+            setActiveButton(id);
+
+            const card = document.querySelector('.live-delivery-card');
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            fetch(order.tracking_url || `/admin/assign-luggage/${id}/tracking-data`, {
+                headers: { 'Accept': 'application/json' }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.message || 'Tracking data unavailable.');
+                    }
+
+                    renderTrackingData(order, data);
+                    subscribeToOrder(id, order);
+                    startPolling(id, order);
+                })
+                .catch(error => {
+                    console.warn('Initial tracking load failed:', error);
+                    renderTrackingData(order, {
+                        pickup: order.pickup,
+                        destination: order.destination,
+                        last_location: order.last_location,
+                        route_history: []
+                    });
+                });
+        }
+
+        listButtons.forEach(button => {
+            button.addEventListener('click', () => loadOrder(button.dataset.orderId));
+        });
+
+        trackButtons.forEach(button => {
+            button.addEventListener('click', () => loadOrder(button.dataset.orderId));
+        });
+
+        if (activeOrderId) {
+            loadOrder(activeOrderId);
+        }
     });
 </script>
 @endpush

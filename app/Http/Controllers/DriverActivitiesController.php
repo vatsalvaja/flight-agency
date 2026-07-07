@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AssignLuggage;
+use App\Models\DriverCurrentLocation;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -83,9 +84,37 @@ class DriverActivitiesController extends Controller
             'delivered' => (clone $statsQuery)->where('status', 'Delivered')->count(),
         ];
 
+        // Orders in Pickup status are already collected by driver GPS tracking.
+        $liveTrackingQuery = AssignLuggage::with(['company', 'station', 'driver', 'creator'])
+            ->where('status', 'Pickup')
+            ->whereNotNull('driver_id');
+
+        if ($isManager) {
+            $liveTrackingQuery->where('created_by', $userId);
+        }
+
+        $liveTrackingAssignments = $liveTrackingQuery
+            ->latest()
+            ->limit(12)
+            ->get();
+
+        $currentLocations = DriverCurrentLocation::whereIn('driver_id', $liveTrackingAssignments->pluck('driver_id')->filter()->unique())
+            ->get()
+            ->keyBy('driver_id');
+
         // Fetch paginated assignments list
         $assignments = $query->latest()->paginate(10)->withQueryString();
 
-        return view('admin.driver-activities.index', compact('assignments', 'drivers', 'kpis', 'driverId', 'status', 'search', 'loggedUser'));
+        return view('admin.driver-activities.index', compact(
+            'assignments',
+            'drivers',
+            'kpis',
+            'driverId',
+            'status',
+            'search',
+            'loggedUser',
+            'liveTrackingAssignments',
+            'currentLocations'
+        ));
     }
 }
