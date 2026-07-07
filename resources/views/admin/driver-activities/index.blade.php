@@ -235,7 +235,8 @@
                                 <span><i class="legend-dot pickup-dot"></i> Pickup</span>
                                 <span><i class="legend-dot drop-dot"></i> Destination</span>
                                 <span><i class="legend-dot driver-dot"></i> Driver</span>
-                                <span><i class="legend-line"></i> Route history</span>
+                                <span><i class="legend-line planned-line"></i> Pickup to delivery</span>
+                                <span><i class="legend-line history-line"></i> Route history</span>
                             </div>
                         </div>
                     </div>
@@ -567,9 +568,14 @@ html.app-skin-dark .live-map-stats span {
     width: 18px;
     height: 3px;
     border-radius: 3px;
-    background: #f59e0b;
     margin-right: 5px;
     vertical-align: middle;
+}
+.legend-line.planned-line {
+    background: #2563eb;
+}
+.legend-line.history-line {
+    background: #f59e0b;
 }
 .pickup-dot {
     background: #3b82f6;
@@ -912,6 +918,7 @@ html.app-skin-dark .table-stepper-label {
         let pickupMarker = null;
         let dropMarker = null;
         let driverMarker = null;
+        let plannedRoutePolyline = null;
         let routePolyline = null;
         let boundsGroup = null;
         let activeOrderId = trackingOrders.length ? String(trackingOrders[0].id) : null;
@@ -975,7 +982,7 @@ html.app-skin-dark .table-stepper-label {
         }
 
         function clearMapLayers() {
-            [pickupMarker, dropMarker, driverMarker, routePolyline].forEach(layer => {
+            [pickupMarker, dropMarker, driverMarker, plannedRoutePolyline, routePolyline].forEach(layer => {
                 if (layer && map) {
                     map.removeLayer(layer);
                 }
@@ -984,6 +991,7 @@ html.app-skin-dark .table-stepper-label {
             pickupMarker = null;
             dropMarker = null;
             driverMarker = null;
+            plannedRoutePolyline = null;
             routePolyline = null;
             if (boundsGroup && map) {
                 map.removeLayer(boundsGroup);
@@ -1083,6 +1091,64 @@ html.app-skin-dark .table-stepper-label {
             }
         }
 
+        function drawPlannedRoute(pickup, destination) {
+            if (!pickup || !destination || pickup.lat === null || pickup.lng === null || destination.lat === null || destination.lng === null || !map) {
+                dashboardTrackingDebug('Planned route skipped because pickup or destination coordinates are missing.', { pickup, destination });
+                return;
+            }
+
+            const fallbackPath = [[pickup.lat, pickup.lng], [destination.lat, destination.lng]];
+
+            function drawFallbackRoute() {
+                plannedRoutePolyline = L.polyline(fallbackPath, {
+                    color: '#2563eb',
+                    weight: 4,
+                    opacity: 0.75,
+                    dashArray: '8 7',
+                    lineCap: 'round',
+                    lineJoin: 'round'
+                }).addTo(map);
+
+                boundsGroup.addLayer(plannedRoutePolyline);
+                dashboardTrackingDebug('Planned route fallback line drawn.', { pickup, destination });
+            }
+
+            const routeUrl = `https://router.project-osrm.org/route/v1/driving/${pickup.lng},${pickup.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`;
+
+            dashboardTrackingDebug('Planned route request sent.', { routeUrl });
+
+            fetch(routeUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const geometry = data && data.routes && data.routes[0] ? data.routes[0].geometry : null;
+
+                    if (!geometry) {
+                        drawFallbackRoute();
+                        return;
+                    }
+
+                    plannedRoutePolyline = L.geoJSON(geometry, {
+                        style: {
+                            color: '#2563eb',
+                            weight: 4,
+                            opacity: 0.82,
+                            lineCap: 'round',
+                            lineJoin: 'round'
+                        }
+                    }).addTo(map);
+
+                    boundsGroup.addLayer(plannedRoutePolyline);
+                    dashboardTrackingDebug('Planned pickup-to-delivery road route drawn.', {
+                        distanceMeters: data.routes[0].distance,
+                        durationSeconds: data.routes[0].duration
+                    });
+                })
+                .catch(error => {
+                    dashboardTrackingDebug('Planned route request failed; drawing fallback line.', { message: error.message });
+                    drawFallbackRoute();
+                });
+        }
+
         function drawRouteHistory(history) {
             if (!history || history.length === 0) return;
 
@@ -1111,6 +1177,7 @@ html.app-skin-dark .table-stepper-label {
 
             pickupMarker = addPointMarker('pickup', data.pickup || order.pickup, 'package', 'Pickup Point');
             dropMarker = addPointMarker('drop', data.destination || order.destination, 'map-pin', 'Delivery Destination');
+            drawPlannedRoute(data.pickup || order.pickup, data.destination || order.destination);
             drawRouteHistory(data.route_history || []);
             updateDriverLocation(data.last_location || order.last_location, order);
 
