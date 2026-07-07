@@ -44,9 +44,16 @@
                         <form id="luggage-assign-form" action="{{ route('assign-luggage.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
+                            @php
+                                $isDriver = false;
+                                if (isset($loggedUser) && $loggedUser->role_id > 0 && $loggedUser->role) {
+                                    $isDriver = (stripos($loggedUser->role->role_name, 'driver') !== false);
+                                }
+                            @endphp
+
                             <!-- Flight Company, Station, Driver Dropdowns -->
                             <div class="row mb-4">
-                                <div class="col-md-4 mb-3">
+                                <div class="{{ $isDriver ? 'col-md-3' : 'col-md-4' }} mb-3">
                                     <label class="form-label fw-semibold" for="company_id">Flight Company <span class="text-danger">*</span></label>
                                     <select name="company_id" id="company_id" class="form-control @error('company_id') is-invalid @enderror" required>
                                         <option value="" disabled selected>Select Flight Company</option>
@@ -61,7 +68,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-md-4 mb-3">
+                                <div class="{{ $isDriver ? 'col-md-3' : 'col-md-4' }} mb-3">
                                     <label class="form-label fw-semibold" for="station_id">Station <span class="text-danger">*</span></label>
                                     <select name="station_id" id="station_id" class="form-control @error('station_id') is-invalid @enderror" required>
                                         <option value="" disabled selected>Select Station</option>
@@ -76,14 +83,8 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-md-4 mb-3">
+                                <div class="{{ $isDriver ? 'col-md-3' : 'col-md-4' }} mb-3">
                                     <label class="form-label fw-semibold" for="driver_id">Driver <span class="text-danger">*</span></label>
-                                    @php
-                                        $isDriver = false;
-                                        if (isset($loggedUser) && $loggedUser->role_id > 0 && $loggedUser->role) {
-                                            $isDriver = (stripos($loggedUser->role->role_name, 'driver') !== false);
-                                        }
-                                    @endphp
                                     @if($isDriver)
                                         <select id="driver_id_display" class="form-control" disabled>
                                             <option value="{{ $loggedUser->id }}" selected>{{ $loggedUser->name }}</option>
@@ -103,6 +104,23 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                @if($isDriver)
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label fw-semibold" for="manager_id">Manager <span class="text-danger">*</span></label>
+                                    <select name="manager_id" id="manager_id" class="form-control @error('manager_id') is-invalid @enderror" required>
+                                        <option value="" disabled selected>Select Manager</option>
+                                        @foreach($managers as $manager)
+                                            <option value="{{ $manager->id }}" {{ old('manager_id') == $manager->id ? 'selected' : '' }}>
+                                                {{ $manager->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('manager_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                @endif
                             </div>
 
                             <!-- Pickup Location, Drop Location, Distance -->

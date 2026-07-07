@@ -33,7 +33,7 @@ class StoreAssignLuggageRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'company_id' => 'required|exists:companies,id',
             'station_id' => 'required|exists:stations,id',
             'driver_id' => 'required|exists:users,id',
@@ -50,5 +50,13 @@ class StoreAssignLuggageRequest extends FormRequest
             'images' => 'nullable|array',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ];
+
+        $userId = session('user_id');
+        $user = \App\Models\User::find($userId);
+        if ($user && $user->role_id > 0 && $user->role && stripos($user->role->role_name, 'driver') !== false) {
+            $rules['manager_id'] = 'required|exists:users,id';
+        }
+
+        return $rules;
     }
 }

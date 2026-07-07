@@ -67,7 +67,13 @@ class AssignLuggageController extends Controller
                        ->orderBy('name', 'asc')
                        ->get();
 
-        return view('admin.assign-luggage.create', compact('companies', 'stations', 'drivers'));
+        $managerRole = Role::where('role_name', 'Manager')->first();
+        $managers = User::where('role_id', $managerRole ? $managerRole->id : -1)
+                        ->where('status', 0)
+                        ->orderBy('name', 'asc')
+                        ->get();
+
+        return view('admin.assign-luggage.create', compact('companies', 'stations', 'drivers', 'managers'));
     }
 
     /**
@@ -86,7 +92,15 @@ class AssignLuggageController extends Controller
         }
 
         $data['images'] = $images;
-        $data['created_by'] = session('user_id');
+
+        $userId = session('user_id');
+        $user = User::find($userId);
+        if ($user && $user->role_id > 0 && $user->role && stripos($user->role->role_name, 'driver') !== false) {
+            $data['created_by'] = $request->input('manager_id');
+        } else {
+            $data['created_by'] = $userId;
+        }
+
         $data['status'] = 'In Progress'; // Automatically set to In Progress on creation
 
         $assignment = AssignLuggage::create($data);
@@ -149,7 +163,13 @@ class AssignLuggageController extends Controller
                        ->orderBy('name', 'asc')
                        ->get();
 
-        return view('admin.assign-luggage.edit', compact('assignment', 'companies', 'stations', 'drivers'));
+        $managerRole = Role::where('role_name', 'Manager')->first();
+        $managers = User::where('role_id', $managerRole ? $managerRole->id : -1)
+                        ->where('status', 0)
+                        ->orderBy('name', 'asc')
+                        ->get();
+
+        return view('admin.assign-luggage.edit', compact('assignment', 'companies', 'stations', 'drivers', 'managers'));
     }
 
     /**
@@ -200,7 +220,12 @@ class AssignLuggageController extends Controller
         }
 
         $data['images'] = array_merge($retainedImages, $newImages);
-        $data['created_by'] = session('user_id');
+
+        if ($user && $user->role_id > 0 && $user->role && stripos($user->role->role_name, 'driver') !== false) {
+            $data['created_by'] = $request->input('manager_id');
+        } else {
+            $data['created_by'] = $assignment->created_by ?? $userId;
+        }
 
         $assignment->update($data);
 
