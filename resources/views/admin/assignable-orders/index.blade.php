@@ -2,10 +2,20 @@
 
 @section('title', 'Assignable Orders || ' . ($appSettings->application_name ?? 'Wings'))
 
+@push('head')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+@endpush
+
 @section('content')
 <div class="nxl-content">
+    <div id="assignableOrdersConfig"
+        data-list-url="{{ route('assignable-orders.list') }}"
+        data-empty-message="You do not have any orders assigned to you at this moment.">
+    </div>
+
     <div class="main-content py-4">
         <div class="container-fluid px-4">
+            <div id="assignableOrdersAlert"></div>
             
             <!-- Dashboard Header Section -->
             <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
@@ -35,7 +45,7 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="fs-10 text-muted d-block text-uppercase fw-bold mb-0.5">Total Orders</span>
-                                <span class="fs-18 fw-extrabold text-dark">{{ $assignments->count() }}</span>
+                                <span class="fs-18 fw-extrabold text-dark" id="assignable-orders-total-count">--</span>
                             </div>
                             <div class="bg-soft-secondary text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
                                 <i class="feather-grid fs-13"></i>
@@ -49,7 +59,7 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="fs-10 text-muted d-block text-uppercase fw-bold mb-0.5">In Transit</span>
-                                <span class="fs-18 fw-extrabold text-primary">{{ $assignments->where('status', 'In Progress')->count() }}</span>
+                                <span class="fs-18 fw-extrabold text-primary" id="assignable-orders-in-progress-count">--</span>
                             </div>
                             <div class="bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
                                 <i class="feather-clock fs-13"></i>
@@ -63,7 +73,7 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="fs-10 text-muted d-block text-uppercase fw-bold mb-0.5">Pickup</span>
-                                <span class="fs-18 fw-extrabold text-warning">{{ $assignments->where('status', 'Pickup')->count() }}</span>
+                                <span class="fs-18 fw-extrabold text-warning" id="assignable-orders-pickup-count">--</span>
                             </div>
                             <div class="bg-soft-warning text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
                                 <i class="feather-truck fs-13"></i>
@@ -77,7 +87,7 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <span class="fs-10 text-muted d-block text-uppercase fw-bold mb-0.5">Delivered</span>
-                                <span class="fs-18 fw-extrabold text-success">{{ $assignments->where('status', 'Delivered')->count() }}</span>
+                                <span class="fs-18 fw-extrabold text-success" id="assignable-orders-delivered-count">--</span>
                             </div>
                             <div class="bg-soft-success text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
                                 <i class="feather-check fs-13"></i>
@@ -90,150 +100,35 @@
             <!-- Filters Bar -->
             <div class="filter-wrapper mb-4">
                 <div class="filter-pills d-flex align-items-center gap-2">
-                    <button class="filter-pill active" onclick="filterStatus('all')">
-                        All <span class="badge rounded-circle px-1.5 py-0.5 fs-10">{{ $assignments->count() }}</span>
+                    <button type="button" class="filter-pill active js-filter-assignable-orders" data-status="all">
+                        All <span class="badge rounded-circle px-1.5 py-0.5 fs-10" id="assignable-orders-filter-all-count">--</span>
                     </button>
-                    <button class="filter-pill" onclick="filterStatus('In Progress')">
-                        In Transit <span class="badge rounded-circle px-1.5 py-0.5 fs-10">{{ $assignments->where('status', 'In Progress')->count() }}</span>
+                    <button type="button" class="filter-pill js-filter-assignable-orders" data-status="In Progress">
+                        In Transit <span class="badge rounded-circle px-1.5 py-0.5 fs-10" id="assignable-orders-filter-in-progress-count">--</span>
                     </button>
-                    <button class="filter-pill" onclick="filterStatus('Pickup')">
-                        Pickup <span class="badge rounded-circle px-1.5 py-0.5 fs-10">{{ $assignments->where('status', 'Pickup')->count() }}</span>
+                    <button type="button" class="filter-pill js-filter-assignable-orders" data-status="Pickup">
+                        Pickup <span class="badge rounded-circle px-1.5 py-0.5 fs-10" id="assignable-orders-filter-pickup-count">--</span>
                     </button>
-                    <button class="filter-pill" onclick="filterStatus('Delivered')">
-                        Delivered <span class="badge rounded-circle px-1.5 py-0.5 fs-10">{{ $assignments->where('status', 'Delivered')->count() }}</span>
+                    <button type="button" class="filter-pill js-filter-assignable-orders" data-status="Delivered">
+                        Delivered <span class="badge rounded-circle px-1.5 py-0.5 fs-10" id="assignable-orders-filter-delivered-count">--</span>
                     </button>
                 </div>
             </div>
 
             <!-- Assigned Orders primary focus (Desktop: 2 cards, Tablet: 2 cards, Mobile: 1 card) -->
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2 g-4" id="orders-list">
-                @forelse($assignments as $assignment)
-                    <div class="col order-card-wrapper" data-status="{{ $assignment->status }}">
-                        <div class="card order-card h-100 shadow-sm border border-gray-3 overflow-hidden d-flex flex-column" onclick="window.location='{{ route('assignable-orders.show', $assignment->id) }}'">
-                            
-                            <div class="card-body p-4 flex-grow-1">
-                                <!-- Badge & Order ID -->
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    @if($assignment->status === 'In Progress')
-                                        <span class="badge bg-soft-info text-info px-2.5 py-1.5 fs-10.5 rounded-pill fw-bold text-uppercase">In Transit</span>
-                                    @elseif($assignment->status === 'Pickup')
-                                        <span class="badge bg-soft-warning text-warning px-2.5 py-1.5 fs-10.5 rounded-pill fw-bold text-uppercase">Pickup</span>
-                                    @else
-                                        <span class="badge bg-soft-success text-success px-2.5 py-1.5 fs-10.5 rounded-pill fw-bold text-uppercase">Delivered</span>
-                                    @endif
-                                    
-                                    <span class="fs-13.5 fw-extrabold text-muted">Order #ORD-{{ str_pad($assignment->id, 5, '0', STR_PAD_LEFT) }}</span>
-                                </div>
-
-                                <!-- Company Banner -->
-                                <div class="d-flex align-items-center mb-3 bg-light p-2.5 rounded-3 border border-gray-2">
-                                    @if($assignment->company->logo)
-                                        <img src="{{ asset($assignment->company->logo) }}" alt="logo" class="rounded me-2.5" style="height: 30px; width: 30px; object-fit: cover;">
-                                    @else
-                                        <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded me-2.5 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-weight: 700; font-size: 11px;">
-                                            {{ substr($assignment->company->company_name, 0, 1) }}
-                                        </div>
-                                    @endif
-                                    <div style="line-height: 1.25;">
-                                        <span class="fw-extrabold text-dark fs-13 d-block">{{ $assignment->company->company_name }}</span>
-                                        <span class="text-muted fs-11">Station: {{ $assignment->station->station_name }}</span>
-                                    </div>
-                                </div>
-
-                                <!-- Visual Journey Paths -->
-                                <div class="route-timeline mb-3.5">
-                                    <div class="timeline-item">
-                                        <span class="text-muted fs-9 d-block text-uppercase fw-bold mb-0.5">From Station (Pickup)</span>
-                                        <span class="fw-bold text-dark fs-12 line-clamp-1" title="{{ $assignment->pickup_location }}">{{ $assignment->pickup_location }}</span>
-                                    </div>
-                                    <div class="timeline-item drop mt-2.5">
-                                        <span class="text-muted fs-9 d-block text-uppercase fw-bold mb-0.5">To Station (Drop)</span>
-                                        <span class="fw-bold text-dark fs-12 line-clamp-1" title="{{ $assignment->drop_location }}">{{ $assignment->drop_location }}</span>
-                                    </div>
-                                </div>
-
-                                <!-- Distance & Expected row -->
-                                <div class="row g-2 border-top border-gray-2 pt-3 text-center">
-                                    <div class="col-6 border-end border-gray-2">
-                                        <span class="text-muted fs-9 text-uppercase d-block mb-0.5 fw-bold">Distance</span>
-                                        <span class="fw-extrabold text-dark fs-12.5">{{ $assignment->distance_km ?? '0.00' }} km</span>
-                                    </div>
-                                    <div class="col-6">
-                                        <span class="text-muted fs-9 text-uppercase d-block mb-0.5 fw-bold">Expected Delivery</span>
-                                        <span class="fw-extrabold text-dark fs-12.5">{{ $assignment->expected_delivery_date->format('d M, Y') }}</span>
-                                    </div>
-                                </div>
-
-                                <!-- Visual Status Workflow progress stepper line -->
-                                <div class="stepper-container mt-4">
-                                    <div class="position-relative">
-                                        <!-- Connect Line bg -->
-                                        <div class="stepper-line-bg"></div>
-                                        <!-- Active Overlay Line -->
-                                        <div class="stepper-line-active" style="width: {{ $assignment->status === 'In Progress' ? '0%' : ($assignment->status === 'Pickup' ? '50%' : '100%') }};"></div>
-                                        
-                                        <!-- Nodes -->
-                                        <div class="stepper-wrapper">
-                                            <!-- Step 1 -->
-                                            <div class="stepper-item {{ in_array($assignment->status, ['In Progress', 'Pickup', 'Delivered']) ? 'active' : '' }}">
-                                                <div class="stepper-icon">
-                                                    <i class="feather-navigation"></i>
-                                                </div>
-                                                <span class="stepper-label">In Transit</span>
-                                            </div>
-                                            <!-- Step 2 -->
-                                            <div class="stepper-item {{ in_array($assignment->status, ['Pickup', 'Delivered']) ? 'active-warning' : '' }}">
-                                                <div class="stepper-icon">
-                                                    <i class="feather-package"></i>
-                                                </div>
-                                                <span class="stepper-label">Pickup</span>
-                                            </div>
-                                            <!-- Step 3 -->
-                                            <div class="stepper-item {{ $assignment->status === 'Delivered' ? 'active-success' : '' }}">
-                                                <div class="stepper-icon">
-                                                    <i class="feather-check"></i>
-                                                </div>
-                                                <span class="stepper-label">Delivered</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Large, full-width Action Area -->
-                            <div class="mt-auto border-top border-gray-2">
-                                @if($assignment->status === 'In Progress')
-                                    <form action="{{ route('assignable-orders.pickup', $assignment->id) }}" method="POST" class="mb-0" onclick="event.stopPropagation();">
-                                        @csrf
-                                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-0 fw-extrabold text-uppercase text-white d-flex align-items-center justify-content-center gap-2" style="font-size: 12.5px; letter-spacing: 0.5px; background-color: #3b82f6; border-color: #3b82f6;">
-                                            Pickup Order <i class="feather-arrow-right fs-14"></i>
-                                        </button>
-                                    </form>
-                                @elseif($assignment->status === 'Pickup')
-                                    <a href="{{ route('assignable-orders.show', $assignment->id) }}" class="btn btn-warning w-100 py-3 rounded-0 fw-extrabold text-uppercase text-white d-flex align-items-center justify-content-center gap-2" onclick="event.stopPropagation();" style="font-size: 12.5px; letter-spacing: 0.5px; background-color: #f59e0b; border-color: #f59e0b;">
-                                        Mark as Delivered <i class="feather-check-circle fs-14"></i>
-                                    </a>
-                                @else
-                                    <div class="bg-soft-success text-success w-100 py-3 text-center fw-extrabold text-uppercase fs-12.5 d-flex align-items-center justify-content-center gap-1.5" style="letter-spacing: 0.5px;">
-                                        Completed <i class="feather-check-circle fs-15"></i>
-                                    </div>
-                                @endif
-                            </div>
-                            
+                <div class="col-12 w-100">
+                    <div class="card shadow-sm border border-gray-3 text-center py-5" style="border-radius: 16px;">
+                        <div class="card-body">
+                            <span class="spinner-border spinner-border-sm text-primary mb-3" role="status" aria-hidden="true"></span>
+                            <h5 class="fw-bold mb-2 text-dark">Loading Orders</h5>
+                            <p class="text-muted fs-13 mb-0">Fetching your latest assigned orders...</p>
                         </div>
                     </div>
-                @empty
-                    <div class="col-12 w-100">
-                        <div class="card shadow-sm border border-gray-3 text-center py-5" style="border-radius: 16px;">
-                            <div class="card-body">
-                                <i class="feather-truck fs-1 text-muted mb-3 d-block"></i>
-                                <h5 class="fw-bold mb-2 text-dark">No Orders Found</h5>
-                                <p class="text-muted fs-13 mb-0">You do not have any orders assigned to you at this moment.</p>
-                            </div>
-                        </div>
-                    </div>
-                @endforelse
+                </div>
             </div>
+
+            <div id="assignable-order-detail-panel" class="mt-4 d-none"></div>
             
         </div>
     </div>
@@ -510,6 +405,54 @@ html.app-skin-dark .stepper-label {
     overflow: hidden;
 }
 
+.order-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    height: 100%;
+}
+html.app-skin-dark .order-detail-item {
+    background: rgba(15, 23, 42, 0.35);
+    border-color: #334155;
+}
+.order-detail-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+html.app-skin-dark .order-detail-icon {
+    background: #1e293b;
+}
+.order-detail-content {
+    min-width: 0;
+    line-height: 1.25;
+}
+.order-detail-label {
+    display: block;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.order-detail-value {
+    display: block;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 800;
+}
+html.app-skin-dark .order-detail-value {
+    color: #f8fafc;
+}
+
 @media (max-width: 576px) {
     /* Reduce page container paddings to 12px margins */
     .nxl-container {
@@ -586,28 +529,37 @@ html.app-skin-dark .stepper-label {
 }
 </style>
 
-<script>
-function filterStatus(status) {
-    // Update active class on filter buttons
-    const buttons = document.querySelectorAll('.filter-pill');
-    buttons.forEach(btn => {
-        if (btn.innerText.includes(status) || (status === 'all' && btn.innerText.includes('All'))) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
-
-    // Filter cards
-    const wrappers = document.querySelectorAll('#orders-list > .order-card-wrapper');
-    wrappers.forEach(wrap => {
-        const cardStatus = wrap.getAttribute('data-status');
-        if (status === 'all' || cardStatus === status) {
-            wrap.style.display = 'block';
-        } else {
-            wrap.style.display = 'none';
-        }
-    });
-}
-</script>
 @endsection
+
+@section('modals')
+<div class="modal fade" id="assignableDeliveryModal" tabindex="-1" aria-labelledby="assignableDeliveryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header py-3 px-4 border-bottom border-gray-2">
+                <h5 class="modal-title fw-extrabold text-dark" id="assignableDeliveryModalLabel">Delivery Proof</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="assignableDeliveryForm" method="POST" enctype="multipart/form-data" class="mb-0">
+                @csrf
+                <div class="modal-body p-4">
+                    <p class="fs-12 text-muted mb-4">Upload at least one proof image showing the delivered luggage clearly.</p>
+                    <input type="file" name="proof_images[]" id="assignableDeliveryProofInput" class="form-control" accept="image/jpeg,image/png,image/jpg,image/webp" multiple required>
+                    <div class="invalid-feedback d-block js-delivery-error mt-2"></div>
+                    <div id="assignableDeliveryPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+                </div>
+                <div class="modal-footer p-3 bg-light border-top border-gray-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-extrabold text-uppercase text-white" style="font-size: 11px; letter-spacing: 0.5px;">
+                        Submit & Complete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ asset('assets/js/assignable-orders.js') }}"></script>
+@endpush
