@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Only target index pages containing listing tables
     const table = document.querySelector('.table-responsive table.table');
     if (!table) return;
+    if (table.classList.contains('js-skip-dual-view') || table.dataset.skipDualView === 'true') return;
 
     // Only target listing tables that have headers (ths)
     const ths = table.querySelectorAll('thead th');

@@ -351,7 +351,7 @@
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-hover align-middle mb-0 js-skip-dual-view" data-skip-dual-view="true">
                                 <thead class="table-light">
                                     <tr>
                                         <th class="ps-4">ID</th>
