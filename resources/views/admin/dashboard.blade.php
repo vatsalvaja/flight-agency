@@ -1,6 +1,9 @@
 @extends('layouts.admin')
 
 @php
+    $isAdmin = isset($isAdmin) ? (bool) $isAdmin : false;
+    $isManager = isset($isManager) ? (bool) $isManager : false;
+    $isDriver = isset($isDriver) ? (bool) $isDriver : false;
     $dashboardTitle = 'Wings Control Center';
     if ($isManager) {
         $dashboardTitle = 'Manager Operations Dashboard';
@@ -13,6 +16,12 @@
 
 @section('content')
 <div class="nxl-content">
+    <div id="dashboardConfig"
+        data-url="{{ route('admin.dashboard.data') }}"
+        data-is-driver="{{ $isDriver ? '1' : '0' }}"
+        data-empty-message="No allocated shipments found.">
+    </div>
+
     <!-- [ page-header ] start -->
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
@@ -46,7 +55,7 @@
                             <div class="card-body d-flex align-items-center justify-content-between p-4">
                                 <div>
                                     <span class="fs-12 text-muted text-uppercase d-block mb-1">Flight Companies</span>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $companiesCount }}</h3>
+                                    <h3 class="fw-bold mb-0 text-dark" id="dashboard-companies-count">--</h3>
                                 </div>
                                 <div class="avatar-text avatar-md bg-soft-primary text-primary rounded p-3 fs-4 shadow-sm">
                                     <i class="feather-briefcase"></i>
@@ -62,7 +71,7 @@
                             <div class="card-body d-flex align-items-center justify-content-between p-4">
                                 <div>
                                     <span class="fs-12 text-muted text-uppercase d-block mb-1">Active Stations</span>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $stationsCount }}</h3>
+                                    <h3 class="fw-bold mb-0 text-dark" id="dashboard-stations-count">--</h3>
                                 </div>
                                 <div class="avatar-text avatar-md bg-soft-info text-info rounded p-3 fs-4 shadow-sm">
                                     <i class="feather-map-pin"></i>
@@ -78,7 +87,7 @@
                             <div class="card-body d-flex align-items-center justify-content-between p-4">
                                 <div>
                                     <span class="fs-12 text-muted text-uppercase d-block mb-1">Total Shipments</span>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $assignmentsCount }}</h3>
+                                    <h3 class="fw-bold mb-0 text-dark" id="dashboard-assignments-count">--</h3>
                                 </div>
                                 <div class="avatar-text avatar-md bg-soft-success text-success rounded p-3 fs-4 shadow-sm">
                                     <i class="feather-package"></i>
@@ -94,10 +103,10 @@
                             <div class="card-body d-flex align-items-center justify-content-between p-4">
                                 <div>
                                     <span class="fs-12 text-muted text-uppercase d-block mb-1">Staff Directory</span>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $usersCount }}</h3>
+                                    <h3 class="fw-bold mb-0 text-dark" id="dashboard-users-count">--</h3>
                                     <div class="mt-1 fs-11 text-muted">
-                                        <span class="badge bg-light text-dark me-1">{{ $managersCount }} Mgr</span>
-                                        <span class="badge bg-light text-dark">{{ $driversCount }} Dvr</span>
+                                        <span class="badge bg-light text-dark me-1"><span id="dashboard-managers-count">--</span> Mgr</span>
+                                        <span class="badge bg-light text-dark"><span id="dashboard-drivers-count">--</span> Dvr</span>
                                     </div>
                                 </div>
                                 <div class="avatar-text avatar-md bg-soft-warning text-warning rounded p-3 fs-4 shadow-sm">
@@ -115,7 +124,7 @@
                             <div class="card-body d-flex align-items-center justify-content-between p-4">
                                 <div>
                                     <span class="fs-12 text-muted text-uppercase d-block mb-1">My Created Jobs</span>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $assignmentsCount }}</h3>
+                                    <h3 class="fw-bold mb-0 text-dark" id="dashboard-assignments-count">--</h3>
                                 </div>
                                 <div class="avatar-text avatar-md bg-soft-primary text-primary rounded p-3 fs-4 shadow-sm">
                                     <i class="feather-package"></i>
@@ -130,7 +139,7 @@
                         <div class="card-body d-flex align-items-center justify-content-between p-4">
                             <div>
                                 <span class="fs-12 text-muted text-uppercase d-block mb-1">Flight Companies</span>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $companiesCount }}</h3>
+                                <h3 class="fw-bold mb-0 text-dark" id="dashboard-companies-count">--</h3>
                             </div>
                             <div class="avatar-text avatar-md bg-soft-info text-info rounded p-3 fs-4 shadow-sm">
                                 <i class="feather-briefcase"></i>
@@ -144,7 +153,7 @@
                         <div class="card-body d-flex align-items-center justify-content-between p-4">
                             <div>
                                 <span class="fs-12 text-muted text-uppercase d-block mb-1">Operating Stations</span>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $stationsCount }}</h3>
+                                <h3 class="fw-bold mb-0 text-dark" id="dashboard-stations-count">--</h3>
                             </div>
                             <div class="avatar-text avatar-md bg-soft-success text-success rounded p-3 fs-4 shadow-sm">
                                 <i class="feather-map-pin"></i>
@@ -159,7 +168,7 @@
                             <div class="card-body d-flex align-items-center justify-content-between p-4">
                                 <div>
                                     <span class="fs-12 text-muted text-uppercase d-block mb-1">Active Drivers</span>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $driversCount }}</h3>
+                                    <h3 class="fw-bold mb-0 text-dark" id="dashboard-drivers-count">--</h3>
                                 </div>
                                 <div class="avatar-text avatar-md bg-soft-warning text-warning rounded p-3 fs-4 shadow-sm">
                                     <i class="feather-truck"></i>
@@ -176,7 +185,7 @@
                             <div class="card-body d-flex align-items-center justify-content-between p-4">
                                 <div>
                                     <span class="fs-12 text-muted text-uppercase d-block mb-1">My Allocated Jobs</span>
-                                    <h3 class="fw-bold mb-0 text-dark">{{ $assignmentsCount }}</h3>
+                                    <h3 class="fw-bold mb-0 text-dark" id="dashboard-assignments-count">--</h3>
                                 </div>
                                 <div class="avatar-text avatar-md bg-soft-primary text-primary rounded p-3 fs-4 shadow-sm">
                                     <i class="feather-package"></i>
@@ -191,7 +200,7 @@
                         <div class="card-body d-flex align-items-center justify-content-between p-4">
                             <div>
                                 <span class="fs-12 text-muted text-uppercase d-block mb-1">Pending Pickups</span>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $pickupCount }}</h3>
+                                <h3 class="fw-bold mb-0 text-dark" id="dashboard-pickup-count">--</h3>
                             </div>
                             <div class="avatar-text avatar-md bg-soft-warning text-warning rounded p-3 fs-4 shadow-sm">
                                 <i class="feather-clock"></i>
@@ -205,7 +214,7 @@
                         <div class="card-body d-flex align-items-center justify-content-between p-4">
                             <div>
                                 <span class="fs-12 text-muted text-uppercase d-block mb-1">Completed Jobs</span>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $deliveredCount }}</h3>
+                                <h3 class="fw-bold mb-0 text-dark" id="dashboard-delivered-count">--</h3>
                             </div>
                             <div class="avatar-text avatar-md bg-soft-success text-success rounded p-3 fs-4 shadow-sm">
                                 <i class="feather-check-circle"></i>
@@ -219,10 +228,8 @@
                         <div class="card-body d-flex align-items-center justify-content-between p-4">
                             <div>
                                 <span class="fs-12 text-muted text-uppercase d-block mb-1">Travel Mileage</span>
-                                <h3 class="fw-bold mb-0 text-dark">{{ $totalDistance }} km</h3>
-                                @if($deliveredCount > 0)
-                                    <span class="text-purple fs-10 d-block mt-0.5"><i class="feather-clock me-0.5"></i>Avg Speed: {{ $avgTimeHours }}h</span>
-                                @endif
+                                <h3 class="fw-bold mb-0 text-dark"><span id="dashboard-total-distance">--</span> km</h3>
+                                <span class="text-purple fs-10 d-block mt-0.5 d-none" id="dashboard-driver-avg-time"><i class="feather-clock me-0.5"></i>Avg Speed: <span id="dashboard-avg-time-hours">--</span>h</span>
                             </div>
                             <div class="avatar-text avatar-md bg-soft-purple text-purple rounded p-3 fs-4 shadow-sm">
                                 <i class="feather-activity"></i>
@@ -243,7 +250,7 @@
                             <i class="feather-clock fs-4"></i>
                         </div>
                         <div>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $pickupCount }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark" id="dashboard-secondary-pickup-count">--</h4>
                             <span class="text-muted fs-11 text-uppercase fw-semibold d-block">Pending Pickups</span>
                         </div>
                     </div>
@@ -256,7 +263,7 @@
                             <i class="feather-truck fs-4"></i>
                         </div>
                         <div>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $inProgressCount }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark" id="dashboard-in-progress-count">--</h4>
                             <span class="text-muted fs-11 text-uppercase fw-semibold d-block">In Transit</span>
                         </div>
                     </div>
@@ -269,7 +276,7 @@
                             <i class="feather-check-circle fs-4"></i>
                         </div>
                         <div>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $deliveredCount }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark" id="dashboard-secondary-delivered-count">--</h4>
                             <span class="text-muted fs-11 text-uppercase fw-semibold d-block">Delivered</span>
                         </div>
                     </div>
@@ -282,9 +289,9 @@
                             <i class="feather-activity fs-4"></i>
                         </div>
                         <div class="w-100">
-                            <h4 class="fw-bold mb-0 text-dark">{{ $totalDistance }} km</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span id="dashboard-secondary-total-distance">--</span> km</h4>
                             <span class="text-muted fs-11 text-uppercase fw-semibold d-block">Logged Mileage</span>
-                            <span class="text-purple fs-10 fw-semibold d-block mt-0.5"><i class="feather-clock me-0.5"></i>Avg Speed: {{ $avgTimeHours }}h</span>
+                            <span class="text-purple fs-10 fw-semibold d-block mt-0.5"><i class="feather-clock me-0.5"></i>Avg Speed: <span id="dashboard-secondary-avg-time-hours">--</span>h</span>
                         </div>
                     </div>
                 </div>
@@ -358,63 +365,13 @@
                                         <th class="pe-4 text-end">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @forelse($recentAssignments as $row)
-                                        <tr>
-                                            <td class="ps-4 fw-semibold text-dark">#{{ $row->id }}</td>
-                                            <td>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    @if($row->company && $row->company->logo)
-                                                        <img src="{{ asset($row->company->logo) }}" alt="logo" class="rounded" style="height: 24px; width: 24px; object-fit: cover;">
-                                                    @else
-                                                        <div class="avatar-text avatar-xs bg-soft-secondary text-secondary rounded d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 10px;">
-                                                            {{ $row->company ? substr($row->company->company_name, 0, 1) : 'C' }}
-                                                        </div>
-                                                    @endif
-                                                    <span class="fw-semibold text-dark fs-12">{{ $row->company ? $row->company->company_name : 'N/A' }}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <span class="fs-12 text-dark"><i class="feather-map-pin text-primary me-1 fs-10"></i>{{ $row->station ? $row->station->station_name : 'N/A' }}</span>
-                                                    <span class="fs-11 text-muted"><i class="feather-arrow-right text-muted me-1 fs-10"></i>{{ Str::limit($row->drop_location, 25) }}</span>
-                                                </div>
-                                            </td>
-                                            @if(!$isDriver)
-                                                <td>
-                                                    <span class="text-dark fs-12 fw-medium">{{ $row->driver ? $row->driver->name : 'Unassigned' }}</span>
-                                                </td>
-                                            @endif
-                                            <td>{{ $row->distance_km }} km</td>
-                                            <td>
-                                                @if($row->status === 'Delivered')
-                                                    <span class="badge bg-soft-success text-success px-2 py-0.5 fs-11">Delivered</span>
-                                                @elseif($row->status === 'Pickup')
-                                                    <span class="badge bg-soft-warning text-warning px-2 py-0.5 fs-11">Pickup</span>
-                                                @else
-                                                    <span class="badge bg-soft-primary text-primary px-2 py-0.5 fs-11">In Transit</span>
-                                                @endif
-                                            </td>
-                                            <td class="pe-4 text-end">
-                                                @if($isDriver)
-                                                    <a href="{{ route('assignable-orders.show', $row->id) }}" class="btn btn-xs btn-light-brand" title="Manage Order">
-                                                        <i class="feather-edit"></i>
-                                                    </a>
-                                                @else
-                                                    <a href="{{ route('assign-luggage.show', $row->id) }}" class="btn btn-xs btn-light-brand" title="View Booking">
-                                                        <i class="feather-eye"></i>
-                                                    </a>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="{{ $isDriver ? '6' : '7' }}" class="text-center text-muted py-5">
-                                                <i class="feather-alert-triangle fs-2 text-warning mb-2 d-block"></i>
-                                                No allocated shipments found.
-                                            </td>
-                                        </tr>
-                                    @endforelse
+                                <tbody id="dashboard-recent-assignments">
+                                    <tr>
+                                        <td colspan="{{ $isDriver ? '6' : '7' }}" class="text-center text-muted py-5">
+                                            <i class="feather-loader fs-2 text-primary mb-2 d-block"></i>
+                                            Loading dashboard data...
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -549,112 +506,5 @@
 @push('scripts')
 <script src="{{ asset('assets/vendors/js/apexcharts.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/js/circle-progress.min.js') }}"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // 1. Stacked Spline Area Chart: Scoped Outbound Shipping Trend for last 15 days
-        var trendData = @json($dailyTrend);
-        
-        var trendOptions = {
-            series: [{
-                name: 'Picked Up',
-                data: trendData.map(item => item.pickup)
-            }, {
-                name: 'In Transit',
-                data: trendData.map(item => item.in_progress)
-            }, {
-                name: 'Delivered',
-                data: trendData.map(item => item.delivered)
-            }],
-            chart: {
-                type: 'area',
-                height: 330,
-                fontFamily: 'Inter, sans-serif',
-                toolbar: { show: false }
-            },
-            dataLabels: { enabled: false },
-            stroke: { curve: 'smooth', width: 2 },
-            colors: ['#f59e0b', '#3b82f6', '#10b981'],
-            xaxis: {
-                categories: trendData.map(item => item.date),
-                labels: {
-                    style: { fontSize: '10px' }
-                }
-            },
-            yaxis: {
-                title: { text: 'Luggage Volume' },
-                tickAmount: 5,
-                labels: {
-                    formatter: function(val) { return Math.round(val); }
-                }
-            },
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shadeIntensity: 1,
-                    opacityFrom: 0.35,
-                    opacityTo: 0.05,
-                    stops: [0, 90, 100]
-                }
-            },
-            legend: {
-                position: 'bottom',
-                fontFamily: 'Inter, sans-serif'
-            },
-            grid: {
-                borderColor: '#e2e8f0',
-                strokeDashArray: 4
-            }
-        };
-
-        var trendChart = new ApexCharts(document.querySelector("#dashboard-ops-trend-chart"), trendOptions);
-        trendChart.render();
-
-        // 2. Status Distribution Donut
-        var donutOptions = {
-            series: [
-                {{ $inProgressCount }}, 
-                {{ $pickupCount }}, 
-                {{ $deliveredCount }}
-            ],
-            chart: {
-                type: 'donut',
-                height: 330,
-                fontFamily: 'Inter, sans-serif',
-                toolbar: { show: false }
-            },
-            labels: ['In Transit', 'Picked Up', 'Delivered'],
-            colors: ['#3b82f6', '#f59e0b', '#10b981'],
-            dataLabels: {
-                enabled: true,
-                formatter: function (val) {
-                    return Math.round(val) + "%";
-                }
-            },
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '72%',
-                        labels: {
-                            show: true,
-                            total: {
-                                show: true,
-                                label: 'Total Jobs',
-                                formatter: function (w) {
-                                    return {{ $assignmentsCount }};
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            legend: {
-                position: 'bottom',
-                fontFamily: 'Inter, sans-serif'
-            }
-        };
-
-        var donutChart = new ApexCharts(document.querySelector("#dashboard-status-ratio-chart"), donutOptions);
-        donutChart.render();
-    });
-</script>
+<script src="{{ asset('assets/js/dashboard.js') }}"></script>
 @endpush

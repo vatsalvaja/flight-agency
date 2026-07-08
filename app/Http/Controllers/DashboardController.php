@@ -17,6 +17,41 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $dashboard = $this->getDashboardData();
+
+        if ($dashboard instanceof \Illuminate\Http\RedirectResponse) {
+            return $dashboard;
+        }
+
+        return view('admin.dashboard', [
+            'isAdmin' => $dashboard['isAdmin'],
+            'isManager' => $dashboard['isManager'],
+            'isDriver' => $dashboard['isDriver'],
+        ]);
+    }
+
+    /**
+     * Return dashboard metrics and recent activity for AJAX rendering.
+     */
+    public function data()
+    {
+        $dashboard = $this->getDashboardData();
+
+        if ($dashboard instanceof \Illuminate\Http\RedirectResponse) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Session expired. Please login again.',
+            ], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $dashboard,
+        ]);
+    }
+
+    private function getDashboardData()
+    {
         $userId = session('user_id');
         $user = User::find($userId);
 
@@ -120,24 +155,47 @@ class DashboardController extends Controller
                 ];
             });
 
-        return view('admin.dashboard', compact(
-            'companiesCount',
-            'stationsCount',
-            'usersCount',
-            'driversCount',
-            'managersCount',
-            'assignmentsCount',
-            'pickupCount',
-            'inProgressCount',
-            'deliveredCount',
-            'totalDistance',
-            'avgTimeHours',
-            'recentAssignments',
-            'dailyTrend',
-            'companyWise',
-            'isAdmin',
-            'isManager',
-            'isDriver'
-        ));
+        return [
+            'isAdmin' => $isAdmin,
+            'isManager' => $isManager,
+            'isDriver' => $isDriver,
+            'counts' => [
+                'companies' => $companiesCount,
+                'stations' => $stationsCount,
+                'users' => $usersCount,
+                'drivers' => $driversCount,
+                'managers' => $managersCount,
+                'assignments' => $assignmentsCount,
+                'pickup' => $pickupCount,
+                'in_progress' => $inProgressCount,
+                'delivered' => $deliveredCount,
+                'total_distance' => $totalDistance,
+                'avg_time_hours' => $avgTimeHours,
+            ],
+            'recent_assignments' => $recentAssignments->map(function ($assignment) use ($isDriver) {
+                return [
+                    'id' => $assignment->id,
+                    'company' => [
+                        'name' => optional($assignment->company)->company_name,
+                        'logo' => optional($assignment->company)->logo ? asset($assignment->company->logo) : null,
+                        'initial' => optional($assignment->company)->company_name ? substr($assignment->company->company_name, 0, 1) : 'C',
+                    ],
+                    'station' => [
+                        'name' => optional($assignment->station)->station_name,
+                    ],
+                    'driver' => [
+                        'name' => optional($assignment->driver)->name,
+                    ],
+                    'drop_location' => $assignment->drop_location,
+                    'distance_km' => $assignment->distance_km,
+                    'status' => $assignment->status,
+                    'action_url' => $isDriver
+                        ? route('assignable-orders.show', $assignment->id)
+                        : route('assign-luggage.show', $assignment->id),
+                ];
+            })->values(),
+            'daily_trend' => $dailyTrend,
+            'company_wise' => $companyWise,
+        ];
     }
 }
