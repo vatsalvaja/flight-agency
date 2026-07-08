@@ -17,7 +17,9 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Protected Admin Panel Routes
 Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('dashboard/data', [DashboardController::class, 'data'])->name('admin.dashboard.data');
+    Route::get('dashboard/admin-data', [DashboardController::class, 'adminData'])->name('admin.dashboard.admin-data');
+    Route::get('dashboard/manager-data', [DashboardController::class, 'managerData'])->name('admin.dashboard.manager-data');
+    Route::get('dashboard/driver-data', [DashboardController::class, 'driverData'])->name('admin.dashboard.driver-data');
     
     Route::get('companies/list', [CompanyController::class, 'list'])->name('companies.list');
     Route::get('companies/{company}/data', [CompanyController::class, 'getDataById'])->name('companies.data');

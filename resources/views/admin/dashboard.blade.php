@@ -4,6 +4,11 @@
     $isAdmin = isset($isAdmin) ? (bool) $isAdmin : false;
     $isManager = isset($isManager) ? (bool) $isManager : false;
     $isDriver = isset($isDriver) ? (bool) $isDriver : false;
+    $dashboardDataUrl = $isAdmin
+        ? route('admin.dashboard.admin-data')
+        : ($isManager
+            ? route('admin.dashboard.manager-data')
+            : route('admin.dashboard.driver-data'));
     $dashboardTitle = 'Wings Control Center';
     if ($isManager) {
         $dashboardTitle = 'Manager Operations Dashboard';
@@ -17,7 +22,7 @@
 @section('content')
 <div class="nxl-content">
     <div id="dashboardConfig"
-        data-url="{{ route('admin.dashboard.data') }}"
+        data-url="{{ $dashboardDataUrl }}"
         data-is-driver="{{ $isDriver ? '1' : '0' }}"
         data-empty-message="No allocated shipments found.">
     </div>

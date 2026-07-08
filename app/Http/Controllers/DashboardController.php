@@ -17,25 +17,37 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $dashboard = $this->getDashboardData();
+        $context = $this->getDashboardUserContext();
 
-        if ($dashboard instanceof \Illuminate\Http\RedirectResponse) {
-            return $dashboard;
+        if ($context instanceof \Illuminate\Http\RedirectResponse) {
+            return $context;
         }
 
         return view('admin.dashboard', [
-            'isAdmin' => $dashboard['isAdmin'],
-            'isManager' => $dashboard['isManager'],
-            'isDriver' => $dashboard['isDriver'],
+            'isAdmin' => $context['isAdmin'],
+            'isManager' => $context['isManager'],
+            'isDriver' => $context['isDriver'],
         ]);
     }
 
-    /**
-     * Return dashboard metrics and recent activity for AJAX rendering.
-     */
-    public function data()
+    public function adminData()
     {
-        $dashboard = $this->getDashboardData();
+        return $this->dashboardJsonResponse('admin');
+    }
+
+    public function managerData()
+    {
+        return $this->dashboardJsonResponse('manager');
+    }
+
+    public function driverData()
+    {
+        return $this->dashboardJsonResponse('driver');
+    }
+
+    private function dashboardJsonResponse(string $role)
+    {
+        $dashboard = $this->getDashboardData($role);
 
         if ($dashboard instanceof \Illuminate\Http\RedirectResponse) {
             return response()->json([
@@ -44,37 +56,46 @@ class DashboardController extends Controller
             ], 401);
         }
 
+        if ($dashboard instanceof \Illuminate\Http\JsonResponse) {
+            return $dashboard;
+        }
+
         return response()->json([
             'success' => true,
             'data' => $dashboard,
         ]);
     }
 
-    private function getDashboardData()
+    private function getDashboardData(string $role)
     {
-        $userId = session('user_id');
-        $user = User::find($userId);
+        $context = $this->getDashboardUserContext();
 
-        if (!$user) {
-            return redirect('/');
+        if ($context instanceof \Illuminate\Http\RedirectResponse) {
+            return $context;
         }
 
-        // Determine user roles
-        $isAdmin = $user->role_id === 0;
-        $isManager = false;
-        $isDriver = false;
-        if ($user->role_id > 0 && $user->role) {
-            $isManager = (stripos($user->role->role_name, 'manager') !== false);
-            $isDriver = (stripos($user->role->role_name, 'driver') !== false);
+        $user = $context['user'];
+        $isAdmin = $context['isAdmin'];
+        $isManager = $context['isManager'];
+        $isDriver = $context['isDriver'];
+
+        if (
+            ($role === 'admin' && !$isAdmin) ||
+            ($role === 'manager' && !$isManager) ||
+            ($role === 'driver' && !$isDriver)
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized dashboard data request.',
+            ], 403);
         }
 
         // Setup base query for luggage assignments scoped by role
-        if ($isAdmin) {
+        if ($role === 'admin') {
             $baseQuery = AssignLuggage::query();
-        } elseif ($isManager) {
+        } elseif ($role === 'manager') {
             $baseQuery = AssignLuggage::where('created_by', $user->id);
         } else {
-            // Driver
             $baseQuery = AssignLuggage::where('driver_id', $user->id);
         }
 
@@ -196,6 +217,32 @@ class DashboardController extends Controller
             })->values(),
             'daily_trend' => $dailyTrend,
             'company_wise' => $companyWise,
+        ];
+    }
+
+    private function getDashboardUserContext()
+    {
+        $userId = session('user_id');
+        $user = User::with('role')->find($userId);
+
+        if (!$user) {
+            return redirect('/');
+        }
+
+        $isAdmin = $user->role_id === 0;
+        $isManager = false;
+        $isDriver = false;
+
+        if ($user->role_id > 0 && $user->role) {
+            $isManager = stripos($user->role->role_name, 'manager') !== false;
+            $isDriver = stripos($user->role->role_name, 'driver') !== false;
+        }
+
+        return [
+            'user' => $user,
+            'isAdmin' => $isAdmin,
+            'isManager' => $isManager,
+            'isDriver' => $isDriver,
         ];
     }
 }

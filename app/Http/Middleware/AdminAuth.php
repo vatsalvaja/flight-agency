@@ -65,6 +65,7 @@ class AdminAuth
         // Restrict paths
         if ($isManager) {
             if (in_array($path, $allowedCommonPaths) || 
+                $path === 'admin/dashboard/manager-data' ||
                 $path === 'admin/assign-luggage' || 
                 str_starts_with($path, 'admin/assign-luggage/') ||
                 $path === 'admin/driver-activities' ||
@@ -76,6 +77,7 @@ class AdminAuth
 
         if ($isDriver) {
             if (in_array($path, $allowedCommonPaths) || 
+                $path === 'admin/dashboard/driver-data' ||
                 $path === 'admin/assignable-orders' || 
                 str_starts_with($path, 'admin/assignable-orders/') ||
                 $path === 'admin/assign-luggage' || 
