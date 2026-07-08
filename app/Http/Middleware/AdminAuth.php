@@ -69,7 +69,9 @@ class AdminAuth
                 $path === 'admin/assign-luggage' || 
                 str_starts_with($path, 'admin/assign-luggage/') ||
                 $path === 'admin/driver-activities' ||
-                $path === 'admin/reports') {
+                $path === 'admin/reports' ||
+                $path === 'admin/reports/list' ||
+                $path === 'admin/reports/export') {
                 return $next($request);
             }
             return redirect('/admin')->with('error', 'Unauthorized access.');
@@ -82,7 +84,9 @@ class AdminAuth
                 str_starts_with($path, 'admin/assignable-orders/') ||
                 $path === 'admin/assign-luggage' || 
                 str_starts_with($path, 'admin/assign-luggage/') ||
-                $path === 'admin/reports') {
+                $path === 'admin/reports' ||
+                $path === 'admin/reports/list' ||
+                $path === 'admin/reports/export') {
                 return $next($request);
             }
             return redirect('/admin')->with('error', 'Unauthorized access.');

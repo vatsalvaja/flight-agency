@@ -9,6 +9,7 @@ use App\Models\Station;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
@@ -38,6 +39,66 @@ class ReportController extends Controller
         if (!$isAdmin && !$isManager && !$isDriver) {
             abort(403, 'Unauthorized action. The Reports module is restricted to Administrators, Managers, and Drivers.');
         }
+
+        $companiesList = Company::where('status', 'active')->orderBy('company_name', 'asc')->get();
+        $stationsList = Station::where('status', 'active')->orderBy('station_name', 'asc')->get();
+        $managersList = User::whereHas('role', function($q) {
+            $q->where('role_name', 'like', '%manager%');
+        })->where('status', 0)->orderBy('name', 'asc')->get();
+        $driversList = User::whereHas('role', function($q) {
+            $q->where('role_name', 'like', '%driver%');
+        })->where('status', 0)->orderBy('name', 'asc')->get();
+
+        $assignments = new LengthAwarePaginator([], 0, 10);
+        $assignmentsForPrint = collect();
+        $totalAssignments = 0;
+        $deliveredCount = 0;
+        $pickupCount = 0;
+        $inProgressCount = 0;
+        $totalDistance = 0;
+        $avgTimeHours = 0;
+        $statusDistribution = ['In Progress' => 0, 'Pickup' => 0, 'Delivered' => 0];
+        $dailyTrend = [];
+        $managerWise = collect();
+        $driverWise = collect();
+        $companyWise = collect();
+        $stationWise = collect();
+        $datePreset = 'monthly';
+        $selectedCompanyName = 'All Companies';
+        $selectedStationName = 'All Stations';
+        $selectedDriverManagerName = $isManager ? ($loggedUser->name ?? 'N/A') : 'All Managers';
+        $selectedDriverName = $isDriver ? ($loggedUser->name ?? 'N/A') : 'All Drivers';
+
+        return view('admin.reports.index', compact(
+            'assignments',
+            'assignmentsForPrint',
+            'companiesList',
+            'stationsList',
+            'managersList',
+            'driversList',
+            'totalAssignments',
+            'deliveredCount',
+            'pickupCount',
+            'inProgressCount',
+            'totalDistance',
+            'avgTimeHours',
+            'statusDistribution',
+            'dailyTrend',
+            'managerWise',
+            'driverWise',
+            'companyWise',
+            'stationWise',
+            'datePreset',
+            'selectedCompanyName',
+            'selectedStationName',
+            'selectedDriverManagerName',
+            'selectedDriverName',
+            'appSettings',
+            'loggedUser',
+            'isAdmin',
+            'isManager',
+            'isDriver'
+        ));
 
         // 1. Handle Date Presets
         $datePreset = $request->input('date_preset', 'monthly'); // default to last 30 days
@@ -398,7 +459,11 @@ class ReportController extends Controller
 
         $query = $this->reportQuery($request, $loggedUser, $isManager, $isDriver, $startDate, $endDate);
         $metrics = $this->reportMetrics($query, $startDate, $endDate);
-        $assignments = (clone $query)->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        $allRowsRequested = $request->input('per_page') === 'all';
+        $orderedQuery = (clone $query)->orderBy('created_at', 'desc');
+        $assignments = $allRowsRequested
+            ? $orderedQuery->get()
+            : $orderedQuery->paginate(10)->withQueryString();
 
         return response()->json([
             'success' => true,
@@ -429,16 +494,17 @@ class ReportController extends Controller
                     'company_wise' => $metrics['companyWise']->values(),
                     'station_wise' => $metrics['stationWise']->values(),
                 ],
-                'assignments' => $assignments->getCollection()->map(function (AssignLuggage $assignment) {
+                'assignments' => ($allRowsRequested ? $assignments : $assignments->getCollection())->map(function (AssignLuggage $assignment) {
                     return $this->formatAssignmentRow($assignment);
-                })->values(),
+                })->values()->all(),
                 'meta' => [
-                    'current_page' => $assignments->currentPage(),
-                    'last_page' => $assignments->lastPage(),
-                    'per_page' => $assignments->perPage(),
-                    'total' => $assignments->total(),
-                    'from' => $assignments->firstItem(),
-                    'to' => $assignments->lastItem(),
+                    'current_page' => $allRowsRequested ? 1 : $assignments->currentPage(),
+                    'last_page' => $allRowsRequested ? 1 : $assignments->lastPage(),
+                    'per_page' => $allRowsRequested ? $assignments->count() : $assignments->perPage(),
+                    'total' => $allRowsRequested ? $assignments->count() : $assignments->total(),
+                    'from' => $allRowsRequested ? ($assignments->count() ? 1 : 0) : $assignments->firstItem(),
+                    'to' => $allRowsRequested ? $assignments->count() : $assignments->lastItem(),
+                    'all_rows' => $allRowsRequested,
                 ],
                 'permissions' => [
                     'is_admin' => $isAdmin,
@@ -447,6 +513,69 @@ class ReportController extends Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Stream a filtered CSV export for AJAX blob download.
+     */
+    public function exportCsv(Request $request)
+    {
+        [$loggedUser, , $isManager, $isDriver] = $this->reportContext();
+        [$datePreset, $startDate, $endDate] = $this->reportDateRange($request);
+        $query = $this->reportQuery($request, $loggedUser, $isManager, $isDriver, $startDate, $endDate);
+        $metrics = $this->reportMetrics($query, $startDate, $endDate);
+        $allAssignments = (clone $query)->orderBy('created_at', 'desc')->get();
+
+        $headers = [
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Content-type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename=wings_management_report_' . now()->format('YmdHis') . '.csv',
+            'Expires' => '0',
+            'Pragma' => 'public',
+        ];
+
+        $callback = function () use ($allAssignments, $metrics, $startDate, $endDate, $datePreset, $loggedUser) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, ['WINGS LOGISTICS OPERATIONS - MANAGEMENT SUMMARY REPORT']);
+            fputcsv($file, ['Generated Date', now()->format('Y-m-d H:i:s')]);
+            fputcsv($file, ['Author / Officer', $loggedUser->name ?? 'N/A']);
+            fputcsv($file, ['Date Scope Preset', ucfirst($datePreset)]);
+            fputcsv($file, ['Date Range Span', $startDate->format('Y-m-d') . ' to ' . $endDate->format('Y-m-d')]);
+            fputcsv($file, []);
+
+            fputcsv($file, ['EXECUTIVE PERFORMANCE METRICS']);
+            fputcsv($file, ['Operational Indicator', 'Value', 'Unit']);
+            fputcsv($file, ['Total Luggage Assignments', $metrics['totalAssignments'], 'orders']);
+            fputcsv($file, ['Completed Deliveries', $metrics['deliveredCount'], 'orders']);
+            fputcsv($file, ['Active In-Transit Logistics', $metrics['inProgressCount'] + $metrics['pickupCount'], 'orders']);
+            fputcsv($file, ['Total Distance Logged', $metrics['totalDistance'], 'km']);
+            fputcsv($file, ['Average Delivery Time Speed', $metrics['avgTimeHours'], 'hours']);
+            fputcsv($file, []);
+
+            fputcsv($file, ['DETAILED AUDIT TRAIL OF ASSIGNMENTS']);
+            fputcsv($file, ['Ref ID', 'Created Date Time', 'Expected Delivery Date', 'Flight Company', 'Pickup Station', 'Dropoff Location', 'Assigned Driver', 'Distance (km)', 'Current Status', 'Delivered At']);
+
+            foreach ($allAssignments as $row) {
+                fputcsv($file, [
+                    $row->id,
+                    optional($row->created_at)->format('Y-m-d H:i:s') ?? 'N/A',
+                    optional($row->expected_delivery_date)->format('Y-m-d') ?? 'N/A',
+                    $row->company->company_name ?? 'N/A',
+                    $row->station->station_name ?? 'N/A',
+                    $row->drop_location ?? 'N/A',
+                    $row->driver->name ?? 'N/A',
+                    $row->distance_km ?? 0,
+                    $row->status ?? 'N/A',
+                    optional($row->delivered_at)->format('Y-m-d H:i:s') ?? 'N/A',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     private function reportContext(): array

@@ -4,7 +4,15 @@
 
 @section('content')
 <div class="nxl-content d-print-none reports-page">
-    <div id="reportsConfig" data-list-url="{{ route('reports.list') }}"></div>
+    <div id="reportsConfig"
+        data-list-url="{{ route('reports.list') }}"
+        data-export-url="{{ route('reports.export') }}"
+        data-report-title="{{ $isDriver ? 'DRIVER ACTIVITY REPORT' : 'MANAGEMENT REPORT' }}"
+        data-application-name="{{ $appSettings->application_name ?? 'Wings' }}"
+        data-officer-name="{{ $loggedUser->name ?? 'N/A' }}"
+        data-is-driver="{{ $isDriver ? '1' : '0' }}"
+        data-is-admin="{{ $isAdmin ? '1' : '0' }}">
+    </div>
     <!-- Page Header (Screen) -->
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
@@ -18,10 +26,10 @@
         </div>
         <div class="page-header-right ms-auto">
             <div class="d-flex align-items-center gap-2">
-                <button type="button" onclick="exportReportCSV()" class="btn btn-light-brand d-flex align-items-center gap-1 fw-semibold">
+                <button type="button" id="reportsExportCsv" class="btn btn-light-brand d-flex align-items-center gap-1 fw-semibold">
                     <i class="feather-download-cloud"></i> Export Excel/CSV
                 </button>
-                <button type="button" onclick="window.print()" class="btn btn-primary d-flex align-items-center gap-1 fw-semibold">
+                <button type="button" id="reportsPrint" class="btn btn-primary d-flex align-items-center gap-1 fw-semibold">
                     <i class="feather-file-text"></i> Print / Save PDF
                 </button>
             </div>
@@ -1027,196 +1035,5 @@
 <script src="{{ asset('assets/vendors/js/apexcharts.min.js') }}"></script>
 <!-- Include Select2 JS script -->
 <script src="{{ asset('assets/vendors/js/select2.min.js') }}"></script>
-
-<script>
-    $(document).ready(function() {
-        // Initialize Date Range Picker
-        $('#report-date-range').daterangepicker({
-            autoUpdateInput: true,
-            locale: {
-                format: 'MM/DD/YYYY',
-                cancelLabel: 'Clear'
-            }
-        });
-
-        // Initialize Select2 selectors (Professional bootstrap-5 themed dropdowns)
-        $('.select2-select').select2({
-            theme: 'bootstrap-5',
-            width: '100%',
-            dropdownParent: $('.filter-card')
-        });
-
-        // Toggle custom date range container based on presets
-        $('#report-date-preset').on('change', function() {
-            if ($(this).val() === 'custom') {
-                $('#custom-date-container').slideDown(200);
-            } else {
-                $('#custom-date-container').slideUp(200);
-            }
-        });
-
-        // Redesigned Chart 1: Daily Operational activity (Stacked bar chart)
-        var opsOptions = {
-            series: [{
-                name: 'In Progress',
-                data: @json(collect($dailyTrend)->pluck('in_progress'))
-            }, {
-                name: 'Picked Up',
-                data: @json(collect($dailyTrend)->pluck('pickup'))
-            }, {
-                name: 'Delivered',
-                data: @json(collect($dailyTrend)->pluck('delivered'))
-            }],
-            chart: {
-                type: 'bar',
-                height: 320,
-                stacked: true,
-                fontFamily: 'Inter, sans-serif',
-                toolbar: { show: false }
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: '55%',
-                    borderRadius: 4
-                },
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                show: true,
-                width: 1,
-                colors: ['transparent']
-            },
-            colors: ['#3b82f6', '#f59e0b', '#10b981'], // Premium Status Colors
-            xaxis: {
-                categories: @json(collect($dailyTrend)->pluck('date')),
-                labels: {
-                    rotate: -45,
-                    style: { fontSize: '10px' }
-                }
-            },
-            yaxis: {
-                title: { text: 'Luggage Count' },
-                tickAmount: 5,
-                labels: {
-                    formatter: function(val) { return Math.round(val); }
-                }
-            },
-            fill: { opacity: 1 },
-            legend: {
-                position: 'bottom',
-                fontFamily: 'Inter, sans-serif'
-            }
-        };
-
-        var opsChart = new ApexCharts(document.querySelector("#operational-activity-chart"), opsOptions);
-        opsChart.render();
-        window.reportsOpsChart = opsChart;
-
-        // Redesigned Chart 2: Corporate Luggage volume comparison (Horizontal bar chart)
-        @if(!$isDriver)
-        var companyOptions = {
-            series: [{
-                name: 'Luggage Volume',
-                data: @json($companyWise->pluck('count'))
-            }],
-            chart: {
-                type: 'bar',
-                height: 300,
-                fontFamily: 'Inter, sans-serif',
-                toolbar: { show: false }
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: true,
-                    barHeight: '55%',
-                    borderRadius: 4
-                }
-            },
-            dataLabels: {
-                enabled: true,
-                formatter: function (val) {
-                    return val + " orders";
-                },
-                style: {
-                    colors: ['#ffffff'],
-                    fontSize: '11px'
-                }
-            },
-            colors: ['#6366f1'], // Indigo theme color
-            xaxis: {
-                categories: @json($companyWise->pluck('name')),
-                labels: {
-                    style: { fontSize: '10px' }
-                }
-            },
-            grid: {
-                xaxis: { lines: { show: true } }
-            }
-        };
-
-        var companyChart = new ApexCharts(document.querySelector("#company-volume-chart"), companyOptions);
-        companyChart.render();
-        window.reportsCompanyChart = companyChart;
-        @endif
-
-        // Redesigned Chart 3: Proportional Status Donut
-        var donutOptions = {
-            series: [
-                {{ $statusDistribution['In Progress'] }}, 
-                {{ $statusDistribution['Pickup'] }}, 
-                {{ $statusDistribution['Delivered'] }}
-            ],
-            chart: {
-                type: 'donut',
-                height: 320,
-                fontFamily: 'Inter, sans-serif',
-                toolbar: { show: false }
-            },
-            labels: ['In Progress', 'Picked Up', 'Delivered'],
-            colors: ['#3b82f6', '#f59e0b', '#10b981'],
-            dataLabels: {
-                enabled: true,
-                formatter: function (val) {
-                    return Math.round(val) + "%";
-                }
-            },
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '72%',
-                        labels: {
-                            show: true,
-                            total: {
-                                show: true,
-                                label: 'Total Volume',
-                                formatter: function (w) {
-                                    return {{ $totalAssignments }};
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            legend: {
-                position: 'bottom',
-                fontFamily: 'Inter, sans-serif'
-            }
-        };
-
-        var donutChart = new ApexCharts(document.querySelector("#status-donut-chart"), donutOptions);
-        donutChart.render();
-        window.reportsDonutChart = donutChart;
-    });
-
-    // Excel CSV Export Trigger
-    function exportReportCSV() {
-        var queryParams = $('#report-filter-form').serialize();
-        var exportUrl = "{{ route('reports.index') }}?" + queryParams + "&export=csv";
-        window.location.href = exportUrl;
-    }
-</script>
 <script src="{{ asset('assets/js/reports.js') }}"></script>
 @endpush

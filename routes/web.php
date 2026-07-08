@@ -54,6 +54,7 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
 
     
     Route::get('reports/list', [\App\Http\Controllers\ReportController::class, 'list'])->name('reports.list');
+    Route::get('reports/export', [\App\Http\Controllers\ReportController::class, 'exportCsv'])->name('reports.export');
     Route::get('reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
 
     Route::get('assign-luggage/list', [\App\Http\Controllers\AssignLuggageController::class, 'list'])->name('assign-luggage.list');
