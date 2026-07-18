@@ -422,7 +422,7 @@
                 <!-- Pagination Footer -->
                 @if($assignments->hasPages())
                     <div id="driverActivitiesPagination" class="card-footer bg-transparent border-top border-gray-2 p-3 px-4 d-flex justify-content-center">
-                        {{ $assignments->links() }}
+                        {{ $assignments->links('pagination::bootstrap-5') }}
                     </div>
                 @else
                     <div id="driverActivitiesPagination" class="card-footer bg-transparent border-top border-gray-2 p-3 px-4 d-none justify-content-center"></div>

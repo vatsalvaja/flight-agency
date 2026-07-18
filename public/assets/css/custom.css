@@ -981,3 +981,113 @@ html.app-skin-dark .wings-loader-status {
         padding: 0.25rem 0.5rem !important;
     }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   Themed Pagination — Laravel bootstrap-5 + AJAX-rendered pagers.
+   Applies to Driver Activities & Reports in light + dark skins.
+   (DataTables pagers keep their own theme styling, untouched.)
+   ══════════════════════════════════════════════════════════════════ */
+#driverActivitiesPagination nav,
+#reportsPagination nav {
+    width: 100%;
+}
+#driverActivitiesPagination .pagination,
+#reportsPagination .pagination {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+}
+#driverActivitiesPagination .pagination {
+    justify-content: center;
+}
+#reportsPagination .pagination {
+    justify-content: flex-end;
+}
+#driverActivitiesPagination .page-item .page-link,
+#reportsPagination .page-item .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 11px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: none;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+#driverActivitiesPagination .page-item .page-link:hover,
+#reportsPagination .page-item .page-link:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #1e293b;
+    transform: translateY(-1px);
+}
+#driverActivitiesPagination .page-item.active .page-link,
+#reportsPagination .page-item.active .page-link {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 4px 11px rgba(59, 130, 246, 0.32);
+}
+#driverActivitiesPagination .page-item.disabled .page-link,
+#reportsPagination .page-item.disabled .page-link {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #cbd5e1;
+    cursor: not-allowed;
+}
+#driverActivitiesPagination .page-item .page-link:focus,
+#reportsPagination .page-item .page-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+/* "Showing X to Y of Z results" caption in the bootstrap-5 view */
+#driverActivitiesPagination p,
+#driverActivitiesPagination small.text-muted,
+#reportsPagination p,
+#reportsPagination small.text-muted {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b !important;
+    margin-bottom: 0;
+}
+
+/* Dark skin overrides */
+html.app-skin-dark #driverActivitiesPagination .page-item .page-link,
+html.app-skin-dark #reportsPagination .page-item .page-link {
+    background: #1e293b;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+html.app-skin-dark #driverActivitiesPagination .page-item .page-link:hover,
+html.app-skin-dark #reportsPagination .page-item .page-link:hover {
+    background: #334155;
+    border-color: #475569;
+    color: #f8fafc;
+}
+html.app-skin-dark #driverActivitiesPagination .page-item.active .page-link,
+html.app-skin-dark #reportsPagination .page-item.active .page-link {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+}
+html.app-skin-dark #driverActivitiesPagination .page-item.disabled .page-link,
+html.app-skin-dark #reportsPagination .page-item.disabled .page-link {
+    background: rgba(30, 41, 59, 0.55);
+    border-color: #334155;
+    color: #475569;
+}
+html.app-skin-dark #driverActivitiesPagination p,
+html.app-skin-dark #driverActivitiesPagination small.text-muted,
+html.app-skin-dark #reportsPagination p,
+html.app-skin-dark #reportsPagination small.text-muted {
+    color: #94a3b8 !important;
+}
