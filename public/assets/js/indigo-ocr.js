@@ -93,7 +93,9 @@
         }
         if (data.delivery_date) {
             var expected = document.getElementById('expected_delivery_date');
-            if (expected && !expected.value.trim()) expected.value = data.delivery_date;
+            if (expected && !expected.value.trim()) {
+                expected.value = expected.type === 'datetime-local' ? data.delivery_date + 'T00:00' : data.delivery_date;
+            }
         }
 
         if (data.document_path) {

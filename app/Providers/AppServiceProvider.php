@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
         // so it can be swapped (e.g. a test fake) without touching the callers.
         $this->app->bind(
             \App\Services\Ocr\OcrEngineInterface::class,
-            \App\Services\Ocr\GoogleDocumentAiOcrService::class
+            \App\Services\Ocr\CompositeOcrEngine::class
         );
     }
 
