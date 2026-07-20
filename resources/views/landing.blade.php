@@ -342,9 +342,9 @@
                         @csrf
                         
                         <div class="form-group-custom">
-                            <label for="login_email" class="form-label-custom">Email Address</label>
+                            <label for="login_identifier" class="form-label-custom">Email or Phone Number</label>
                             <div class="input-container">
-                                <input type="email" name="email" id="login_email" class="form-control-custom" placeholder="name@company.com" required autocomplete="email" autofocus>
+                                <input type="text" name="login" id="login_identifier" class="form-control-custom" placeholder="name@company.com or +91 98765 43210" value="{{ old('login') }}" required autocomplete="username" autofocus>
                             </div>
                         </div>
                         

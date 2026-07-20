@@ -26,18 +26,21 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
+            'login' => 'required|string|max:255',
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $credentials['email'])->first();
+        $login = trim($credentials['login']);
+        $user = User::where('email', $login)
+            ->orWhere('phone', $login)
+            ->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
             if ($user->role_id != 0) {
                 // For dynamic roles (Manager, Driver), verify if the role is active in the roles table
                 if ($user->role && $user->role->status != 0) {
                     return redirect()->back()
-                        ->withInput($request->only('email'))
+                        ->withInput($request->only('login'))
                         ->withErrors(['login_error' => 'Your role has been deactivated.'])
                         ->with('auth_error', 'Your role has been deactivated.');
                 }
@@ -45,7 +48,7 @@ class AuthController extends Controller
 
             if ($user->status != 0) {
                 return redirect()->back()
-                    ->withInput($request->only('email'))
+                    ->withInput($request->only('login'))
                     ->withErrors(['login_error' => 'Your account is inactive.'])
                     ->with('auth_error', 'Your account is inactive.');
             }
@@ -59,9 +62,9 @@ class AuthController extends Controller
         }
 
         return redirect()->back()
-            ->withInput($request->only('email'))
-            ->withErrors(['login_error' => 'Invalid email or password.'])
-            ->with('auth_error', 'Invalid email or password.');
+            ->withInput($request->only('login'))
+            ->withErrors(['login_error' => 'Invalid email or phone number or password.'])
+            ->with('auth_error', 'Invalid email or phone number or password.');
     }
 
     /**

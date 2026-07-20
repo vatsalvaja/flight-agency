@@ -52,10 +52,10 @@
                         <form action="{{ route('login') }}" method="POST">
                             @csrf
                             <div class="mb-3">
-                                <label for="login_email" class="form-label fw-semibold fs-13 text-secondary">Email Address</label>
+                                <label for="login_identifier" class="form-label fw-semibold fs-13 text-secondary">Email or Phone Number</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0 text-muted"><i class="feather-mail"></i></span>
-                                    <input type="email" name="email" id="login_email" class="form-control border-start-0" placeholder="admin@gmail.com" value="{{ old('email') }}" required>
+                                    <input type="text" name="login" id="login_identifier" class="form-control border-start-0" placeholder="admin@gmail.com or +91 98765 43210" value="{{ old('login') }}" required autocomplete="username">
                                 </div>
                             </div>
                             <div class="mb-4">
