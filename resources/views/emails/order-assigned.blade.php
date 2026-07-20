@@ -86,7 +86,7 @@
                                     <div style="margin-bottom: 20px;">
                                         <span style="color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; display: block;">Pickup Location</span>
                                         <strong style="color: #0f172a; font-size: 15px; display: block; margin-top: 2px;">{{ $assignment->pickup_location }}</strong>
-                                        <span style="color: #94a3b8; font-size: 13px;">Date: {{ optional($assignment->expected_delivery_date)->format('M d, Y') ?? 'N/A' }}</span>
+                                        <span style="color: #94a3b8; font-size: 13px;">Expected: {{ optional($assignment->expected_delivery_date)->format('M d, Y h:i A') ?? 'N/A' }}</span>
                                     </div>
                                     <div>
                                         <span style="color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; display: block;">Drop Location</span>

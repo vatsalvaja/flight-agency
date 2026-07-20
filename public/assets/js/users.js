@@ -60,7 +60,7 @@
     }
 
     function emptyRow(message) {
-        return '<tr><td colspan="6" class="text-center py-5 text-muted">' +
+        return '<tr><td colspan="7" class="text-center py-5 text-muted">' +
             '<i class="feather-alert-circle fs-3 d-block mb-2"></i>' + escapeHtml(message) +
         '</td></tr>';
     }
@@ -101,6 +101,7 @@
                 '<td class="ps-4"><code>#' + escapeHtml(user.id) + '</code></td>' +
                 '<td class="fw-semibold text-dark">' + escapeHtml(user.name) + '</td>' +
                 '<td>' + escapeHtml(user.email) + '</td>' +
+                '<td>' + escapeHtml(user.phone) + '</td>' +
                 '<td>' + roleBadge(user) + '</td>' +
                 '<td>' + statusBadge(user.status) + '</td>' +
                 '<td class="text-end pe-4"><div class="d-inline-flex gap-2">' +
@@ -133,6 +134,8 @@
                         '</div>' +
                         '<div class="dual-view-card-details">' +
                             gridDetail('Role', roleBadge(user), true) +
+                            gridDetail('Phone', user.phone) +
+                            (user.is_driver ? gridDetail('License', user.license_number) : '') +
                             gridDetail('Status', statusBadge(user.status), true) +
                             gridDetail('Created', user.created_at) +
                         '</div>' +
@@ -171,9 +174,12 @@
         $('#user_id').val(user.id || '');
         $('#name').val(user.name || '');
         $('#email').val(user.email || '');
+        $('#phone').val(user.phone || '');
+        $('#license_number').val(user.license_number || '');
         $('#password').val('');
         $('#role_id').val(String(user.role_id || '0'));
         $('#status').val(String(user.status || '0'));
+        toggleDriverLicenseField();
     }
 
     window.saveUser = function () {
@@ -242,7 +248,9 @@
             $(selectors.detailsBody).html(
                 '<div class="text-center mb-4">' + avatar(user) + '<h5 class="mt-3 mb-1 text-dark">' + escapeHtml(user.name) + '</h5><div class="text-muted fs-12">' + escapeHtml(user.email) + '</div></div>' +
                 detailRow('User ID', '#' + escapeHtml(user.id)) +
+                detailRow('Phone Number', escapeHtml(user.phone || 'N/A')) +
                 detailRow('Role', roleBadge(user)) +
+                (user.is_driver ? detailRow('License Number', escapeHtml(user.license_number || 'N/A')) : '') +
                 detailRow('Status', statusBadge(user.status)) +
                 detailRow('Created At', escapeHtml(user.created_at)) +
                 detailRow('Last Updated', escapeHtml(user.updated_at))
@@ -254,6 +262,25 @@
 
     function detailRow(label, value) {
         return '<div class="row mb-3 pb-3 border-bottom"><div class="col-sm-4 text-muted fw-medium">' + escapeHtml(label) + '</div><div class="col-sm-8 text-dark fw-semibold">' + value + '</div></div>';
+    }
+
+    function selectedRoleName() {
+        var $selected = $('#role_id option:selected');
+        return String($selected.data('role-name') || $selected.text() || '').trim();
+    }
+
+    function toggleDriverLicenseField() {
+        var driverSelected = selectedRoleName().toLowerCase() === 'driver';
+        var $field = $('.js-driver-license-field');
+        var $input = $('#license_number');
+
+        $field.toggleClass('d-none', !driverSelected);
+        $input.prop('required', driverSelected);
+
+        if (!driverSelected) {
+            $input.val('').removeClass('is-invalid');
+            $input.siblings('.js-validation-error').remove();
+        }
     }
 
     function openModal() {
@@ -341,6 +368,8 @@
             event.preventDefault();
             saveUser();
         });
+        $(document).on('change', '#role_id', toggleDriverLicenseField);
+        toggleDriverLicenseField();
         $(document).on('click', '.js-view-user', function () {
             viewUser($(this).data('id'), $(this).data('url'));
         });

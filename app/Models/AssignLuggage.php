@@ -24,6 +24,17 @@ use Illuminate\Database\Eloquent\Model;
     'created_by',
     'delivered_at',
     'delivery_proof_images',
+    // IndiGo document auto-fill fields
+    'reference_number',
+    'number_of_bags',
+    'pickup_date',
+    'delivery_date',
+    'pnr_number',
+    'customer_name',
+    'contact_number',
+    'customer_address',
+    'pincode',
+    'indigo_document_path',
 ])]
 class AssignLuggage extends Model
 {
@@ -39,7 +50,7 @@ class AssignLuggage extends Model
     protected function casts(): array
     {
         return [
-            'expected_delivery_date' => 'date',
+            'expected_delivery_date' => 'datetime',
             'images' => 'array',
             'pickup_latitude' => 'decimal:8',
             'pickup_longitude' => 'decimal:8',
@@ -48,6 +59,8 @@ class AssignLuggage extends Model
             'distance_km' => 'decimal:2',
             'delivered_at' => 'datetime',
             'delivery_proof_images' => 'array',
+            'pickup_date' => 'date',
+            'delivery_date' => 'date',
         ];
     }
 

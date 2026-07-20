@@ -117,7 +117,9 @@ class AssignLuggageController extends Controller
                         ->orderBy('name', 'asc')
                         ->get();
 
-        return view('admin.assign-luggage.create', compact('companies', 'stations', 'drivers', 'managers'));
+        $indigoCompanyId = $this->indigoCompanyId($companies);
+
+        return view('admin.assign-luggage.create', compact('companies', 'stations', 'drivers', 'managers', 'indigoCompanyId'));
     }
 
     /**
@@ -281,7 +283,9 @@ class AssignLuggageController extends Controller
                         ->orderBy('name', 'asc')
                         ->get();
 
-        return view('admin.assign-luggage.edit', compact('assignment', 'companies', 'stations', 'drivers', 'managers'));
+        $indigoCompanyId = $this->indigoCompanyId($companies);
+
+        return view('admin.assign-luggage.edit', compact('assignment', 'companies', 'stations', 'drivers', 'managers', 'indigoCompanyId'));
     }
 
     /**
@@ -384,10 +388,13 @@ class AssignLuggageController extends Controller
         }
 
         $images = $assignment->images ?? [];
-        
+
         foreach ($images as $img) {
             $this->deletePublicUpload($img);
         }
+
+        // Remove the stored IndiGo source document, if any.
+        $this->deletePublicUpload($assignment->indigo_document_path);
 
         $assignment->delete();
 
@@ -400,6 +407,21 @@ class AssignLuggageController extends Controller
         }
 
         return redirect()->route('assign-luggage.index')->with('success', 'Luggage assignment deleted successfully.');
+    }
+
+    /**
+     * Resolve the IndiGo company id from the loaded companies collection.
+     * Matched by IATA code "6E" or a company name containing "indigo".
+     * Used only to reveal the IndiGo document upload panel on the form.
+     */
+    private function indigoCompanyId($companies): ?int
+    {
+        $match = $companies->first(function ($company) {
+            return strcasecmp((string) $company->company_code, '6E') === 0
+                || stripos((string) $company->company_name, 'indigo') !== false;
+        });
+
+        return $match?->id;
     }
 
     private function authorizeAssignmentAccess(AssignLuggage $assignment)
@@ -444,12 +466,23 @@ class AssignLuggageController extends Controller
             'drop_latitude' => 'nullable|numeric',
             'drop_longitude' => 'nullable|numeric',
             'distance_km' => 'nullable|numeric',
-            'expected_delivery_date' => 'required|date',
+            'expected_delivery_date' => 'required|date_format:Y-m-d\TH:i',
             'status' => 'nullable|in:Pickup,In Progress,Delivered',
             'notes' => 'nullable|string',
             'retained_images' => 'nullable',
             'images' => 'nullable|array',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            // IndiGo document auto-fill fields (optional; never break the existing flow)
+            'reference_number' => 'nullable|string|max:255',
+            'number_of_bags' => 'nullable|integer|min:0|max:65535',
+            'pickup_date' => 'nullable|date',
+            'delivery_date' => 'nullable|date',
+            'pnr_number' => 'nullable|string|max:255',
+            'customer_name' => 'nullable|string|max:255',
+            'contact_number' => 'nullable|string|max:50',
+            'customer_address' => 'nullable|string|max:1000',
+            'pincode' => 'nullable|string|max:20',
+            'indigo_document_path' => 'nullable|string|max:2048',
         ];
 
         $userId = session('user_id');
@@ -536,10 +569,23 @@ class AssignLuggageController extends Controller
             'drop_latitude' => $assignment->drop_latitude,
             'drop_longitude' => $assignment->drop_longitude,
             'distance_km' => $assignment->distance_km,
-            'expected_delivery_date' => $assignment->expected_delivery_date ? $assignment->expected_delivery_date->format('Y-m-d') : null,
-            'expected_delivery_display' => $assignment->expected_delivery_date ? $assignment->expected_delivery_date->format('M d, Y') : 'N/A',
+            'expected_delivery_date' => $assignment->expected_delivery_date ? $assignment->expected_delivery_date->format('Y-m-d\TH:i') : null,
+            'expected_delivery_display' => $assignment->expected_delivery_date ? $assignment->expected_delivery_date->format('M d, Y h:i A') : 'N/A',
             'status' => $assignment->status,
             'notes' => $assignment->notes,
+            'reference_number' => $assignment->reference_number,
+            'number_of_bags' => $assignment->number_of_bags,
+            'pickup_date' => $assignment->pickup_date ? $assignment->pickup_date->format('Y-m-d') : null,
+            'pickup_date_display' => $assignment->pickup_date ? $assignment->pickup_date->format('M d, Y') : null,
+            'delivery_date' => $assignment->delivery_date ? $assignment->delivery_date->format('Y-m-d') : null,
+            'delivery_date_display' => $assignment->delivery_date ? $assignment->delivery_date->format('M d, Y') : null,
+            'pnr_number' => $assignment->pnr_number,
+            'customer_name' => $assignment->customer_name,
+            'contact_number' => $assignment->contact_number,
+            'customer_address' => $assignment->customer_address,
+            'pincode' => $assignment->pincode,
+            'indigo_document_path' => $assignment->indigo_document_path,
+            'indigo_document_url' => $assignment->indigo_document_path ? asset($assignment->indigo_document_path) : null,
             'images' => collect($assignment->images ?? [])->map(fn ($path) => ['path' => $path, 'url' => asset($path)])->values(),
             'show_url' => route('assign-luggage.show', $assignment->id),
             'edit_url' => route('assign-luggage.edit', $assignment->id),

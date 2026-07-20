@@ -28,3 +28,6 @@ Thumbs.db
 /public/uploads
 # tests/feature
 /tests/Feature
+/tests/Unit
+/docs/superpowers/specs/2026-07-18-indigo-document-autofill-design.md
+/indigo-demo-receipt.pdf

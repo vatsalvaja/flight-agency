@@ -62,6 +62,13 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold" for="phone">Phone Number</label>
+                                    <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $userData->phone ?? '') }}">
+                                    @error('phone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
                             <div class="row mb-4">
@@ -75,9 +82,9 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="role_id">Role Dropdown <span class="text-danger">*</span></label>
                                     <select name="role_id" id="role_id" class="form-control @error('role_id') is-invalid @enderror" required>
-                                        <option value="0" {{ old('role_id', $userData->role_id ?? '') == '0' ? 'selected' : '' }}>Admin (System)</option>
+                                        <option value="0" data-role-name="Admin" {{ old('role_id', $userData->role_id ?? '') == '0' ? 'selected' : '' }}>Admin (System)</option>
                                         @foreach(($roles ?? []) as $role)
-                                            <option value="{{ $role->id }}" {{ old('role_id', $userData->role_id ?? '') == $role->id ? 'selected' : '' }}>{{ $role->role_name }}</option>
+                                            <option value="{{ $role->id }}" data-role-name="{{ $role->role_name }}" {{ old('role_id', $userData->role_id ?? '') == $role->id ? 'selected' : '' }}>{{ $role->role_name }}</option>
                                         @endforeach
                                     </select>
                                     @error('role_id')
@@ -87,6 +94,13 @@
                             </div>
 
                             <div class="row mb-4">
+                                <div class="col-md-6 mb-3 js-driver-license-field d-none">
+                                    <label class="form-label fw-semibold" for="license_number">License Number <span class="text-danger">*</span></label>
+                                    <input type="text" name="license_number" id="license_number" class="form-control @error('license_number') is-invalid @enderror" value="{{ old('license_number', $userData->license_number ?? '') }}">
+                                    @error('license_number')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold" for="status">Status <span class="text-danger">*</span></label>
                                     <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>

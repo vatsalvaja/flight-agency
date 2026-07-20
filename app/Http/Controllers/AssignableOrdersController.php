@@ -227,7 +227,7 @@ class AssignableOrdersController extends Controller
             'drop_latitude' => $assignment->drop_latitude !== null ? (float) $assignment->drop_latitude : null,
             'drop_longitude' => $assignment->drop_longitude !== null ? (float) $assignment->drop_longitude : null,
             'distance_km' => $assignment->distance_km ?? '0.00',
-            'expected_delivery_date' => optional($assignment->expected_delivery_date)->format('d M, Y') ?? 'N/A',
+            'expected_delivery_date' => optional($assignment->expected_delivery_date)->format('d M, Y h:i A') ?? 'N/A',
             'created_at' => optional($assignment->created_at)->format('d M, Y H:i A') ?? 'N/A',
             'delivered_at' => optional($assignment->delivered_at)->format('d M, Y H:i A'),
             'show_url' => route('assignable-orders.show', $assignment->id),

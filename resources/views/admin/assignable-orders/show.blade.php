@@ -149,8 +149,8 @@
                                             <i class="feather-calendar text-primary"></i>
                                         </div>
                                         <div class="order-detail-content">
-                                            <span class="order-detail-label">Expected Date</span>
-                                            <span class="order-detail-value">{{ $assignment->expected_delivery_date->format('d M, Y') }}</span>
+                                            <span class="order-detail-label">Expected Date &amp; Time</span>
+                                            <span class="order-detail-value">{{ $assignment->expected_delivery_date->format('d M, Y h:i A') }}</span>
                                         </div>
                                     </div>
                                 </div>

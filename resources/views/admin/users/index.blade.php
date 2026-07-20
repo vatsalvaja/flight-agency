@@ -61,6 +61,7 @@
                                         <th class="ps-4" style="width: 80px;">ID</th>
                                         <th>Name</th>
                                         <th>Email</th>
+                                        <th>Phone</th>
                                         <th>Role</th>
                                         <th>Status</th>
                                         <th class="text-end pe-4" style="width: 150px;">Actions</th>
@@ -68,7 +69,7 @@
                                 </thead>
                                 <tbody id="usersTableBody">
                                     <tr>
-                                        <td colspan="6" class="text-center py-5 text-muted">
+                                        <td colspan="7" class="text-center py-5 text-muted">
                                             <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
                                             Loading users...
                                         </td>

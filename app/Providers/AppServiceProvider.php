@@ -12,7 +12,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Default OCR engine for IndiGo document extraction. Bound to an interface
+        // so it can be swapped (e.g. a test fake) without touching the callers.
+        $this->app->bind(
+            \App\Services\Ocr\OcrEngineInterface::class,
+            \App\Services\Ocr\GoogleDocumentAiOcrService::class
+        );
     }
 
     /**

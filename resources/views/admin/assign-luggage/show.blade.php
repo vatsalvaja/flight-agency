@@ -91,8 +91,8 @@
                                         <td class="py-3"><span class="badge bg-soft-secondary text-dark fs-12 px-3 py-1 fw-bold">{{ $assignment->distance_km ?? '0.00' }} km</span></td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-semibold text-muted py-3">Expected Delivery Date</td>
-                                        <td class="py-3 fw-bold text-dark">{{ $assignment->expected_delivery_date->format('l, F d, Y') }}</td>
+                                        <td class="fw-semibold text-muted py-3">Expected Delivery Date &amp; Time</td>
+                                        <td class="py-3 fw-bold text-dark">{{ $assignment->expected_delivery_date->format('l, F d, Y h:i A') }}</td>
                                     </tr>
                                     <tr>
                                         <td class="fw-semibold text-muted py-3">Assigned Driver</td>
@@ -120,6 +120,43 @@
                         </div>
                     </div>
                 </div>
+
+                @php
+                    $hasIndigoDetails = $assignment->reference_number || $assignment->pnr_number || $assignment->customer_name
+                        || $assignment->contact_number || $assignment->customer_address || $assignment->pincode
+                        || $assignment->number_of_bags || $assignment->pickup_date || $assignment->delivery_date
+                        || $assignment->indigo_document_path;
+                @endphp
+                @if($hasIndigoDetails)
+                <!-- IndiGo Baggage & Customer Details -->
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">IndiGo Baggage &amp; Customer Details</h5>
+                        @if($assignment->indigo_document_path)
+                            <a href="{{ asset($assignment->indigo_document_path) }}" target="_blank" class="btn btn-sm btn-light-brand">
+                                <i class="feather-file-text me-1"></i>View Document
+                            </a>
+                        @endif
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle mb-0">
+                                <tbody>
+                                    <tr><td class="fw-semibold text-muted py-3" style="width: 30%;">Reference Number</td><td class="py-3 text-dark">{{ $assignment->reference_number ?? 'N/A' }}</td></tr>
+                                    <tr><td class="fw-semibold text-muted py-3">Number of Bags</td><td class="py-3 text-dark">{{ $assignment->number_of_bags ?? 'N/A' }}</td></tr>
+                                    <tr><td class="fw-semibold text-muted py-3">PNR Number</td><td class="py-3 text-dark">{{ $assignment->pnr_number ?? 'N/A' }}</td></tr>
+                                    <tr><td class="fw-semibold text-muted py-3">Pickup Date</td><td class="py-3 text-dark">{{ $assignment->pickup_date ? $assignment->pickup_date->format('M d, Y') : 'N/A' }}</td></tr>
+                                    <tr><td class="fw-semibold text-muted py-3">Delivery Date</td><td class="py-3 text-dark">{{ $assignment->delivery_date ? $assignment->delivery_date->format('M d, Y') : 'N/A' }}</td></tr>
+                                    <tr><td class="fw-semibold text-muted py-3">Customer Name</td><td class="py-3 text-dark">{{ $assignment->customer_name ?? 'N/A' }}</td></tr>
+                                    <tr><td class="fw-semibold text-muted py-3">Contact Number</td><td class="py-3 text-dark">{{ $assignment->contact_number ?? 'N/A' }}</td></tr>
+                                    <tr><td class="fw-semibold text-muted py-3">Customer Address</td><td class="py-3 text-dark">{{ $assignment->customer_address ?? 'N/A' }}</td></tr>
+                                    <tr><td class="fw-semibold text-muted py-3">Pincode</td><td class="py-3 text-dark">{{ $assignment->pincode ?? 'N/A' }}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 @if($assignment->status === 'Pickup' || $assignment->status === 'Delivered')
                 <!-- Real-Time Map Card -->

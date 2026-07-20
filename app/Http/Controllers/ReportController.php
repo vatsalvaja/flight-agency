@@ -377,13 +377,13 @@ class ReportController extends Controller
 
                 // C. Detailed Records Log Header
                 fputcsv($file, ['DETAILED AUDIT TRAIL OF ASSIGNMENTS']);
-                fputcsv($file, ['Ref ID', 'Created Date Time', 'Expected Delivery Date', 'Flight Company', 'Pickup Station', 'Dropoff Location', 'Assigned Driver', 'Distance (km)', 'Current Status', 'Delivered At']);
+                fputcsv($file, ['Ref ID', 'Created Date Time', 'Expected Delivery Date Time', 'Flight Company', 'Pickup Station', 'Dropoff Location', 'Assigned Driver', 'Distance (km)', 'Current Status', 'Delivered At']);
 
                 foreach ($allAssignments as $row) {
                     fputcsv($file, [
                         $row->id,
                         $row->created_at->format('Y-m-d H:i:s'),
-                        $row->expected_delivery_date ? $row->expected_delivery_date->format('Y-m-d') : 'N/A',
+                        $row->expected_delivery_date ? $row->expected_delivery_date->format('Y-m-d H:i') : 'N/A',
                         $row->company ? $row->company->company_name : 'N/A',
                         $row->station ? $row->station->station_name : 'N/A',
                         $row->drop_location,
@@ -555,13 +555,13 @@ class ReportController extends Controller
             fputcsv($file, []);
 
             fputcsv($file, ['DETAILED AUDIT TRAIL OF ASSIGNMENTS']);
-            fputcsv($file, ['Ref ID', 'Created Date Time', 'Expected Delivery Date', 'Flight Company', 'Pickup Station', 'Dropoff Location', 'Assigned Driver', 'Distance (km)', 'Current Status', 'Delivered At']);
+            fputcsv($file, ['Ref ID', 'Created Date Time', 'Expected Delivery Date Time', 'Flight Company', 'Pickup Station', 'Dropoff Location', 'Assigned Driver', 'Distance (km)', 'Current Status', 'Delivered At']);
 
             foreach ($allAssignments as $row) {
                 fputcsv($file, [
                     $row->id,
                     optional($row->created_at)->format('Y-m-d H:i:s') ?? 'N/A',
-                    optional($row->expected_delivery_date)->format('Y-m-d') ?? 'N/A',
+                    optional($row->expected_delivery_date)->format('Y-m-d H:i') ?? 'N/A',
                     $row->company->company_name ?? 'N/A',
                     $row->station->station_name ?? 'N/A',
                     $row->drop_location ?? 'N/A',

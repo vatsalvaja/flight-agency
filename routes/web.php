@@ -60,6 +60,7 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     Route::get('assign-luggage/list', [\App\Http\Controllers\AssignLuggageController::class, 'list'])->name('assign-luggage.list');
     Route::get('assign-luggage/{id}/data', [\App\Http\Controllers\AssignLuggageController::class, 'getDataById'])->name('assign-luggage.data');
     Route::post('assign-luggage/save', [\App\Http\Controllers\AssignLuggageController::class, 'save'])->name('assign-luggage.save');
+    Route::post('assign-luggage/indigo-extract', [\App\Http\Controllers\IndigoOcrController::class, 'extract'])->name('assign-luggage.indigo-extract');
     Route::resource('assign-luggage', \App\Http\Controllers\AssignLuggageController::class);
 
     Route::get('driver-activities/list', [\App\Http\Controllers\DriverActivitiesController::class, 'list'])->name('driver-activities.list');

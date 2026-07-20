@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'google_document_ai' => [
+        'project_id' => env('GOOGLE_DOCUMENT_AI_PROJECT_ID'),
+        'location' => env('GOOGLE_DOCUMENT_AI_LOCATION', 'us'),
+        'processor_id' => env('GOOGLE_DOCUMENT_AI_PROCESSOR_ID'),
+        // Absolute path (or path relative to the app root) of the service-account JSON key.
+        'credentials' => env('GOOGLE_DOCUMENT_AI_CREDENTIALS'),
+    ],
+
 ];

@@ -66,7 +66,7 @@
                                     <label class="form-label fw-semibold" for="company_id">Flight Company <span class="text-danger">*</span></label>
                                     <select name="company_id" id="company_id" class="form-control @error('company_id') is-invalid @enderror" required>
                                         @foreach($companies as $company)
-                                            <option value="{{ $company->id }}" {{ old('company_id', $assignment->company_id) == $company->id ? 'selected' : '' }}>
+                                            <option value="{{ $company->id }}" {{ old('company_id', $assignment->company_id) == $company->id ? 'selected' : '' }} @if(($indigoCompanyId ?? null) == $company->id) data-indigo="1" @endif>
                                                 {{ $company->company_name }} ({{ $company->company_code }})
                                             </option>
                                         @endforeach
@@ -129,6 +129,9 @@
                                 @endif
                             </div>
 
+                            <!-- IndiGo Document Upload & Auto-Fill (visible only when IndiGo is selected) -->
+                            @include('admin.assign-luggage._indigo-panel', ['assignment' => $assignment])
+
                             <!-- Pickup Location, Drop Location, Distance -->
                             <div class="row mb-4">
                                 <div class="col-md-5 mb-3">
@@ -160,11 +163,11 @@
                                 </div>
                             </div>
 
-                            <!-- Expected Delivery Date, Status -->
+                            <!-- Expected Delivery Date & Time, Status -->
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold" for="expected_delivery_date">Expected Delivery Date <span class="text-danger">*</span></label>
-                                    <input type="date" name="expected_delivery_date" id="expected_delivery_date" class="form-control @error('expected_delivery_date') is-invalid @enderror" value="{{ old('expected_delivery_date', $assignment->expected_delivery_date ? $assignment->expected_delivery_date->format('Y-m-d') : '') }}" required>
+                                    <label class="form-label fw-semibold" for="expected_delivery_date">Expected Delivery Date &amp; Time <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" name="expected_delivery_date" id="expected_delivery_date" class="form-control @error('expected_delivery_date') is-invalid @enderror" value="{{ old('expected_delivery_date', $assignment->expected_delivery_date ? $assignment->expected_delivery_date->format('Y-m-d\TH:i') : '') }}" required>
                                     @error('expected_delivery_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -434,4 +437,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <script src="{{ asset('assets/js/assign-luggage.js') }}"></script>
+<script src="{{ asset('assets/js/indigo-ocr.js') }}"></script>
 @endpush

@@ -142,6 +142,10 @@ class UserController extends Controller
 
         $validated = $validator->validated();
 
+        if (! $this->isDriverRoleId((int) $validated['role_id'])) {
+            $validated['license_number'] = null;
+        }
+
         if (! empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
@@ -169,6 +173,8 @@ class UserController extends Controller
 
     private function validationRules(?int $userId = null): array
     {
+        $selectedRoleId = (int) request()->input('role_id');
+
         return [
             'name' => 'required|string|max:255',
             'email' => [
@@ -178,6 +184,7 @@ class UserController extends Controller
                 Rule::unique('users', 'email')->ignore($userId),
             ],
             'password' => ($userId ? 'nullable' : 'required') . '|string|min:6',
+            'phone' => 'nullable|string|max:20',
             'role_id' => [
                 'required',
                 'integer',
@@ -191,6 +198,12 @@ class UserController extends Controller
                     }
                 },
             ],
+            'license_number' => [
+                Rule::requiredIf($this->isDriverRoleId($selectedRoleId)),
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'status' => 'required|in:0,1',
         ];
     }
@@ -198,13 +211,17 @@ class UserController extends Controller
     private function formatUser(User $user): array
     {
         $roleName = ((int) $user->role_id === 0) ? 'Admin (System)' : ($user->role->role_name ?? 'N/A');
+        $isDriver = $this->isDriverRoleName($roleName);
 
         return [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'phone' => $user->phone,
+            'license_number' => $user->license_number,
             'role_id' => $user->role_id,
             'role_name' => $roleName,
+            'is_driver' => $isDriver,
             'status' => (string) $user->status,
             'initials' => $user->getInitials(),
             'edit_url' => route('users.edit', $user->id),
@@ -213,6 +230,22 @@ class UserController extends Controller
             'created_at' => $user->created_at ? $user->created_at->format('M d, Y') : null,
             'updated_at' => $user->updated_at ? $user->updated_at->format('M d, Y h:i A') : null,
         ];
+    }
+
+    private function isDriverRoleId(int $roleId): bool
+    {
+        if ($roleId === 0) {
+            return false;
+        }
+
+        $roleName = Role::where('id', $roleId)->value('role_name');
+
+        return $this->isDriverRoleName($roleName);
+    }
+
+    private function isDriverRoleName(?string $roleName): bool
+    {
+        return $roleName !== null && strcasecmp(trim($roleName), 'Driver') === 0;
     }
 
     private function userErrorResponse(Request $request, string $message, int $status)
